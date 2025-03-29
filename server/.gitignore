@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+coverage/
+dist/
+
+# Environment variables
+.env
+.env.local
+
+# Typescript cache
+*.tsbuildinfo
+
+# Debugger configurations
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# npm package lock file (if using yarn)
+package-lock.json
+.pnpm-debug.log
+
+# Build output
+build/
+lib/
+
+# Editor-specific settings
+*.sublime-workspace
+*.code-workspace
+
+# Tests and coverage output
+coverage/
+test-results.xml
+
+# Jest cache
+jest/
