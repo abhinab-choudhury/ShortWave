@@ -1,4 +1,4 @@
-import CampaignCard, { CampaignCardProps } from '@/components/CampaignCard';
+import CampaignCard, { CampaignCardI } from '@/components/CampaignCard';
 import { useEffect, useState } from 'react';
 import isEqual from 'lodash/isEqual';
 import {
@@ -7,12 +7,12 @@ import {
   Megaphone,
   PlusCircle,
   SlidersHorizontal,
+  TentIcon,
   TrendingUp,
 } from 'lucide-react';
-import { IconBrandCampaignmonitor } from '@tabler/icons-react';
 import DashboardQuickInfoCard from '@/components/DashoardQuickInfoCard';
 
-export async function getLink(): Promise<CampaignCardProps[]> {
+export async function getLink(): Promise<CampaignCardI[]> {
   return [
     {
       campaign_name: 'Resume Links',
@@ -33,7 +33,7 @@ export async function getLink(): Promise<CampaignCardProps[]> {
 }
 
 const DashboardPage = () => {
-  const [linkList, setLinkList] = useState<CampaignCardProps[]>([]);
+  const [linkList, setLinkList] = useState<CampaignCardI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -60,12 +60,14 @@ const DashboardPage = () => {
     };
 
     fetchData();
-  });
+  }, []);
 
   return (
     <div className="flex flex-1">
       <div className="p-2 md:p-10 border bg-white dark:bg-slate-900 flex-col gap-2 flex-1 w-full max-h-screen overflow-scroll scrollbar-slim">
-        <h1 className="text-2xl font-bold">Links</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
           {/* Card 1: Total Shortened Links */}
           <DashboardQuickInfoCard
@@ -81,8 +83,8 @@ const DashboardPage = () => {
 
           {/* Card 2: Click Growth Rate */}
           <DashboardQuickInfoCard
-            title="Active Campaigns"
-            data="25"
+            title="Click Rate Growth"
+            data="+83.9%"
             className="group bg-gradient-to-br from-green-100 to-green-50 dark:from-slate-800 dark:to-slate-700 border-green-200 dark:border-slate-600"
             footer="Since yesterday"
             icon_styles="bg-green-200 dark:bg-green-600/20"
@@ -131,8 +133,8 @@ const DashboardPage = () => {
         </div>
         <div className="flex flex-col p-4 gap-2 flex-1 border rounded-lg bg-gray-50 dark:bg-slate-900 min-h-[23rem] h-auto">
           <h1 className="text-xl font-bold flex gap-2 text-slate-800 dark:text-white">
-            <IconBrandCampaignmonitor />
-            All Campaigns
+            <TentIcon />
+            Recent Campaigns
           </h1>
 
           {isLoading ? (

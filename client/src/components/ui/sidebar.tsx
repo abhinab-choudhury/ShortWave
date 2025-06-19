@@ -1,49 +1,16 @@
-'use client';
 import { cn } from '@/lib/utils';
 import { Link, LinkProps, useLocation } from 'react-router-dom';
-import React, { createContext, useState } from 'react';
+import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { IconMenu2, IconX } from '@tabler/icons-react';
 import { useSidebar } from '@/hooks/useSidebar';
+import { SidebarProvider } from '@/providers/SidebarProvider';
 
 interface Links {
   label: string;
   href: string;
   icon: React.JSX.Element | React.ReactNode;
 }
-
-interface SidebarContextProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  animate: boolean;
-}
-
-export const SidebarContext = createContext<SidebarContextProps | undefined>(
-  undefined
-);
-
-export const SidebarProvider = ({
-  children,
-  open: openProp,
-  setOpen: setOpenProp,
-  animate = true,
-}: {
-  children: React.ReactNode;
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  animate?: boolean;
-}) => {
-  const [openState, setOpenState] = useState(false);
-
-  const open = openProp !== undefined ? openProp : openState;
-  const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
-
-  return (
-    <SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
-      {children}
-    </SidebarContext.Provider>
-  );
-};
 
 export const Sidebar = ({
   children,
@@ -160,8 +127,9 @@ export const SidebarLink = ({
   const location = useLocation();
   const { open, setOpen, animate } = useSidebar();
 
-  const isActive = location.pathname === link.href;
-
+  const isActive = location.pathname
+    .split('/')
+    .includes(link.href.split('/')[0]);
   return (
     <Link
       to={link.href}

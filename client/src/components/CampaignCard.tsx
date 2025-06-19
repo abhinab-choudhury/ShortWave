@@ -1,6 +1,6 @@
 import { Link2 } from 'lucide-react';
 
-export interface CampaignCardProps {
+export interface CampaignCardI {
   campaign_name: string;
   page_link: string;
   created_at: string;
@@ -10,9 +10,9 @@ export default function CampaignCard({
   campaign_name,
   page_link,
   created_at,
-}: CampaignCardProps) {
+}: CampaignCardI) {
   return (
-    <div className="border rounded-xl px-5 py-6 h-auto min-h-[8rem] md:max-w-[560px] w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm hover:shadow-md transition-shadow">
+    <div className="border border-transparent rounded-xl px-5 py-6 h-auto min-h-[8rem] md:max-w-[560px] w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col justify-between h-full gap-4">
         {/* Campaign Title */}
         <div className="text-lg font-semibold leading-tight tracking-tight text-teal-700 dark:text-teal-300">

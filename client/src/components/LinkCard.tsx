@@ -1,24 +1,21 @@
-import { DashboardLinkData } from '@/pages/DashboardPage';
 import { Copy, Link2, QrCode } from 'lucide-react';
 
+export interface LinkCardI {
+  orginal_link: string;
+  short_link: string;
+  created_at: string;
+}
+
 export default function LinkCard({
-  image,
   orginal_link,
   short_link,
   created_at,
-}: DashboardLinkData) {
+}: LinkCardI) {
   return (
-    <div className="border rounded-lg mb-2 px-4 py-5 bg-white dark:bg-gray-900">
+    <div className="border dark:border-transparent rounded-lg mb-2 px-4 py-5 bg-white dark:bg-gray-900">
       <div className="flex items-center justify-between">
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center space-x-4">
-            <div className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-              <img
-                className="aspect-square h-full w-full"
-                alt="User Avatar"
-                src={image}
-              />
-            </div>
             <div>
               <div className="flex items-center gap-1 text-sm font-medium leading-none my-1">
                 {orginal_link}

@@ -19,21 +19,21 @@ export function DashboardLayout() {
   const links = [
     {
       label: 'Dashboard',
-      href: '/dashboard',
+      href: 'dashboard',
       icon: (
         <IconLayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: 'Analytics',
-      href: '/dashboard/analytics',
+      href: 'analytics',
       icon: (
         <IconChartCovariate className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: 'Settings',
-      href: '/dashboard/settings',
+      href: 'settings',
       icon: (
         <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
@@ -62,7 +62,7 @@ export function DashboardLayout() {
   return (
     <div
       className={cn(
-        'relative rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-slate-800 w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden'
+        'relative rounded-md flex flex-col md:flex-row  w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden'
       )}
     >
       <Sidebar open={open} setOpen={setOpen} animate={animate}>
@@ -86,22 +86,35 @@ export function DashboardLayout() {
               </div>
             </div>
           </div>
-          <div className="mt-[100%] md:mt-0">
-            <SidebarLink
-              link={{
-                label: 'Manu Arora',
-                href: '/profile',
-                icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 flex-shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
+
+          <div className="mt-auto w-full">
+            <Link
+              to="#"
+              onClick={() => setOpen(!open)}
+              className="flex items-center justify-start gap-2 group/sidebar py-2 px-3 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
+            >
+              <div className="p-2 rounded-full transition-colors text-neutral-500 dark:text-slate-300">
+                <img
+                  src="https://avatars.githubusercontent.com/u/132006996?v=4"
+                  alt="Avatar"
+                  className="-p-2 h-10 w-10 rounded-full border-transparent shadow-sm object-cover"
+                />
+              </div>
+
+              <motion.span
+                animate={{
+                  display: animate
+                    ? open
+                      ? 'inline-block'
+                      : 'none'
+                    : 'inline-block',
+                  opacity: animate ? (open ? 1 : 0) : 1,
+                }}
+                className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"
+              >
+                Abhinab Choudhury
+              </motion.span>
+            </Link>
           </div>
         </SidebarBody>
       </Sidebar>
@@ -114,7 +127,7 @@ export const Logo = () => {
   return (
     <div className="flex gap-3 justify-between mt-12 md:m-0">
       <Link
-        to="/"
+        to="/home"
         className="font-normal flex space-x-2 items-center text-sm text-gray-950 py-1 relative z-20"
       >
         <div className="flex gap-3">

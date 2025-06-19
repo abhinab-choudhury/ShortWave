@@ -13,11 +13,11 @@ const Footer: React.FC = () => {
       text: 'Dashboard',
     },
     {
-      to: '/services',
+      to: '#',
       text: 'Services',
     },
     {
-      to: '/about',
+      to: '#',
       text: 'About',
     },
   ];
