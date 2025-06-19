@@ -1,9 +1,9 @@
 # ShortWave
-This Project is to be made is pure react and must input include dashboard for interacting and managing the number of click for the url and 
+This Project is to be made is pure react and must input include dashboard for interacting and managing the number of click for the url and
 and the QR generated for the shortener link and QR Code
 this project will also be main  and use prisma for database scheme
 
-Feature Idea: Let the user create a Page that will let them create a link page which will contain all the necessary links and help them to tract the clicks 
+Feature Idea: Let the user create a Page that will let them create a link page which will contain all the necessary links and help them to tract the clicks
 and know now many users clicked those links
 
 ## UI-Insperation and color-theme for dashboard and features to implement
@@ -11,11 +11,9 @@ https://www.styleglide.ai/themes?view=mainline - Citrus Theme
 https://www.styleglide.ai/themes?view=dashboard-v4 - Citrus Theme
 https://shadcnblocks-admin.vercel.app/
 
-## This will be a Project focusing Both Freelancing and Portfolio
-
 ## Decision:
 
-- Auth:  Auth with Passport.js - [ Google & Apple and Facebook Auth] 
+- Auth:  Auth with Passport.js - [ Google & Apple and Facebook Auth]
     -  # Feature:
         - Light + Dark  Mode [ As Beautifull UI as Possible - Proper SAAS Landing Page ]
         - Use Cookies Pop-up
@@ -33,7 +31,7 @@ https://shadcnblocks-admin.vercel.app/
     This will showcase my skill in understanding for Skilling Product
     and System Design
 
-    Deadline: 23-11-24 to 30-11-24 
+    Deadline: 23-11-24 to 30-11-24
     #### 7 Days to TOO much time for project like this do as quickly as Possible remember that Guy who got his freelance Gig in with in 7-days of Starting his Project
 
 
@@ -81,7 +79,7 @@ Display data that encourages user action:
   - e.g., "Inactive Links: 5 (Revisit)"
 
 
-# UI-Components: 
+# UI-Components:
 
 - [Month wise Grpah](https://www.creative-tim.com/twcomponents/component/free-tailwind-css-graph-component)
 - [Pricing Plan](https://www.creative-tim.com/twcomponents/component/popular-pricing-section)
