@@ -1,11 +1,6 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import ApiError from "./api-error-handling";
-
-type JwtPayload = {
-  destination: string;
-  code: string;
-  [key: string]: unknown;
-};
+import { env } from "./secrets";
 
 export const decodeToken = (secret: string, token?: string) => {
   if (!token) {
@@ -14,10 +9,8 @@ export const decodeToken = (secret: string, token?: string) => {
   return jwt.verify(token, secret);
 };
 
-export const generateToken = (
-  secret: string,
-  payload: JwtPayload,
-  options: SignOptions = { expiresIn: "60min" },
-): string => {
-  return jwt.sign(payload, secret, options);
-};
+export const generateAccessToken = (userId: string) =>
+  jwt.sign({ userId }, env.ACCESS_TOKEN_SECRET, { expiresIn: env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] });
+
+export const generateRefreshToken = (userId: string) =>
+  jwt.sign({ userId }, env.REFRESH_TOKEN_SECRET, { expiresIn: env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] });

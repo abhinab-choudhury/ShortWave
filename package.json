@@ -1,0 +1,18 @@
+{
+  "name": "shortwave",
+  "packageManager": "yarn@4.6.0",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace client dev\"  \"yarn workspace server dev\"",
+    "build": "concurrently \"yarn workspace client build\"  \"yarn workspace server build\"",
+    "format": "concurrently \"yarn workspace client format\"  \"yarn workspace server format\"",
+    "lint": "concurrently \"yarn workspace client lint\"  \"yarn workspace server lint\"",
+    "clean": "concurrently \"yarn workspace client clean\"  \"yarn workspace server clean\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

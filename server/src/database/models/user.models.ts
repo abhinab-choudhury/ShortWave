@@ -1,19 +1,21 @@
-import { model, Schema } from "mongoose";
+// models/User.ts
+
+import mongoose from "mongoose";
 import { IUser } from "../../interfaces/models";
 
-const UserSchema = new Schema<IUser>(
+const UserSchema = new mongoose.Schema<IUser>(
   {
     email: {
       type: String,
       trim: true,
       lowercase: true,
     },
-    googleId: {
+    authProvider: {
       type: String,
-      unique: true,
-      trim: true,
+      enum: ["google", "github"],
+      require: false,
     },
-    githubId: {
+    authProviderId: {
       type: String,
       unique: true,
       trim: true,
@@ -22,7 +24,7 @@ const UserSchema = new Schema<IUser>(
       type: String,
       trim: true,
     },
-    profile_pic: {
+    profilePic: {
       type: String,
       trim: true,
     },
@@ -30,10 +32,15 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    refreshToken: {
+      type: String,
+      unqiue: true,
+      trim: true,
+    }
   },
   {
     timestamps: true,
   },
 );
 
-export const User = model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);

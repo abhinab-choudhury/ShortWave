@@ -2,11 +2,12 @@ import { ObjectId, Document } from "mongoose";
 
 export interface IUser extends Document {
   email: string;
-  googleId: string;
-  githubId: string;
+  authProvider: string;
+  authProviderId: string;
   name: string;
-  profile_pic: string;
+  profilePic: string;
   admin: boolean;
+  refreshToken: string;
 }
 
 export interface ILocation extends Document {

@@ -1,31 +1,25 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-export const PORT = process.env.PORT || "8080";
-export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
-export const MONGODB_CONNECTION_STRING = `${process.env.MONGODB_CONNECTION_STRING}/${process.env.DATABASE_NAME}`;
-export const DATABASE_NAME = process.env.DATABASE_NAME || "mydatabase";
-export const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
-export const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY;
-export const SESSION_SECRET = process.env.SESSION_SECRET;
-export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-
-const requiredEnvVariables = [
-  "PORT",
-  "CLIENT_URL",
-  "MONGODB_CONNECTION_STRING",
-  "DATABASE_NAME",
-  "REFRESH_TOKEN_SECRET",
-  "REFRESH_TOKEN_EXPIRY",
-  "SESSION_SECRET",
-  "GOOGLE_CLIENT_ID",
-  "GOOGLE_CLIENT_SECRET",
-];
-
-requiredEnvVariables.some((envVar: string) => {
-  if (!process.env[envVar]) {
-    console.log(envVar, "is required.");
+const getEnv = (key: string, required = true, defaultValue?: string): string => {
+  const value = process.env[key] || defaultValue;
+  if (required && !value) {
+    console.error(`❌ Environment variable ${key} is required but not defined.`);
     process.exit(1);
   }
-});
+  return value!;
+};
+
+export const env = {
+  PORT: getEnv("PORT", false, "8080"),
+  CLIENT_URL: getEnv("CLIENT_URL", false, "http://localhost:5173"),
+  MONGODB_BASE_URI: getEnv("MONGODB_BASE_URI", false, "mongodb://localhost:27017"),
+  DATABASE_NAME: getEnv("DATABASE_NAME", false, "mydatabase"),
+  ACCESS_TOKEN_SECRET: getEnv("ACCESS_TOKEN_SECRET"),
+  ACCESS_TOKEN_EXPIRY: getEnv("ACCESS_TOKEN_EXPIRY", false, "15m"),
+  REFRESH_TOKEN_SECRET: getEnv("REFRESH_TOKEN_SECRET"),
+  REFRESH_TOKEN_EXPIRY: getEnv("REFRESH_TOKEN_EXPIRY", false, "7d"),
+  SESSION_SECRET: getEnv("SESSION_SECRET"),
+  GOOGLE_CLIENT_ID: getEnv("GOOGLE_CLIENT_ID"),
+  GOOGLE_CLIENT_SECRET: getEnv("GOOGLE_CLIENT_SECRET"),
+};
