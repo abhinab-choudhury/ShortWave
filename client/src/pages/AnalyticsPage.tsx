@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 const AnalyticsPage = () => {
   const [linkList, setLinkList] = useState<CampaignCardI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [campaign, setCampaign] = useState('Advertise Insights');
+  // const [campaign, setCampaign] = useState('Advertise Insights');
 
   useEffect(() => {
     const fetchData = async () => {

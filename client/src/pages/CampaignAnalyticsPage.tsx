@@ -46,7 +46,7 @@ import { IconLink } from '@tabler/icons-react';
 
 const CampaignAnalyticsPage = () => {
   const [linkList, setLinkList] = useState<LinkCardI[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [campaign, setCampaign] = useState('Advertise Insights');
 
   const campaignList = ['Resume Link', 'Advertise Insights', 'ABC Studios'];
@@ -72,8 +72,6 @@ const CampaignAnalyticsPage = () => {
         ]);
       } catch (error) {
         console.error('Failed to fetch links:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -278,7 +276,9 @@ function ChartCard({
           </div>
           <Select
             value={chartType}
-            onValueChange={(value: any) => setChartType(value)}
+            onValueChange={(value: 'line' | 'bar' | 'area') =>
+              setChartType(value)
+            }
           >
             <SelectTrigger className="w-28">
               <SelectValue placeholder="Chart Type" />
