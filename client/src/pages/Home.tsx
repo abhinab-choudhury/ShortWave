@@ -4,7 +4,7 @@ const Home = () => {
     <AppLayout>
       <section
         id="MainContent"
-        className="min-h-screen flex justify-center align-middle items-center"
+        className="min-h-screen flex justify-center align-middle items-center dark:bg-slate-900"
       >
         <h1>Home Page</h1>
       </section>

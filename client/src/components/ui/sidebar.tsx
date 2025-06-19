@@ -82,7 +82,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          'h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] flex-shrink-0',
+          'h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-slate-800 w-[300px] flex-shrink-0',
           className
         )}
         animate={{
@@ -108,7 +108,7 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          'h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full'
+          'h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-slate-800 w-full'
         )}
         {...props}
       >
@@ -129,12 +129,12 @@ export const MobileSidebar = ({
                 ease: 'easeInOut',
               }}
               className={cn(
-                'fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between',
+                'fixed h-full w-full inset-0 bg-white dark:bg-slate-900 p-10 z-[100] flex flex-col justify-between',
                 className
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
+                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-slate-200"
                 onClick={() => setOpen(!open)}
               >
                 <IconX />
@@ -159,21 +159,28 @@ export const SidebarLink = ({
 }) => {
   const location = useLocation();
   const { open, setOpen, animate } = useSidebar();
+
+  const isActive = location.pathname === link.href;
+
   return (
     <Link
       to={link.href}
       onClick={() => setOpen(!open)}
       className={cn(
-        'flex items-center justify-start gap-2  group/sidebar py-2',
+        'flex items-center justify-start gap-2 group/sidebar py-2 px-3 rounded-md transition-colors',
+        isActive
+          ? 'bg-gray-200 dark:bg-teal-800'
+          : 'hover:bg-gray-100 dark:hover:bg-slate-700',
         className
       )}
       {...props}
     >
       <div
         className={cn(
-          location.pathname === link.href
-            ? 'bg-gray-300 dark:bg-neutral-900 rounded-full p-2'
-            : 'p-2'
+          'p-2 rounded-full transition-colors',
+          isActive
+            ? 'bg-gray-300 dark:bg-teal-600 text-white'
+            : 'text-neutral-500 dark:text-slate-300'
         )}
       >
         {link.icon}
@@ -184,7 +191,7 @@ export const SidebarLink = ({
           display: animate ? (open ? 'inline-block' : 'none') : 'inline-block',
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"
       >
         {link.label}
       </motion.span>

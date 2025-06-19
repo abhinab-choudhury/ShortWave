@@ -15,7 +15,6 @@ import { useForm } from 'react-hook-form';
 import GoogleLogo from '/google_logo.png';
 import GithubLogo from '/github_logo.png';
 import AuthLayout from '@/components/Layouts/AuthLayout';
-import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { Separator } from '@/components/ui/separator';
@@ -49,8 +48,8 @@ const SigninPage: React.FC = () => {
   return (
     <AuthLayout>
       <Form {...form}>
-        <h1 className="text-3xl">Welcome Back</h1>
-        <p className="text-base">Sign in to your account</p>
+        <h1 className="text-3xl">Welcome to Shortwave</h1>
+        <p className="text-base">Create an account</p>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
@@ -88,7 +87,7 @@ const SigninPage: React.FC = () => {
               <img
                 src={GoogleLogo}
                 alt="Google logo"
-                className="h-5 w-5 mr-2"
+                className="h-8 w-8 mr-2"
               />
               Google
             </Button>
@@ -99,21 +98,13 @@ const SigninPage: React.FC = () => {
               <img
                 src={GithubLogo}
                 alt="Google logo"
-                className="h-5 w-5 mr-2"
+                className="h-6 w-6 mr-2"
               />
               Github
             </Button>
           </div>
         </form>
       </Form>
-      <div className="mt-4 text-center">
-        <p className="text-sm">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-500">
-            Sign up
-          </Link>
-        </p>
-      </div>
     </AuthLayout>
   );
 };
