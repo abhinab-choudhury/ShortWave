@@ -10,8 +10,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   // const location = useLocation();
 
   return (
-    <main className="relative  w-full">
-      <header className="bg-white dark:bg-gray-900 top-0 sticky">
+    <main className="relative w-full">
+      <header className="bg-white dark:bg-slate-800 top-0 sticky">
         <div className="mx-auto flex h-16 max-w-screen-xl items-center gap-8 px-4 sm:px-6 lg:px-8">
           <Link
             className="flex gap-2 items-center text-teal-600 dark:text-teal-300"

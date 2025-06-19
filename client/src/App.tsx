@@ -5,7 +5,7 @@ import PageNotFound from './pages/PageNotFound';
 import DashboardPage from './pages/DashboardPage';
 import About from './pages/About';
 import ServicesPage from './pages/ServicesPage.tsx';
-import SignupPage from './pages/SignupPage';
+import SigninPage from './pages/SigninPage';
 import DashboardLayout from './components/Layouts/DashboardLayout';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -28,7 +28,7 @@ function App() {
             <Route path={'/about'} element={<About />} />
             <Route path={'/services'} element={<ServicesPage />} />
 
-            <Route path={'/signup'} element={<SignupPage />} />
+            <Route path={'/signin'} element={<SigninPage />} />
             <Route path={'*'} element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>

@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { IconBrandCampaignmonitor } from '@tabler/icons-react';
+import DashboardQuickInfoCard from '@/components/DashoardQuickInfoCard';
 
 export async function getLink(): Promise<CampaignCardProps[]> {
   return [
@@ -67,64 +68,41 @@ const DashboardPage = () => {
         <h1 className="text-2xl font-bold">Links</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
           {/* Card 1: Total Shortened Links */}
-          <div className="group bg-gradient-to-br from-teal-100 to-teal-50 dark:from-slate-800 dark:to-slate-700 p-5 rounded-2xl shadow-md border border-teal-200 dark:border-slate-600 transition hover:shadow-lg hover:-translate-y-1 duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-teal-800 dark:text-teal-300">
-                  Total Links Created
-                </p>
-                <h2 className="text-3xl font-bold text-teal-900 dark:text-white mt-1">
-                  1,200
-                </h2>
-              </div>
-              <div className="bg-teal-200 dark:bg-teal-600/20 p-3 rounded-full">
-                <Link2 className="w-6 h-6 text-teal-700 dark:text-teal-300" />
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-teal-700/70 dark:text-slate-400">
-              +102 this week
-            </p>
-          </div>
+          <DashboardQuickInfoCard
+            className="group bg-gradient-to-br from-teal-100 to-teal-50 dark:from-slate-800 dark:to-slate-700 border-teal-200 dark:border-slate-600"
+            title="Total Links Created"
+            data="45"
+            footer="+10 this week"
+            icon_styles="bg-teal-200 dark:bg-teal-600/20"
+            icon={
+              <Link2 className="w-6 h-6 text-teal-700 dark:text-teal-300" />
+            }
+          />
 
           {/* Card 2: Click Growth Rate */}
-          <div className="group bg-gradient-to-br from-green-100 to-green-50 dark:from-slate-800 dark:to-slate-700 p-5 rounded-2xl shadow-md border border-green-200 dark:border-slate-600 transition hover:shadow-lg hover:-translate-y-1 duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-800 dark:text-green-300">
-                  Click Rate Growth
-                </p>
-                <h2 className="text-3xl font-bold text-green-900 dark:text-white mt-1">
-                  +83.9%
-                </h2>
-              </div>
-              <div className="bg-green-200 dark:bg-green-600/20 p-3 rounded-full">
-                <TrendingUp className="w-6 h-6 text-green-700 dark:text-green-300" />
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-green-700/70 dark:text-slate-400">
-              Since yesterday
-            </p>
-          </div>
+          <DashboardQuickInfoCard
+            title="Active Campaigns"
+            data="25"
+            className="group bg-gradient-to-br from-green-100 to-green-50 dark:from-slate-800 dark:to-slate-700 border-green-200 dark:border-slate-600"
+            footer="Since yesterday"
+            icon_styles="bg-green-200 dark:bg-green-600/20"
+            icon={
+              <TrendingUp className="w-6 h-6 text-green-700 dark:text-green-300" />
+            }
+          />
 
           {/* Card 3: Active Campaigns */}
-          <div className="group bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-slate-800 dark:to-slate-700 p-5 rounded-2xl shadow-md border border-indigo-200 dark:border-slate-600 transition hover:shadow-lg hover:-translate-y-1 duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-800 dark:text-indigo-300">
-                  Active Campaigns
-                </p>
-                <h2 className="text-3xl font-bold text-indigo-900 dark:text-white mt-1">
-                  25
-                </h2>
-              </div>
-              <div className="bg-indigo-200 dark:bg-indigo-600/20 p-3 rounded-full">
-                <Megaphone className="w-6 h-6 text-indigo-700 dark:text-indigo-300" />
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-indigo-700/70 dark:text-slate-400">
-              Running this week
-            </p>
-          </div>
+          <DashboardQuickInfoCard
+            title="Active Campaigns"
+            data="25"
+            className="group bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-slate-800 dark:to-slate-700 border-indigo-200 dark:border-slate-600"
+            footer="Running this week
+          "
+            icon_styles="bg-indigo-200 dark:bg-indigo-600/20"
+            icon={
+              <Megaphone className="w-6 h-6 text-indigo-700 dark:text-indigo-300" />
+            }
+          />
         </div>
         <div className="flex flex-col mt-5 md:flex-row items-start md:items-center justify-between mb-6 gap-3">
           {/* Filter + Display Buttons */}

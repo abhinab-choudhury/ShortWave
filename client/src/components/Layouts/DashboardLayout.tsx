@@ -62,12 +62,12 @@ export function DashboardLayout() {
   return (
     <div
       className={cn(
-        'relative rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-gray-950 w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden',
+        'relative rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-slate-800 w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden'
       )}
     >
       <Sidebar open={open} setOpen={setOpen} animate={animate}>
-        <SidebarBody className="justify-between gap-10 dark:bg-gray-950 pt-8 overflow-hidden">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden mb-auto">
+        <SidebarBody className="justify-between gap-10 dark:bg-slate-800 pt-8 overflow-hidden">
+          <div className="flex flex-col flex-1">
             <Logo />
             <div className="mt-8 flex flex-col gap-2 h-fit">
               {links.map((link, idx) => (
@@ -75,18 +75,18 @@ export function DashboardLayout() {
               ))}
               <div
                 onClick={handleLogout}
-                className="flex items-center justify-start gap-2  group/sidebar py-2 cursor-pointer"
+                className="flex items-center justify-start gap-2 group/sidebar py-2 px-3 cursor-pointer rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
               >
-                <div className="border-gray-300 border rounded-full p-2">
-                  <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+                <div className="border border-gray-300 dark:border-slate-600 rounded-full p-2 bg-white dark:bg-slate-800 transition-colors">
+                  <IconArrowLeft className="text-neutral-700 dark:text-slate-200 h-5 w-5 flex-shrink-0" />
                 </div>
-                <div className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
+                <div className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
                   Logout
                 </div>
               </div>
             </div>
           </div>
-          <div className='mt-[100%] md:mt-0'>
+          <div className="mt-[100%] md:mt-0">
             <SidebarLink
               link={{
                 label: 'Manu Arora',
