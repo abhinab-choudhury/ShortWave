@@ -16,8 +16,12 @@ import GoogleLogo from '/google_logo.png';
 import GithubLogo from '/github_logo.png';
 import AuthLayout from '@/components/Layouts/AuthLayout';
 import { toast } from '@/components/ui/use-toast';
-import { ToastAction } from '@/components/ui/toast';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { axiosInstance } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   email: z
@@ -34,46 +38,82 @@ const SigninPage: React.FC = () => {
     },
   });
 
+  const navigate = useNavigate();
+  const { isLoading, user } = useAuth();
+  const [isSending, setIsSending] = useState<boolean>(false);
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('Signin Button Clicked');
-    toast({
-      variant: 'default',
-      title: 'Scheduled: Catch up',
-      description: 'Friday, February 10, 2023 at 5:57 PM',
-      action: <ToastAction altText="Try again">Try again</ToastAction>,
-    });
-    console.log('Value:', values);
+    try {
+      setIsSending(true);
+      const response = await axiosInstance().post('/auth/signin', {
+        data: values,
+      });
+      if (response.status == 200) {
+        toast({
+          variant: 'default',
+          title: response.data.message || 'Check Your Email',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Signin Failed!!!',
+        });
+      }
+    } catch (err) {
+      console.log('Error: ', err);
+      toast({
+        variant: 'destructive',
+        title: 'Unknow Error has Occured.',
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [navigate, user]);
   return (
     <AuthLayout>
       <Form {...form}>
-        <h1 className="text-3xl">Welcome to Shortwave</h1>
-        <p className="text-base">Create an account</p>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="name@example.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Enter your email address to receive your secure login link.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" variant={'secondary'} className="w-full">
-            Sign In
-          </Button>
+        <div className="max-w-[420px] w-full flex flex-col gap-5">
+          <h1 className="text-3xl text-center">Welcome to Shortwave</h1>
+          <p className="text-base text-center">Create an account</p>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="name@example.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Enter your email address to receive your secure login link.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              disabled={isLoading || isSending ? true : false}
+              type="submit"
+              variant={'secondary'}
+              className="w-full"
+            >
+              {isLoading || isSending ? (
+                <Loader2 className="h-8 w-8 animate-spin text-black dark:text-white" />
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
           <div className="flex w-auto items-center align-middle justify-center">
             <Separator className="mx-2 w-28" />
             <p className="uppercase font-thin text-sm">Or continue with</p>
@@ -82,6 +122,12 @@ const SigninPage: React.FC = () => {
           <div className="flex flex-col gap-2">
             <Button
               type="button"
+              onClick={() =>
+                window.open(
+                  `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/google`,
+                  '_self'
+                )
+              }
               className="w-full text-base flex justify-center align-middle items-center"
             >
               <img
@@ -93,6 +139,12 @@ const SigninPage: React.FC = () => {
             </Button>
             <Button
               type="button"
+              onClick={() =>
+                window.open(
+                  `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/github`,
+                  '_self'
+                )
+              }
               className="w-full text-base flex justify-center align-middle items-center"
             >
               <img
@@ -103,7 +155,7 @@ const SigninPage: React.FC = () => {
               Github
             </Button>
           </div>
-        </form>
+        </div>
       </Form>
     </AuthLayout>
   );

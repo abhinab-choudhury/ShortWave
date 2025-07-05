@@ -4,8 +4,11 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const Home = () => {
+  const { user } = useAuth();
+
   return (
     <AppLayout>
       {/* Hero Section */}
@@ -31,7 +34,11 @@ const Home = () => {
               </p>
               <div className="flex w-full flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                 <Button asChild size="lg" className="w-full sm:w-auto">
-                  <Link to={'./signin'}>Get Started</Link>
+                  {user ? (
+                    <Link to={'/dashboard'}>Dashboard</Link>
+                  ) : (
+                    <Link to={'/signin'}>Get Started</Link>
+                  )}
                 </Button>
                 <Button
                   asChild

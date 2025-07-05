@@ -11,9 +11,9 @@ class ApiResponse {
     data: object = {},
   ) {
     this.statusCode = statusCode;
-    this.data = data;
     this.message = message;
     this.success = success;
+    this.data = data;
   }
 }
 

@@ -5,9 +5,10 @@ import { Link } from 'react-router-dom';
 import ShortwaveLogo from '/shortwave_logo.png';
 import { Toaster } from '../ui/toaster';
 import { ThemeToggle } from '../ui/theme-toggle';
+import { useAuth } from '@/hooks/useAuth';
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
-  // const location = useLocation();
+  const { user } = useAuth();
 
   return (
     <main className="relative w-full">
@@ -33,7 +34,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="sm:flex sm:gap-4">
               <Link
                 className="block rounded-md bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700 dark:hover:bg-teal-500"
-                to="/signin"
+                to={user ? '/dashboard' : '/signin'}
               >
                 Get Started
               </Link>

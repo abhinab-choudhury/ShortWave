@@ -1,5 +1,4 @@
-'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import {
   IconArrowLeft,
@@ -7,13 +6,14 @@ import {
   IconSettings,
   IconChartCovariate,
 } from '@tabler/icons-react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { axiosInstance, cn } from '@/lib/utils';
 import { toast } from '../ui/use-toast';
-import { ToastAction } from '@/components/ui/toast';
 import ShortwaveLogo from '/shortwave_logo.png';
 import { ThemeToggle } from '../ui/theme-toggle';
+import { useAuth } from '@/hooks/useAuth';
+import { User } from 'lucide-react';
 
 export function DashboardLayout() {
   const links = [
@@ -40,25 +40,37 @@ export function DashboardLayout() {
     },
   ];
   const animate = false;
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const handleLogout = () => {
-    console.log('Logout btn Clicked');
-    toast({
-      title: 'Logged Out',
-      description: 'You’re all set. Come back soon!',
-    });
-    toast({
-      title: 'Session Expired',
-      description: 'You’ve been logged out for security. Please sign in again',
-      action: <ToastAction altText="Try again">Signin</ToastAction>,
-    });
-    toast({
-      title: 'Logout Unsuccessful',
-      description: 'Something went wrong. Please try again.',
-      action: <ToastAction altText="Try again">Try again</ToastAction>,
-    });
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance().post('/auth/logout');
+      if (response.status == 200) {
+        toast({
+          title: 'Logged Out Successfull',
+          description: 'You’re all set. Come back soon!',
+        });
+        navigate('/home');
+      }
+    } catch (err) {
+      console.log('Error : ', err);
+      toast({
+        title: 'Logout Unsuccessful',
+        description: 'Something went wrong. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/signin');
+    }
+  }, [navigate, user]);
   return (
     <div
       className={cn(
@@ -73,7 +85,8 @@ export function DashboardLayout() {
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
               ))}
-              <div
+              <button
+                disabled={isLoading ? true : false}
                 onClick={handleLogout}
                 className="flex items-center justify-start gap-2 group/sidebar py-2 px-3 cursor-pointer rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
               >
@@ -83,7 +96,7 @@ export function DashboardLayout() {
                 <div className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
                   Logout
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -94,11 +107,15 @@ export function DashboardLayout() {
               className="flex items-center justify-start gap-2 group/sidebar py-2 px-3 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
             >
               <div className="p-2 rounded-full transition-colors text-neutral-500 dark:text-slate-300">
-                <img
-                  src="https://avatars.githubusercontent.com/u/132006996?v=4"
-                  alt="Avatar"
-                  className="-p-2 h-10 w-10 rounded-full border-transparent shadow-sm object-cover"
-                />
+                {user ? (
+                  <img
+                    src={user?.profilePic}
+                    alt="Avatar"
+                    className="-p-2 h-10 w-10 rounded-full border-transparent shadow-sm object-cover"
+                  />
+                ) : (
+                  <User className="h-8 w-8 rounded-full border-transparent shadow-sm object-cover" />
+                )}
               </div>
 
               <motion.span
@@ -112,7 +129,7 @@ export function DashboardLayout() {
                 }}
                 className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"
               >
-                Abhinab Choudhury
+                {user && user?.name}
               </motion.span>
             </Link>
           </div>

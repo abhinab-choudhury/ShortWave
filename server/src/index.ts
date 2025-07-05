@@ -1,51 +1,92 @@
-import express, { Application } from "express";
-// import cookieParser from 'cookie-parser';
-import bodyParser from "body-parser";
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
 import session from "express-session";
-import cors, { CorsOptions } from "cors";
-import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
-import {
-  CLIENT_URL,
-  PORT,
-  SESSION_SECRET,
-} from "./utils/secrets";
-import authRoute from "./routes/auth.routes";
-import MongoStore from "connect-mongo";
 import passport from "passport";
+import MongoStore from "connect-mongo";
 
-const app: Application = express();
-const corsOptions: CorsOptions = {
-  origin: [CLIENT_URL as string],
-  credentials: true, // Allow credentials (cookies, authentication headers)
-};
-const sessionOptions: session.SessionOptions = {
-  secret: [SESSION_SECRET as string],
-  resave: false,
-  saveUninitialized: true,
-  store: MongoStore.create({
-    mongoUrl: MONGODB_URI,
-    collectionName: "sessions",
-  }),
-  cookie: {
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24,
-  },
-};
+import { env } from "./utils/secret";
+import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
+import { getUserById } from "./services/user.services";
+import authRoute from "./routes/auth.route";
+import campaignRoute from "./routes/campaign.route";
+import urlRoute from "./routes/url.route";
+import analyticsRoute from "./routes/analytics.route";
+import redirectRoute from "./routes/redirect.route";
+import globalErrorHandler from "./middlewares/error.middleware";
+import path from "node:path";
+
+const app = express();
 
 app.set("trust proxy", 1);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-app.use(cors(corsOptions));
-app.use(bodyParser.json({ limit: "16kb" }));
-app.use(bodyParser.urlencoded({ extended: true, limit: "16kb" }));
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  }),
+);
+app.use(
+  session({
+    secret: env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "lax",
+      secure: env.NODE_ENV !== "development",
+      httpOnly: true,
+    },
+    store: MongoStore.create({
+      mongoUrl: MONGODB_URI,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60,
+      autoRemove: "native",
+    }),
+  }),
+);
+
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
+
+app.use(passport.initialize());
 app.use(passport.session());
+passport.serializeUser((user: Express.User, done) => {
+  done(null, user._id);
+});
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await getUserById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
 
-DB_CONNECT().then((): void => {
-  app.get("/health", (_, res) => {
-    res.send("I am healthy");
+app.get("/", (_req, res) => {
+  res.render("index", {
+    title: "Shortwave | Rest API Server",
+    year: new Date().getFullYear(),
   });
-  app.use("/api/v1/auth", authRoute);
 });
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/campaign", campaignRoute);
+app.use("/api/v1/url", urlRoute);
+app.use("/api/v1/analytics", analyticsRoute);
+app.use("/:shortId", redirectRoute);
+app.use(globalErrorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server Running on http://localhost:${PORT || 8080}`);
-});
+DB_CONNECT()
+  .then(() => {
+    app.listen(env.PORT, () => {
+      console.log(`Server running at http://localhost:${env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err);
+    process.exit(1);
+  });
