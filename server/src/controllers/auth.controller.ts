@@ -8,7 +8,7 @@ import {
 } from "../services/user.services";
 import { z } from "zod";
 import { IUser } from "../interfaces/model";
-import { sendSignInEmail } from "../utils/email";
+import { sendSignInEmail, sendWelcomeEmail } from "../utils/email";
 import { env } from "../utils/secret";
 import { blockJWT, findBlockedJWT } from "../services/blockjwt.service";
 import ApiResponse from "../utils/api-response-handling";
@@ -40,8 +40,6 @@ export async function signinUser(
   next: NextFunction,
 ): Promise<void> {
   try {
-    console.log("Body: ", req.body);
-
     const parsedReq = signinReqSchema.parse(req.body.data);
     let user = (await getUserByEmail(parsedReq.email)) as IUser;
 
@@ -52,6 +50,7 @@ export async function signinUser(
         name: parsedReq.email.split("@")?.[0],
         admin: false,
       };
+      await sendWelcomeEmail(newUser.name, newUser.email);
       const response = await createUser(newUser);
       userId = response._id as string;
       user = response;

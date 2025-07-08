@@ -1,10 +1,10 @@
-import AppLayout from '@/components/Layouts/AppLayout';
-import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import AppLayout from "@/components/Layouts/AppLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const Home = () => {
   const { user } = useAuth();
@@ -12,7 +12,7 @@ const Home = () => {
   return (
     <AppLayout>
       {/* Hero Section */}
-      <section className="pt-24 pb-32 bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <section className="py-24 px-20 bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="container">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Text Column */}
@@ -35,9 +35,9 @@ const Home = () => {
               <div className="flex w-full flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                 <Button asChild size="lg" className="w-full sm:w-auto">
                   {user ? (
-                    <Link to={'/dashboard'}>Dashboard</Link>
+                    <Link to={"/dashboard"}>Dashboard</Link>
                   ) : (
-                    <Link to={'/signin'}>Get Started</Link>
+                    <Link to={"/signin"}>Get Started</Link>
                   )}
                 </Button>
                 <Button
@@ -61,17 +61,17 @@ const Home = () => {
                 </p>
                 <div className="flex flex-wrap gap-2 justify-start">
                   {[
-                    'shadcn-ui-icon',
-                    'typescript-icon',
-                    'react-icon',
-                    'tailwind-icon',
+                    "shadcn-ui-icon",
+                    "typescript-icon",
+                    "react-icon",
+                    "tailwind-icon",
                   ].map((tech, i) => (
                     <a
                       key={i}
                       href="#"
                       className={cn(
-                        buttonVariants({ variant: 'secondary' }),
-                        'group dark:bg-white flex aspect-square h-12 items-center justify-center p-0'
+                        buttonVariants({ variant: "secondary" }),
+                        "group dark:bg-white flex aspect-square h-12 items-center justify-center p-0",
                       )}
                     >
                       <img

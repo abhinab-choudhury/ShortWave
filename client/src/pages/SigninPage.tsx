@@ -6,35 +6,35 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import GoogleLogo from '/google_logo.png';
-import GithubLogo from '/github_logo.png';
-import AuthLayout from '@/components/Layouts/AuthLayout';
-import { toast } from '@/components/ui/use-toast';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { axiosInstance } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import GoogleLogo from "/google_logo.png";
+import GithubLogo from "/github_logo.png";
+import AuthLayout from "@/components/Layouts/AuthLayout";
+import { toast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z
     .string()
-    .min(1, { message: 'This field needs to be filled.' })
-    .email({ message: 'Invalid email address.' }),
+    .min(1, { message: "This field needs to be filled." })
+    .email({ message: "Invalid email address." }),
 });
 
 const SigninPage: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
+      email: "",
     },
   });
 
@@ -44,34 +44,35 @@ const SigninPage: React.FC = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSending(true);
-      const response = await axiosInstance().post('/auth/signin', {
+      const response = await axiosInstance.post("/auth/signin", {
         data: values,
       });
       if (response.status == 200) {
         toast({
-          variant: 'default',
-          title: response.data.message || 'Check Your Email',
+          variant: "default",
+          title: response.data.message || "Check Your Email",
         });
+        form.reset();
       } else {
         toast({
-          variant: 'destructive',
-          title: 'Signin Failed!!!',
+          variant: "default",
+          title: "❌ Signin Failed!!!",
         });
       }
     } catch (err) {
-      console.log('Error: ', err);
+      console.log("Error: ", err);
       toast({
-        variant: 'destructive',
-        title: 'Unknow Error has Occured.',
+        variant: "default",
+        title: "❌ Unknow Error has Occured.",
       });
     } finally {
       setIsSending(false);
     }
   };
-
+  console.log("User : ", user);
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [navigate, user]);
   return (
@@ -104,13 +105,13 @@ const SigninPage: React.FC = () => {
             <Button
               disabled={isLoading || isSending ? true : false}
               type="submit"
-              variant={'secondary'}
+              variant={"secondary"}
               className="w-full"
             >
               {isLoading || isSending ? (
                 <Loader2 className="h-8 w-8 animate-spin text-black dark:text-white" />
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </Button>
           </form>
@@ -125,7 +126,7 @@ const SigninPage: React.FC = () => {
               onClick={() =>
                 window.open(
                   `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/google`,
-                  '_self'
+                  "_self",
                 )
               }
               className="w-full text-base flex justify-center align-middle items-center"
@@ -142,7 +143,7 @@ const SigninPage: React.FC = () => {
               onClick={() =>
                 window.open(
                   `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/github`,
-                  '_self'
+                  "_self",
                 )
               }
               className="w-full text-base flex justify-center align-middle items-center"

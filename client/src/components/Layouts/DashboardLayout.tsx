@@ -1,39 +1,39 @@
-import { useEffect, useState } from 'react';
-import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { useEffect, useState } from "react";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
   IconLayoutDashboard,
   IconSettings,
   IconChartCovariate,
-} from '@tabler/icons-react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { axiosInstance, cn } from '@/lib/utils';
-import { toast } from '../ui/use-toast';
-import ShortwaveLogo from '/shortwave_logo.png';
-import { ThemeToggle } from '../ui/theme-toggle';
-import { useAuth } from '@/hooks/useAuth';
-import { User } from 'lucide-react';
+} from "@tabler/icons-react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { axiosInstance, cn } from "@/lib/utils";
+import { toast } from "../ui/use-toast";
+import ShortwaveLogo from "/shortwave_logo.png";
+import { ThemeToggle } from "../ui/theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
+import { User } from "lucide-react";
 
 export function DashboardLayout() {
   const links = [
     {
-      label: 'Dashboard',
-      href: 'dashboard',
+      label: "Dashboard",
+      href: "dashboard",
       icon: (
         <IconLayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
-      label: 'Analytics',
-      href: 'analytics',
+      label: "Analytics",
+      href: "analytics",
       icon: (
         <IconChartCovariate className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
-      label: 'Settings',
-      href: 'settings',
+      label: "Settings",
+      href: "settings",
       icon: (
         <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
@@ -47,19 +47,19 @@ export function DashboardLayout() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance().post('/auth/logout');
+      const response = await axiosInstance.post("/auth/logout");
       if (response.status == 200) {
         toast({
-          title: 'Logged Out Successfull',
-          description: 'You’re all set. Come back soon!',
+          title: "Logged Out Successfull",
+          description: "You’re all set. Come back soon!",
         });
-        navigate('/home');
+        navigate("/home");
       }
     } catch (err) {
-      console.log('Error : ', err);
+      console.log("Error : ", err);
       toast({
-        title: 'Logout Unsuccessful',
-        description: 'Something went wrong. Please try again.',
+        title: "Logout Unsuccessful",
+        description: "Something went wrong. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -68,13 +68,13 @@ export function DashboardLayout() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/signin');
+      navigate("/signin");
     }
   }, [navigate, user]);
   return (
     <div
       className={cn(
-        'relative rounded-md flex flex-col md:flex-row  w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden'
+        "relative rounded-md flex flex-col md:flex-row  w-full h-screen flex-1 mx-auto border border-neutral-200 dark:border-gray-700 overflow-hidden",
       )}
     >
       <Sidebar open={open} setOpen={setOpen} animate={animate}>
@@ -107,14 +107,14 @@ export function DashboardLayout() {
               className="flex items-center justify-start gap-2 group/sidebar py-2 px-3 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
             >
               <div className="p-2 rounded-full transition-colors text-neutral-500 dark:text-slate-300">
-                {user ? (
+                {user?.profilePic ? (
                   <img
-                    src={user?.profilePic}
+                    src={user.profilePic}
                     alt="Avatar"
                     className="-p-2 h-10 w-10 rounded-full border-transparent shadow-sm object-cover"
                   />
                 ) : (
-                  <User className="h-8 w-8 rounded-full border-transparent shadow-sm object-cover" />
+                  <User className="h-8 w-8 rounded-full shadow-none object-cover" />
                 )}
               </div>
 
@@ -122,9 +122,9 @@ export function DashboardLayout() {
                 animate={{
                   display: animate
                     ? open
-                      ? 'inline-block'
-                      : 'none'
-                    : 'inline-block',
+                      ? "inline-block"
+                      : "none"
+                    : "inline-block",
                   opacity: animate ? (open ? 1 : 0) : 1,
                 }}
                 className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"

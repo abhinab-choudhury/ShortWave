@@ -1,0 +1,15 @@
+{
+  "name": "shortwave",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:frontend": "cd client && npm run dev",
+    "start:backend": "cd server && npm run dev",
+    "start": "concurrently 'npm run start:frontend' 'npm run start:backend'"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "packageManager": "yarn@1.22.22"
+}
