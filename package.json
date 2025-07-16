@@ -2,10 +2,11 @@
   "name": "shortwave",
   "version": "0.0.1",
   "description": "",
+  "private": "true",
   "main": "index.js",
   "scripts": {
-    "start:frontend": "cd client && npm run dev",
-    "start:backend": "cd server && npm run dev",
+    "start:frontend": "cd apps/client && npm run dev",
+    "start:backend": "cd apps/server && npm run dev",
     "start": "concurrently 'npm run start:frontend' 'npm run start:backend'"
   },
   "dependencies": {
