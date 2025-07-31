@@ -23,17 +23,17 @@ class ApiError extends Error {
   }
 }
 
-export function normalizeError(err: any, defaultMessage: string): ApiError {
-  if (err instanceof ApiError) return err;
+export function normalizeError(error: any, defaultMessage: string): ApiError {
+  if (error instanceof ApiError) return error;
 
-  if (err instanceof z.ZodError)
+  if (error instanceof z.ZodError)
     return new ApiError(
       400,
       "Validation Failed",
-      err.issues.map((issue) => issue.message),
+      error.issues.map((issue) => issue.message),
     );
 
-  return new ApiError(500, defaultMessage, err);
+  return new ApiError(500, defaultMessage, error);
 }
 
 export default ApiError;

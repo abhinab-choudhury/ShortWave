@@ -1,13 +1,18 @@
 import { Copy, Link2, QrCode } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export interface LinkCardI {
-  orginal_link: string;
+  link_id: string;
+  campaign_id: string;
+  original_link: string;
   short_link: string;
   created_at: string;
 }
 
 export default function LinkCard({
-  orginal_link,
+  link_id,
+  campaign_id,
+  original_link,
   short_link,
   created_at,
 }: LinkCardI) {
@@ -16,7 +21,12 @@ export default function LinkCard({
       <div className="flex justify-between items-start w-full">
         <div className="flex flex-col gap-2 w-full">
           <div className="flex justify-between items-center gap-2 text-sm font-medium break-all">
-            <span className="line-clamp-1">{orginal_link}</span>
+            <Link
+              to={`/analytics/${campaign_id}/${link_id}`}
+              className="line-clamp-1"
+            >
+              {original_link}
+            </Link>
             <div className="flex flex-row gap-2">
               <button
                 className="p-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"

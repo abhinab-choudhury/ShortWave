@@ -32,7 +32,7 @@ const AnalyticsPage = () => {
 
     const userCampaigns = campaigns.data.data ?? [];
     console.log("User Campaigns : ", userCampaigns);
-    if (userCampaigns.length === 0) {
+    if (userCampaigns.length == 0) {
       return (
         <div className="flex justify-center items-center col-span-full text-gray-500 dark:text-slate-400 min-h-[200px]">
           No links available.

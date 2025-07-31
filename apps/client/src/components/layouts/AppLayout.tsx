@@ -1,9 +1,7 @@
-"use client";
 import React from "react";
 import Footer from "../ui/footer";
 import { Link } from "react-router-dom";
 import ShortwaveLogo from "/shortwave_logo.png";
-import { Toaster } from "../ui/toaster";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -43,7 +41,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </header>
       {children}
-      <Toaster />
       <Footer />
     </main>
   );

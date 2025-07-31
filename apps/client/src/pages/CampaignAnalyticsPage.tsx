@@ -1,60 +1,30 @@
 import { CircleDot } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import LinkCard, { LinkCardI } from "@/components/LinkCard";
 import { Button } from "@/components/ui/button";
 import { IconLink } from "@tabler/icons-react";
 import AlertDeleteBtn from "@/components/AlertDeleteBtn";
 import ChartCard from "@/components/AnalyticsChartCard";
 import CreateLinkBtn from "@/components/CreateLinkBtn";
+import { useQueries } from "@tanstack/react-query";
+import { axiosInstance } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 const CampaignAnalyticsPage = () => {
-  const [linkList, setLinkList] = useState<LinkCardI[]>([]);
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [campaign, setCampaign] = useState("Advertise Insights");
+  const { campaignId } = useParams();
 
-  const campaignList = ["Resume Link", "Advertise Insights", "ABC Studios"];
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLinkList([
-          {
-            orginal_link: "github.com/abhinab-choudhury",
-            short_link: "short.link/abhinab",
-            created_at: "11th Nov 2024",
-          },
-          {
-            orginal_link: "github.com/hkirat",
-            short_link: "short.link/hkirat",
-            created_at: "2nd Dec 2023",
-          },
-          {
-            orginal_link: "github.com/XBastile",
-            short_link: "short.link/xbastile",
-            created_at: "5th Dec 2025",
-          },
-          {
-            orginal_link: "github.com/XBastille/DeepFX-Studio",
-            short_link: "short.link/deepfx",
-            created_at: "23rd Oct 2025",
-          },
-        ]);
-      } catch (error) {
-        console.error("Failed to fetch links:", error);
-      }
-    };
+  const [campaignLinks] = useQueries({
+    queries: [
+      {
+        queryKey: ["campaignLink", campaignId],
+        queryFn: () =>
+          axiosInstance
+            .get(`/campaign/${campaignId}/url`)
+            .then((res) => res.data.data),
+      },
+    ],
+  });
 
-    fetchData();
-  }, []);
-
+  console.log("campaign: ", campaignLinks.data);
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
       <div className="p-2 md:p-10 max-w-7xl mx-auto">
@@ -63,35 +33,11 @@ const CampaignAnalyticsPage = () => {
             Analytics
           </h1>
           <div className="relative flex gap-2 flex-row justify-between">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant={"default"}>
-                  <CircleDot className="w-4 h-4 mr-2 bg-transparent" />
-                  {campaign || "Select Campaign"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg">
-                <DropdownMenuLabel className="text-xs uppercase text-slate-500 dark:text-slate-400 px-3 py-2">
-                  Choose Campaign
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="border-t border-slate-200 dark:border-slate-700" />
-                <DropdownMenuRadioGroup
-                  value={campaign}
-                  onValueChange={setCampaign}
-                >
-                  {campaignList.map((camp, index) => (
-                    <DropdownMenuRadioItem
-                      key={index}
-                      value={camp}
-                      className="px-8 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm"
-                    >
-                      {camp}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDeleteBtn />
+            <Button variant={"default"}>
+              <CircleDot className="w-4 h-4 mr-2 bg-transparent" />
+              {campaignLinks.data?.name || "Name"}
+            </Button>
+            <AlertDeleteBtn campaignId={campaignId!} />
           </div>
         </div>
 
@@ -119,18 +65,31 @@ const CampaignAnalyticsPage = () => {
               <IconLink />
               Links
             </h1>
-            <CreateLinkBtn />
+            <CreateLinkBtn campaignId={campaignId!} />
           </div>
           <div className="flex flex-row justify-start flex-wrap gap-x-3 w-full">
-            {linkList.length > 0 ? (
-              linkList.map((linkData, index) => (
-                <LinkCard
-                  key={index}
-                  orginal_link={linkData.orginal_link}
-                  short_link={linkData.short_link}
-                  created_at={linkData.created_at}
-                />
-              ))
+            {campaignLinks.data?.urls.length > 0 ? (
+              campaignLinks.data?.urls.map(
+                (
+                  linkData: {
+                    _id: LinkCardI["link_id"];
+                    campaign_id: LinkCardI["campaign_id"];
+                    original_url: LinkCardI["original_link"];
+                    short_url: LinkCardI["short_link"];
+                    createdAt: LinkCardI["created_at"];
+                  },
+                  index: number,
+                ) => (
+                  <LinkCard
+                    key={index}
+                    link_id={linkData._id}
+                    campaign_id={linkData.campaign_id}
+                    original_link={linkData.original_url}
+                    short_link={linkData.short_url}
+                    created_at={linkData.createdAt}
+                  />
+                ),
+              )
             ) : (
               <div className="flex justify-center items-center text-gray-500 dark:text-slate-400">
                 No links available.

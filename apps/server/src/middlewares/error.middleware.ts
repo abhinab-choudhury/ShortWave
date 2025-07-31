@@ -6,36 +6,36 @@ import { env } from "../utils/secret";
 import { z } from "zod";
 
 const globalErrorHandler: ErrorRequestHandler = (
-  err: Error,
+  error: Error,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
-  if (err instanceof ApiError) {
-    res.status(err.statusCode).json(
-      new ApiResponse(err.statusCode, err.message, false, {
-        errors: err.errors || [],
-        stack: env.NODE_ENV === "development" ? err.stack : undefined,
+  if (error instanceof ApiError) {
+    res.status(error.statusCode).json(
+      new ApiResponse(error.statusCode, error.message, false, {
+        errors: error.errors || [],
+        stack: env.NODE_ENV === "development" ? error.stack : undefined,
       }),
     );
     return;
   }
 
-  if (err instanceof z.ZodError) {
+  if (error instanceof z.ZodError) {
     res.status(400).json(
       new ApiResponse(
         400,
         "Validation Failed",
         false,
-        err.issues.map((issue) => issue.message),
+        error.issues.map((issue) => issue.message),
       ),
     );
   }
 
   res.status(500).json(
     new ApiResponse(500, "Internal Server Error", false, {
-      errors: [err.message || "Unexpected error occurred"],
-      stack: env.NODE_ENV === "development" ? err.stack : undefined,
+      errors: [error.message || "Unexpected error occurred"],
+      stack: env.NODE_ENV === "development" ? error.stack : undefined,
     }),
   );
   return;

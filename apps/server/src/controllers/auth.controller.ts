@@ -75,15 +75,15 @@ export async function signinUser(
           true,
         ),
       );
-  } catch (err: any) {
-    if (err instanceof z.ZodError) {
-      const messages = err.errors.map(
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      const messages = error.errors.map(
         (e) => `${e.path.join(".")}: ${e.message}`,
       );
       return next(new ApiError(400, "Validation failed", messages));
     }
-    console.log("Error: ", err);
-    return next(new ApiError(500, "Unexprected error occured", err));
+    console.log("Error: ", error);
+    return next(new ApiError(500, "Unexprected error occured", error));
   }
 }
 
@@ -105,9 +105,9 @@ export async function verifyToken(
     if (!user) return next(new ApiError(400, "User not found"));
 
     await new Promise<void>((resolve, reject) => {
-      req.logIn(user, function (err) {
-        if (err)
-          return reject(new ApiError(500, "Login failed", [err.message]));
+      req.logIn(user, function (error) {
+        if (error)
+          return reject(new ApiError(500, "Login failed", [error.message]));
         return resolve();
       });
     });
@@ -115,8 +115,8 @@ export async function verifyToken(
     await blockJWT(token);
 
     res.redirect(`${env.CLIENT_URL}/dashboard`);
-  } catch (err: any) {
-    return next(new ApiError(400, "Invalid Token or Expired", [err.message]));
+  } catch (error: any) {
+    return next(new ApiError(400, "Invalid Token or Expired", [error.message]));
   }
 }
 
@@ -131,10 +131,10 @@ export async function logoutUser(
   next: NextFunction,
 ) {
   try {
-    req.session.destroy((err) => {
-      if (err) {
+    req.session.destroy((error) => {
+      if (error) {
         return next(
-          new ApiError(500, "Failed to destroy session", [err.messaege]),
+          new ApiError(500, "Failed to destroy session", [error.messaege]),
         );
       }
       res.clearCookie("connect.sid");
@@ -142,11 +142,11 @@ export async function logoutUser(
         .status(200)
         .json(new ApiResponse(200, "User logged out successfully"));
     });
-  } catch (err: any) {
+  } catch (error: any) {
     return next(
-      err instanceof ApiError
-        ? err
-        : new ApiError(500, "Unexpcted error during logout", err),
+      error instanceof ApiError
+        ? error
+        : new ApiError(500, "Unexpcted error during logout", error),
     );
   }
 }

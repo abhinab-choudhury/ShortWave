@@ -59,8 +59,8 @@ const SigninPage: React.FC = () => {
           title: "❌ Signin Failed!!!",
         });
       }
-    } catch (err) {
-      console.log("Error: ", err);
+    } catch (error) {
+      console.log("Error: ", error);
       toast({
         variant: "default",
         title: "❌ Unknow Error has Occured.",

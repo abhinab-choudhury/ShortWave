@@ -42,9 +42,9 @@ export function AuthProvider({
           title: "Session Expired",
         });
       }
-    } catch (err) {
+    } catch (error) {
       setUser(null);
-      console.log("Error: ", err);
+      console.log("Error: ", error);
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ export function AuthProvider({
           title: "Session Expired",
         });
       }
-      console.error("Refresh user failed: ", err);
+      console.error("Refresh user failed: ", error);
     }
   };
 

@@ -182,9 +182,9 @@ async function sendEmail(email: string, title: string, emailTemplate: string) {
       html: emailTemplate,
       text: "Please view this email in HTML-compatible client.",
     });
-  } catch (err: any) {
+  } catch (error: any) {
     throw new ApiError(500, "Failed to send email", [
-      err?.message || "Unknown error from email service",
+      error?.message || "Unknown error from email service",
     ]);
   }
 }

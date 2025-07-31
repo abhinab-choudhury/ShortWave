@@ -24,18 +24,13 @@ const UrlSchema = new mongoose.Schema<IUrl>(
       unique: true,
       trim: true,
     },
-    expire_at: {
+    from_date: {
       type: Date,
+      required: false,
     },
-    qr_code_path: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    active: {
-      type: Boolean,
-      default: false,
+    to_date: {
+      type: Date,
+      required: false,
     },
   },
   {

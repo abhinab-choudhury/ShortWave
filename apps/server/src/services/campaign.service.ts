@@ -4,6 +4,8 @@ import { ICampaign, IUser } from "../interfaces/model";
 import Url from "../database/models/url.model";
 import Location from "../database/models/location.model";
 import Click from "../database/models/click.model";
+import { getActiveLinkCnt, getTotalLinkCnt } from "./url.services";
+import { getTotalCGRPercent } from "./click.service";
 
 /**
  * Fetch all campaigns for a specific user from the database
@@ -11,14 +13,14 @@ import Click from "../database/models/click.model";
 export async function getAllCampaigns(
   userId: IUser["_id"],
 ): Promise<ICampaign[] | null> {
-  return await Campaign.find({ user: userId }).sort({ createdAt: -1 });
+  return await Campaign.find({ user_id: userId }).sort({ createdAt: -1 });
 }
 
 /**
  * Create a new campaign in the database
  */
 export async function createCampaign(
-  data: Pick<ICampaign, "name" | "user">,
+  data: Pick<ICampaign, "name" | "user_id">,
 ): Promise<ICampaign> {
   const campaign = new Campaign(data);
   return await campaign.save();
@@ -81,7 +83,7 @@ export async function deleteCampaign(
     deleteCampaignSession.endSession();
 
     console.log("Campaign and all related data deleted successfully");
-  } catch (err) {
+  } catch (error) {
     await deleteCampaignSession.abortTransaction();
     deleteCampaignSession.endSession();
     console.log("Error while deleting the campaign and its related data");
@@ -93,15 +95,22 @@ export async function deleteCampaign(
  * updated campaign
  */
 export async function getRecentCampaigns() {
-  const recentCampaigns = await Campaign.find();
+  const recentCampaigns = await Campaign.find()
+    .sort({ updatedAt: -1 })
+    .limit(3);
   return recentCampaigns;
 }
 
+/* Get Campaign Status for the all dashboard.  */
 export async function getCampaignStats() {
+  const totalLinkCnt = await getTotalLinkCnt();
+  const cgrPercent = await getTotalCGRPercent();
+  const activeLinkCnt = await getActiveLinkCnt();
+
   const stats = {
-    total_links: "10",
-    crg: "40.42%",
-    active_campaigns: "4",
+    total_links: totalLinkCnt,
+    crg: cgrPercent,
+    active_links: activeLinkCnt,
   };
   return stats;
 }

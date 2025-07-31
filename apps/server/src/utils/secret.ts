@@ -26,6 +26,7 @@ export const env = {
     false,
     "mongodb://localhost:27017",
   ),
+  REDIS_URL: getEnv("REDIS_URL", false, "redis://localhost:6379"),
   DATABASE_NAME: getEnv("DATABASE_NAME", false, "mydatabase"),
   SESSION_SECRET: getEnv("SESSION_SECRET"),
   JWT_SECRET: getEnv("JWT_SECRET"),

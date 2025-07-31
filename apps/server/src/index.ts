@@ -7,6 +7,7 @@ import MongoStore from "connect-mongo";
 
 import { env } from "./utils/secret";
 import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
+import { REDIS_CONNECT } from "./database/redis-connect";
 import { getUserById } from "./services/user.services";
 import authRoute from "./routes/auth.route";
 import campaignRoute from "./routes/campaign.route";
@@ -61,8 +62,8 @@ passport.deserializeUser(async (id, done) => {
   try {
     const user = await getUserById(id);
     done(null, user);
-  } catch (err) {
-    done(err, null);
+  } catch (error) {
+    done(error, null);
   }
 });
 
@@ -79,12 +80,13 @@ app.use("/:shortId", redirectRoute);
 app.use(globalErrorHandler);
 
 DB_CONNECT()
-  .then(() => {
+  .then(async () => {
+    await REDIS_CONNECT();
     app.listen(env.PORT, () => {
       console.log(`Server running at http://localhost:${env.PORT}`);
     });
   })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB:", err);
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB:", error);
     process.exit(1);
   });

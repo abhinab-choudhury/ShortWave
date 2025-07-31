@@ -12,6 +12,16 @@ import { ICampaign } from "../interfaces/model";
 import ApiResponse from "../utils/api-response-handling";
 import ApiError, { normalizeError } from "../utils/api-error-handling";
 
+const campaignSchema = z.object({
+  name: z
+    .string()
+    .min(5, "Name should contain at least 5 characters")
+    .max(20, "Name can contain at most 20 characters"),
+  description: z
+    .string()
+    .min(10, "Description shoould be at least 10 characters"),
+});
+
 /**
  * @desc    Get all campaigns
  * @route   GET /api/v1/campaign
@@ -24,13 +34,15 @@ export async function getAllUserCampaigns(
 ) {
   try {
     const campaigns = await getAllCampaigns(req.user?._id);
-    console.log("All User Campaigns: ", campaigns);
     res
       .status(200)
       .json(new ApiResponse(200, "All Campaigns", true, campaigns!));
-  } catch (err: any) {
+  } catch (error: any) {
     return next(
-      normalizeError(err, "Unexpected error occurred while fetching campaigns"),
+      normalizeError(
+        error,
+        "Unexpected error occurred while fetching campaigns",
+      ),
     );
   }
 }
@@ -45,16 +57,6 @@ export async function createUserCampaign(
   res: Response,
   next: NextFunction,
 ) {
-  const campaignSchema = z.object({
-    name: z
-      .string()
-      .min(5, "Name should contain at least 5 characters")
-      .max(20, "Name can contain at most 20 characters"),
-    description: z
-      .string()
-      .min(10, "Description shoould be at least 10 characters"),
-  });
-
   const parsed = campaignSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -63,10 +65,10 @@ export async function createUserCampaign(
   }
 
   try {
-    const data: Pick<ICampaign, "name" | "description" | "user"> = {
+    const data: Pick<ICampaign, "name" | "description" | "user_id"> = {
       name: parsed.data.name,
       description: parsed.data.description,
-      user: req.user?._id,
+      user_id: req.user?._id,
     };
 
     const newCampaign = await createCampaign(data);
@@ -81,10 +83,10 @@ export async function createUserCampaign(
           newCampaign,
         ),
       );
-  } catch (err: any) {
+  } catch (error: any) {
     return next(
       normalizeError(
-        err,
+        error,
         "Unexpected error occurred while creating a new campaign",
       ),
     );
@@ -103,7 +105,17 @@ export async function updateUserCampaign(
 ) {
   try {
     const { campaignId } = req.params;
-    const data = req.body;
+    const parsed = campaignSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      const messages = parsed.error.issues.map((issue) => issue.message);
+      return next(new ApiError(400, "Validation Failed", messages));
+    }
+
+    const data: Pick<ICampaign, "name" | "description"> = {
+      name: parsed.data.name,
+      description: parsed.data.description,
+    };
 
     const updatedCampaign = await updateCampaign(
       campaignId,
@@ -120,10 +132,10 @@ export async function updateUserCampaign(
           updatedCampaign!,
         ),
       );
-  } catch (err: any) {
+  } catch (error: any) {
     return next(
       normalizeError(
-        err,
+        error,
         "Unexpected error occurred while updating the campaign",
       ),
     );
@@ -147,10 +159,10 @@ export async function deleteUserCampaign(
     res
       .status(204)
       .json(new ApiResponse(204, "Campaign deleted successfully", true));
-  } catch (err: any) {
+  } catch (error: any) {
     return next(
       normalizeError(
-        err,
+        error,
         "Unexpected error occurred while deleting the campaign",
       ),
     );
@@ -168,18 +180,18 @@ export async function getUserCampaignStats(
   next: NextFunction,
 ) {
   try {
-    const { total_links, crg, active_campaigns } = await getCampaignStats();
+    const { total_links, crg, active_links } = await getCampaignStats();
     res.status(200).json(
       new ApiResponse(200, "Campaign Stats", true, {
         total_links,
         crg,
-        active_campaigns,
+        active_links,
       }),
     );
-  } catch (err) {
+  } catch (error) {
     return next(
       normalizeError(
-        err,
+        error,
         "Unexpected error occurred while fetching campaign statistics",
       ),
     );
@@ -201,10 +213,10 @@ export async function getUsersRecentCampaigns(
     res
       .status(200)
       .json(new ApiResponse(200, "Recent Campaigns", true, { links }));
-  } catch (err) {
+  } catch (error) {
     return next(
       normalizeError(
-        err,
+        error,
         "Unexpected error occurred while getting recent campaigns",
       ),
     );

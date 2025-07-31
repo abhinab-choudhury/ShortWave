@@ -11,23 +11,23 @@ export interface IBlockJWT extends Document {
 
 export interface IUser extends Document {
   email: string;
-  authProviders?: IAuthProvider[];
+  authProviders?: Array<IAuthProvider>;
   name: string;
   profilePic?: string;
   admin: boolean;
 }
 
 export interface ICampaign extends Document {
+  user_id: IUser["_id"];
   name: string;
   description: string;
-  user: IUser["_id"];
 }
 
 export interface ILocation extends Document {
   user_id: IUser["_id"];
   url_id: IUrl["_id"];
-  ip: string;
   click: IClick["_id"];
+  ip: string;
 }
 
 export interface IUrl extends Document {
@@ -35,28 +35,30 @@ export interface IUrl extends Document {
   campaign_id: ICampaign["_id"];
   original_url: string;
   short_url: string;
-  qr_code_path: string;
-  expire_at: Date;
-  active: boolean;
+  from_date?: Date;
+  to_date?: Date;
+}
+
+export interface IClickLog extends Document {
+  user_id: IUser["_id"];
+  url_id: IUrl["_id"];
+  data: Date;
+  click_cnt: number;
 }
 
 export interface IClick extends Document {
   user_id: IUser["_id"];
   url_id: IUrl["_id"];
-  click_cnt: number;
-  device_list: Array<IDevice["_id"]>;
-  location_list: Array<ILocation["_id"]>;
+  device_id: IDevice["_id"];
+  location_id: ILocation["_id"];
+  click_log: IClickLog["_id"];
 }
 
 export interface IDevice extends Document {
   user_id: IUser["_id"];
   url_id: IUrl["_id"];
   click: IClick["_id"];
-  mobile: number;
-  tablet: number;
-  desktop: number;
-  windows: number;
-  mac: number;
-  linux: number;
-  other: number;
+  device: string;
+  os: string;
+  browser: string;
 }

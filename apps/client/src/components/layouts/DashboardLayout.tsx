@@ -56,8 +56,8 @@ export function DashboardLayout() {
         await refreshUser();
         navigate("/home");
       }
-    } catch (err) {
-      console.log("Error : ", err);
+    } catch (error) {
+      console.log("Error : ", error);
       toast({
         title: "Logout Unsuccessful",
         description: "Something went wrong. Please try again.",

@@ -6,28 +6,23 @@ const ClickSchema = new mongoose.Schema<IClick>(
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      require: true,
+      required: true,
     },
     url_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Url",
     },
-    device_list: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Device",
-      },
-    ],
-    location_list: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Location",
-      },
-    ],
-    click_cnt: {
-      type: Number,
-      required: true,
-      default: 0,
+    device_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Device",
+    },
+    location_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Location",
+    },
+    click_log: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ClickLog",
     },
   },
   {

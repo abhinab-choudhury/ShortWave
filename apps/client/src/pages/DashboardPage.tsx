@@ -97,8 +97,8 @@ const DashboardPage = () => {
           }
         />
         <DashboardQuickInfoCard
-          title="Active Campaigns"
-          data={stats.active_campaigns}
+          title="Active Links"
+          data={stats.active_links}
           className="group bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-slate-800 dark:to-slate-700 border-indigo-200 dark:border-slate-600"
           footer="Running this week"
           icon_styles="bg-indigo-200 dark:bg-indigo-600/20"
@@ -200,43 +200,47 @@ function CreateCampaign() {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
-  const handleSubmit = async () => {
-    console.log("Clicked");
-    setIsSending(true);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     try {
+      setIsSending(true);
       const response = await axiosInstance.post("/campaign", {
         name,
         description,
       });
+
+      console.log("HandleSubmit dashboard submit:\nResponse: ", response);
+
       if (response.status == 201) {
         toast({
           variant: "default",
           title: "New event created successfully",
         });
+        setOpen(false);
       }
-    } catch (err) {
-      console.log("Error : ", err);
+    } catch (error) {
+      console.log("Error : ", error);
       toast({
         variant: "destructive",
         title: "Failed to create a new event!!!!",
       });
     } finally {
-      setName("");
-      setDescription("");
       setIsSending(false);
     }
   };
 
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="default">
-            <PlusCircle className="text-white" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default">
+          <PlusCircle className="text-white" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Campaign</DialogTitle>
             <DialogDescription>
@@ -259,8 +263,9 @@ function CreateCampaign() {
                 className="h-20 resize-none"
                 id="campaign_description"
                 name="description"
-                value={description}
                 onChange={(event) => setDescription(event.currentTarget.value)}
+                value={description}
+                disabled={isSending}
               />
             </div>
           </div>
@@ -268,12 +273,12 @@ function CreateCampaign() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleSubmit} disabled={isSending} type="submit">
-              Save changes
+            <Button type="submit" disabled={isSending}>
+              {isSending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

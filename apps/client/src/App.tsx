@@ -12,6 +12,7 @@ import LinkAnalyticsPage from "./pages/LinkAnalyticsPage";
 import { AuthProvider } from "./providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "./components/ui/toaster";
 
 const queryClient = new QueryClient();
 
@@ -32,11 +33,11 @@ function App() {
                   <Route path={"/dashboard"} element={<DashboardPage />} />
                   <Route path={"/analytics"} element={<AnalyticsPage />} />
                   <Route
-                    path={"/analytics/:campaign"}
+                    path={"/analytics/:campaignId"}
                     element={<CampaignAnalyticsPage />}
                   />
                   <Route
-                    path={"/analytics/:campaign/:linkid"}
+                    path={"/analytics/:campaignId/:linkId"}
                     element={<LinkAnalyticsPage />}
                   />
                   <Route path={"/settings"} element={<SettingsPage />} />
@@ -45,6 +46,7 @@ function App() {
                 <Route path={"/signin"} element={<SigninPage />} />
                 <Route path={"*"} element={<PageNotFound />} />
               </Routes>
+              <Toaster />
             </BrowserRouter>
           </AuthProvider>
         </ThemeProvider>

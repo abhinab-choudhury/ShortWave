@@ -11,14 +11,45 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
 import { DeleteIcon } from "lucide-react";
+import { axiosInstance } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "./ui/use-toast";
 
-function AlertDeleteBtn() {
+function AlertDeleteBtn(props: { campaignId: string }) {
+  const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await axiosInstance.delete(
+        `/campaign/${props.campaignId!}`,
+      );
+      if (response.status == 204) {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.log("Error: ", error);
+      toast({
+        variant: "destructive",
+        description: "Failed to delete the Campaign!",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="text-white">
+        <Button
+          disabled={isDeleting}
+          variant="destructive"
+          className="text-white"
+        >
           <DeleteIcon className="mr-2 w-4.5 h-4.5" />
-          Delete
+          {isDeleting ? "Deleting..." : "Delete"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -31,7 +62,7 @@ function AlertDeleteBtn() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

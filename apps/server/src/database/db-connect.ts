@@ -12,7 +12,7 @@ const DB_CONNECT = async (): Promise<Connection> => {
 
     return connectionInstance.connection;
   } catch (error) {
-    console.log("Connection Error :", error);
+    console.log("MongoDB Connection Error :", error);
     process.exit(1);
   }
 };
