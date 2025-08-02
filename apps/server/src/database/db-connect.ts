@@ -1,7 +1,7 @@
 import mongoose, { Connection } from "mongoose";
 import { env } from "../utils/secret";
 
-export const MONGODB_URI = `${env.MONGODB_BASE_URI}/${env.DATABASE_NAME}`;
+export const MONGODB_URI = `${env.MONGODB_BASE_URI}/${env.DATABASE_NAME}?retryWrites=true`;
 const DB_CONNECT = async (): Promise<Connection> => {
   try {
     const connectionInstance = await mongoose.connect(MONGODB_URI);

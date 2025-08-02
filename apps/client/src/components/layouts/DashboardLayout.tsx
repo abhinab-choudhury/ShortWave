@@ -128,9 +128,9 @@ export function DashboardLayout() {
                     : "inline-block",
                   opacity: animate ? (open ? 1 : 0) : 1,
                 }}
-                className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"
+                className="w-full truncate text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block !p-0 !m-0"
               >
-                {user ? user?.name : "User"}
+                <span>{user?.email || "User"}</span>
               </motion.span>
             </Link>
           </div>

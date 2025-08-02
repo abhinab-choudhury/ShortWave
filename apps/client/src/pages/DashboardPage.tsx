@@ -1,35 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import DashboardQuickInfoCard from "@/components/DashoardQuickInfoCard";
 import CampaignCard, { CampaignCardI } from "@/components/CampaignCard";
+import CreateCampaign from "@/components/CreateCampaignBtn";
 import {
   ChevronLeft,
   ChevronRight,
   Link2,
   ListFilter,
   Megaphone,
-  PlusCircle,
   SlidersHorizontal,
   TentIcon,
   TrendingUp,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { CardSkeleton } from "@/components/CardSkeleton";
 import { Button } from "@/components/ui/button";
 import { axiosInstance } from "@/lib/utils";
 import { useQueries } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 
 const DashboardPage = () => {
   const [recentLinks, dashboardStats] = useQueries({
@@ -111,35 +98,30 @@ const DashboardPage = () => {
   };
 
   const CampaignCards = () => {
-    if (recentLinks.isPending) {
-      return (
-        <>
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-        </>
-      );
-    }
-
-    const links = recentLinks.data?.data?.links ?? [];
-
-    if (links.length === 0) {
-      return (
-        <div className="flex justify-center items-center col-span-full text-gray-500 dark:text-slate-400 min-h-[200px]">
-          No links available.
-        </div>
-      );
-    }
-    return links.map((link: CampaignCardI, index: number) => (
-      <CampaignCard
-        key={index}
-        name={link.name}
-        description={link.description}
-        _id={link._id}
-        createdAt={link.createdAt}
-      />
-    ));
+    return recentLinks.isPending ? (
+      <>
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </>
+    ) : recentLinks.data?.data?.links.length > 0 ? (
+      recentLinks.data?.data?.links.map(
+        (link: CampaignCardI, index: number) => (
+          <CampaignCard
+            key={index}
+            name={link.name}
+            description={link.description}
+            _id={link._id}
+            createdAt={link.createdAt}
+          />
+        ),
+      )
+    ) : (
+      <div className="flex justify-center items-center col-span-full text-gray-500 dark:text-slate-400 min-h-[200px]">
+        No links available.
+      </div>
+    );
   };
 
   return (
@@ -155,10 +137,10 @@ const DashboardPage = () => {
 
         <div className="flex flex-col mt-5 md:flex-row items-start md:items-center justify-between mb-6 gap-3">
           <div className="flex gap-2 w-full md:w-fit">
-            <Button variant="outline">
+            <Button variant="outline" className="dark:bg-gray-700">
               Filter <ListFilter className="w-4 h-4 ml-2" />
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" className="dark:bg-gray-700">
               Display <SlidersHorizontal className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -195,92 +177,5 @@ const DashboardPage = () => {
     </div>
   );
 };
-
-function CreateCampaign() {
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [isSending, setIsSending] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    try {
-      setIsSending(true);
-      const response = await axiosInstance.post("/campaign", {
-        name,
-        description,
-      });
-
-      console.log("HandleSubmit dashboard submit:\nResponse: ", response);
-
-      if (response.status == 201) {
-        toast({
-          variant: "default",
-          title: "New event created successfully",
-        });
-        setOpen(false);
-      }
-    } catch (error) {
-      console.log("Error : ", error);
-      toast({
-        variant: "destructive",
-        title: "Failed to create a new event!!!!",
-      });
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default">
-          <PlusCircle className="text-white" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create Campaign</DialogTitle>
-            <DialogDescription>
-              Create a new campaign, where you group all your related links.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="campaign_name">Name</Label>
-              <Input
-                id="campaign_name"
-                name="name"
-                value={name}
-                onChange={(event) => setName(event.currentTarget.value)}
-              />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="campaign_description">Description</Label>
-              <Textarea
-                className="h-20 resize-none"
-                id="campaign_description"
-                name="description"
-                onChange={(event) => setDescription(event.currentTarget.value)}
-                value={description}
-                disabled={isSending}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button type="submit" disabled={isSending}>
-              {isSending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export default DashboardPage;

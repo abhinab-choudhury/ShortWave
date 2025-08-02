@@ -13,41 +13,38 @@ import { Label } from "@/components/ui/label";
 import { axiosInstance } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function CreateLinkBtn(props: { campaignId: string }) {
   const [link, setLink] = useState<string>("https://example.com");
-  const [isSending, setIsSending] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
 
+  const createCampaignLinkQC = useQueryClient();
+  const createCampaignLink = useMutation({
+    mutationFn: (data: { url: string }) =>
+      axiosInstance.post(`/campaign/${props.campaignId}/url`, data),
+    onSuccess: () => {
+      toast({
+        variant: "default",
+        title: "New url created successfully",
+      });
+      setLink("");
+      setOpen(false);
+      createCampaignLinkQC.invalidateQueries({
+        queryKey: ["campaignLink", props.campaignId],
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "default",
+        title: "❌ Failed to create new url!",
+      });
+      console.log("Error: ", error);
+    },
+  });
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      setIsSending(true);
-      const response = await axiosInstance.post(
-        `/campaign/${props.campaignId}/url`,
-        {
-          url: link,
-        },
-      );
-
-      if (response.status === 201) {
-        toast({
-          variant: "default",
-          title: "New url created successfully",
-        });
-        setOpen(false);
-      }
-    } catch (error) {
-      console.log("Error: ", error);
-      toast({
-        variant: "destructive",
-        title: "Failed to create new url!",
-        description: "Please check the URL and try again.",
-      });
-    } finally {
-      setIsSending(false);
-    }
+    await createCampaignLink.mutateAsync({ url: link });
   };
 
   return (
@@ -70,17 +67,18 @@ function CreateLinkBtn(props: { campaignId: string }) {
               </Label>
               <Input
                 id="link"
+                type="url"
                 required
                 value={link}
-                onChange={(e) => setLink(e.target.value)}
+                onChange={(e) => setLink(e.currentTarget.value)}
                 className="col-span-3"
-                disabled={isSending}
+                disabled={createCampaignLink.isPending}
               />
             </div>
           </div>
           <DialogFooter className="sm:justify-start">
-            <Button type="submit" disabled={isSending}>
-              {isSending ? "Saving..." : "Save"}
+            <Button type="submit" disabled={createCampaignLink.isPending}>
+              {createCampaignLink.isPending ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </form>

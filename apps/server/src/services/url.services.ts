@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import Url from "../database/models/url.model";
 import { redisClient } from "../database/redis-connect";
-import { IUrl } from "../interfaces/model";
+import { IUrl, IUser } from "../interfaces/model";
 import Campaign from "../database/models/campaign.model";
+import User from "../database/models/user.model";
 
 /* Create a new URL in DB */
 export async function createCampaignUrl(
@@ -62,8 +63,8 @@ export async function getLongUrlHandler(
  * get all the links which are created by the user
  * over all the campaigns
  * */
-async function getAllUrl(): Promise<IUrl[]> {
-  return await Url.find();
+async function getAllUrl(userId: IUser["_id"]): Promise<IUrl[]> {
+  return await Url.find({ user_id: userId });
 }
 
 /* get all urls for a given campaign */
@@ -98,19 +99,19 @@ export async function getAllCampaignUrls(campaignId: string): Promise<IUrl[]> {
 }
 
 /* delete a specific url from a campaign by the help of short_url */
-export async function deleteUrl(short_url: string) {
-  return await Url.deleteOne({ short_url });
+export async function deleteUrl(userId: IUser["_id"], shortUrl: string) {
+  return await Url.deleteOne({ user_id: userId, short_url: shortUrl });
 }
 
 /* get Count of URL which is created */
-export async function getTotalLinkCnt(): Promise<Number> {
-  return await Url.countDocuments();
+export async function getTotalLinkCnt(userId: IUser["_id"]): Promise<Number> {
+  return await Url.find({ user_id: userId }).countDocuments();
 }
 
 /* get all active-link cnt */
-export async function getActiveLinkCnt(): Promise<Number> {
+export async function getActiveLinkCnt(userId: IUser["_id"]): Promise<Number> {
   let activeLinkCnt = 0;
-  const allLinks = await getAllUrl();
+  const allLinks = await getAllUrl(userId);
   const now = new Date();
   allLinks.forEach((link) => {
     const fromDate = link.from_date;

@@ -1,8 +1,8 @@
-import { toast } from "@/components/ui/use-toast";
 import { axiosInstance } from "@/lib/utils";
-import { useEffect, useState, createContext } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, createContext, useMemo, useCallback } from "react";
 
-export interface User {
+export interface IUser {
   userId: string;
   email: string;
   name?: string;
@@ -10,9 +10,9 @@ export interface User {
 }
 
 export interface AuthContextType {
-  user: User | null;
+  user: IUser | null;
   isLoading: boolean;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -26,64 +26,49 @@ export function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const fetchUser = async () => {
-    try {
-      const response = await axiosInstance("/auth/me");
-      if (response.status == 200) {
-        setUser(response.data.data.user);
-      }
-      if (response.status == 401) {
+  const queryClient = useQueryClient();
+  const [user, setUser] = useState<IUser | null>(null);
+  const { isLoading, refetch: refreshUser } = useQuery<IUser | null>({
+    queryKey: ["me"],
+    queryFn: async () => {
+      try {
+        const response = await axiosInstance.get("/auth/me");
+        setUser(response.data?.data?.user);
+        return response.data?.data?.user;
+      } catch (error) {
         setUser(null);
-        toast({
-          variant: "destructive",
-          title: "Session Expired",
-        });
+        console.error("Error fetching user: ", error);
+        return null;
       }
-    } catch (error) {
-      setUser(null);
-      console.log("Error: ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-  const logout = async () => {
-    await axiosInstance.post("/auth/logout");
-    await refreshUser();
-  };
-
-  const refreshUser = async () => {
+  const logout = useCallback(async () => {
     try {
-      const response = await axiosInstance.get("/auth/me");
-      setUser(response.data.data.user);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+      await axiosInstance.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout failed: ", error);
+    } finally {
       setUser(null);
-      if (err?.response?.status === 401) {
-        toast({
-          variant: "destructive",
-          title: "Session Expired",
-        });
-      }
-      console.error("Refresh user failed: ", error);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
     }
-  };
+  }, [queryClient]);
 
-  const value = {
-    user,
-    isLoading,
-    setUser,
-    logout,
-    refreshUser,
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isLoading,
+      setUser,
+      logout,
+      refreshUser: async () => {
+        await refreshUser();
+      },
+    }),
+    [user, isLoading, refreshUser, logout],
+  );
 
   return (
     <AuthContext.Provider {...props} value={value}>

@@ -1,5 +1,5 @@
 import Click from "../database/models/click.model";
-import { IClick } from "../interfaces/model";
+import { IClick, IUser } from "../interfaces/model";
 
 export async function getClickById(urlId: string): Promise<IClick> {
   const requiredUrl = await Click.findById(urlId);
@@ -16,6 +16,6 @@ export async function createClick(
   return await response.save();
 }
 
-export async function getTotalCGRPercent() {
+export async function getTotalCGRPercent(userId: IUser["_id"]) {
   return "10%";
 }

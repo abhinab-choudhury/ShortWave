@@ -11,6 +11,7 @@ import { z } from "zod";
 import { ICampaign } from "../interfaces/model";
 import ApiResponse from "../utils/api-response-handling";
 import ApiError, { normalizeError } from "../utils/api-error-handling";
+import Campaign from "../database/models/campaign.model";
 
 const campaignSchema = z.object({
   name: z
@@ -152,21 +153,22 @@ export async function deleteUserCampaign(
   res: Response,
   next: NextFunction,
 ) {
-  try {
-    const { campaignId } = req.params;
-    await deleteCampaign(campaignId, req.user?.id);
+  const { campaignId } = req.params;
 
-    res
-      .status(204)
-      .json(new ApiResponse(204, "Campaign deleted successfully", true));
-  } catch (error: any) {
-    return next(
-      normalizeError(
-        error,
-        "Unexpected error occurred while deleting the campaign",
-      ),
-    );
-  }
+  deleteCampaign(campaignId, req.user?.id)
+    .then(() => {
+      res
+        .status(200)
+        .json(new ApiResponse(200, "Campaign deleted successfully", true));
+    })
+    .catch((error) => {
+      return next(
+        normalizeError(
+          error,
+          "Unexpected error occurred while deleting the campaign",
+        ),
+      );
+    });
 }
 
 /**
@@ -175,12 +177,14 @@ export async function deleteUserCampaign(
  * @access  Authenticated
  */
 export async function getUserCampaignStats(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { total_links, crg, active_links } = await getCampaignStats();
+    const { total_links, crg, active_links } = await getCampaignStats(
+      req.user?._id,
+    );
     res.status(200).json(
       new ApiResponse(200, "Campaign Stats", true, {
         total_links,
@@ -204,12 +208,12 @@ export async function getUserCampaignStats(
  * @access  Authenticated
  */
 export async function getUsersRecentCampaigns(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const links = await getRecentCampaigns();
+    const links = await getRecentCampaigns(req.user?._id);
     res
       .status(200)
       .json(new ApiResponse(200, "Recent Campaigns", true, { links }));

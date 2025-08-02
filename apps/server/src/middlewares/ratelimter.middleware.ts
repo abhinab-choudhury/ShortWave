@@ -3,7 +3,7 @@ import { makeIssue } from "zod";
 
 export const signinRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  max: 5,
+  max: 15,
   message: {
     status: 429,
     message: "Too many login attemps, please try again later.",

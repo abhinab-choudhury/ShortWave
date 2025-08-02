@@ -25,26 +25,30 @@ function App() {
           <AuthProvider>
             <BrowserRouter>
               <Routes>
-                {/* App Related Pages */}
-                <Route path={"/home"} element={<Home />} />
-                <Route path={"/"} element={<Navigate to="/home" />} />
+                {/* Redirect root to /home */}
+                <Route path="/" element={<Navigate to="/home" />} />
 
-                <Route path={"/"} element={<DashboardLayout />}>
-                  <Route path={"/dashboard"} element={<DashboardPage />} />
-                  <Route path={"/analytics"} element={<AnalyticsPage />} />
+                {/* Public Pages */}
+                <Route path="/home" element={<Home />} />
+                <Route path="/signin" element={<SigninPage />} />
+
+                {/* App Pages with Dashboard Layout */}
+                <Route element={<DashboardLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route
-                    path={"/analytics/:campaignId"}
+                    path="/analytics/:campaignId"
                     element={<CampaignAnalyticsPage />}
                   />
                   <Route
-                    path={"/analytics/:campaignId/:linkId"}
+                    path="/analytics/:campaignId/:linkId"
                     element={<LinkAnalyticsPage />}
                   />
-                  <Route path={"/settings"} element={<SettingsPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
                 </Route>
 
-                <Route path={"/signin"} element={<SigninPage />} />
-                <Route path={"*"} element={<PageNotFound />} />
+                {/* Catch-All Route */}
+                <Route path="*" element={<PageNotFound />} />
               </Routes>
               <Toaster />
             </BrowserRouter>

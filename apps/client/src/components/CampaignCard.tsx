@@ -30,9 +30,9 @@ export default function CampaignCard({
         <div className="text-lg font-semibold leading-tight text-teal-700 dark:text-teal-300">
           {name}
         </div>
-        <Button asChild variant={"outline"}>
+        <Button asChild variant={"outline"} className="dark:bg-gray-600">
           <Link to={`/analytics/${_id}`}>
-            <LinkIcon className="text-black w-3 h-3" />
+            <LinkIcon className="text-black dark:text-white w-3 h-3" />
           </Link>
         </Button>
       </div>

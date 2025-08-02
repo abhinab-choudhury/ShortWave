@@ -6,8 +6,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useEffect, useState } from 'react';
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 const LinkAnalyticsPage = () => {
   const [linkList, setLinkList] = useState<string[]>([]);
@@ -15,12 +15,12 @@ const LinkAnalyticsPage = () => {
 
   useEffect(() => {
     setLinkList([
-      'github.com/abhinab-choudhury',
-      'fiver.com/abhinab',
-      'upwork.com/abhinab',
+      "github.com/abhinab-choudhury",
+      "fiver.com/abhinab",
+      "upwork.com/abhinab",
     ]);
     setCurrentLink(linkList[0]);
-  }, []);
+  }, [linkList]);
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
       <div className="p-2 md:p-10 max-w-7xl mx-auto">

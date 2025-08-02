@@ -41,8 +41,8 @@ export async function getCampaignById(
  * updates name of the campaign
  */
 export async function updateCampaign(
-  campaignId: string,
-  userId: string,
+  campaignId: ICampaign["_id"],
+  userId: IUser["_id"],
   data: Partial<ICampaign>,
 ): Promise<ICampaign | null> {
   return await Campaign.findOneAndUpdate(
@@ -56,7 +56,7 @@ export async function updateCampaign(
  * Delete a campaign by ID
  */
 export async function deleteCampaign(
-  campaignId: string,
+  campaignId: ICampaign["_id"],
   userId: IUser["_id"],
 ): Promise<void> {
   const deleteCampaignSession = await mongoose.startSession();
@@ -67,26 +67,31 @@ export async function deleteCampaign(
       deleteCampaignSession,
     );
     const urlIds = urls.map((url) => url._id);
+
     await Location.deleteMany({ url_id: { $in: urlIds } }).session(
       deleteCampaignSession,
     );
     await Click.deleteMany({ url_id: { $in: urlIds } }).session(
       deleteCampaignSession,
     );
-    await Url.deleteMany({ campaign_id: campaignId }).session(
+    await Url.deleteMany({ user_id: userId, campaign_id: campaignId }).session(
       deleteCampaignSession,
     );
-    await Campaign.findOneAndDelete({ _id: campaignId, user: userId }).session(
+    const deleted = await Campaign.findByIdAndDelete(campaignId).session(
       deleteCampaignSession,
     );
-    await deleteCampaignSession.commitTransaction();
-    deleteCampaignSession.endSession();
 
-    console.log("Campaign and all related data deleted successfully");
+    await deleteCampaignSession.commitTransaction();
+    console.log(
+      "Campaign and all related data deleted successfully.\nDeleted: ",
+      deleted,
+    );
   } catch (error) {
     await deleteCampaignSession.abortTransaction();
+    console.error("Error during campaign deletion:", error);
+    throw error;
+  } finally {
     deleteCampaignSession.endSession();
-    console.log("Error while deleting the campaign and its related data");
   }
 }
 
@@ -94,18 +99,18 @@ export async function deleteCampaign(
  * Gets all the Campaigns in order of the last
  * updated campaign
  */
-export async function getRecentCampaigns() {
-  const recentCampaigns = await Campaign.find()
+export async function getRecentCampaigns(userId: IUser["_id"]) {
+  const recentCampaigns = await Campaign.find({ user_id: userId })
     .sort({ updatedAt: -1 })
     .limit(3);
   return recentCampaigns;
 }
 
 /* Get Campaign Status for the all dashboard.  */
-export async function getCampaignStats() {
-  const totalLinkCnt = await getTotalLinkCnt();
-  const cgrPercent = await getTotalCGRPercent();
-  const activeLinkCnt = await getActiveLinkCnt();
+export async function getCampaignStats(userId: IUser["_id"]) {
+  const totalLinkCnt = await getTotalLinkCnt(userId);
+  const cgrPercent = await getTotalCGRPercent(userId);
+  const activeLinkCnt = await getActiveLinkCnt(userId);
 
   const stats = {
     total_links: totalLinkCnt,

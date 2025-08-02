@@ -15,41 +15,42 @@ import { axiosInstance } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function AlertDeleteBtn(props: { campaignId: string }) {
   const navigate = useNavigate();
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
 
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true);
-      const response = await axiosInstance.delete(
-        `/campaign/${props.campaignId!}`,
-      );
-      if (response.status == 204) {
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      console.log("Error: ", error);
-      toast({
-        variant: "destructive",
-        description: "Failed to delete the Campaign!",
+  const deleteCampaignQC = useQueryClient();
+  const deleteCampaign = useMutation({
+    mutationFn: () => axiosInstance.delete(`/campaign/${props.campaignId}`),
+    onSuccess: () => {
+      navigate("/dashboard");
+      deleteCampaignQC.invalidateQueries({
+        queryKey: ["recentLinks", "dashboardStats", "campaigns"],
       });
-    } finally {
-      setIsDeleting(false);
-    }
+    },
+    onError: (error) => {
+      toast({
+        variant: "default",
+        description: "❌ Failed to delete the Campaign!",
+      });
+      console.log("Error: ", error);
+    },
+  });
+  const handleDelete = async () => {
+    await deleteCampaign.mutateAsync();
   };
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          disabled={isDeleting}
+          disabled={deleteCampaign.isPaused}
           variant="destructive"
           className="text-white"
         >
           <DeleteIcon className="mr-2 w-4.5 h-4.5" />
-          {isDeleting ? "Deleting..." : "Delete"}
+          {deleteCampaign.isPaused ? "Deleting..." : "Delete"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -62,7 +63,12 @@ function AlertDeleteBtn(props: { campaignId: string }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+          <AlertDialogAction
+            className="border-red-700 bg-red-500 hover:bg-red-600 hover:border-red-800 text-white"
+            onClick={handleDelete}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

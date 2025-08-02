@@ -8,6 +8,7 @@ import CreateLinkBtn from "@/components/CreateLinkBtn";
 import { useQueries } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils";
 import { useParams } from "react-router-dom";
+import { CardSkeleton } from "@/components/CardSkeleton";
 
 const CampaignAnalyticsPage = () => {
   const { campaignId } = useParams();
@@ -24,10 +25,9 @@ const CampaignAnalyticsPage = () => {
     ],
   });
 
-  console.log("campaign: ", campaignLinks.data);
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
-      <div className="p-2 md:p-10 max-w-7xl mx-auto">
+      <div className="p-2 md:p-10 w-full mx-auto">
         <div className="flex flex-col justify-start items-start mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Analytics
@@ -35,7 +35,9 @@ const CampaignAnalyticsPage = () => {
           <div className="relative flex gap-2 flex-row justify-between">
             <Button variant={"default"}>
               <CircleDot className="w-4 h-4 mr-2 bg-transparent" />
-              {campaignLinks.data?.name || "Name"}
+              {campaignLinks.isPending
+                ? "Loading..."
+                : campaignLinks.data?.name || "unknown"}
             </Button>
             <AlertDeleteBtn campaignId={campaignId!} />
           </div>
@@ -68,8 +70,14 @@ const CampaignAnalyticsPage = () => {
             <CreateLinkBtn campaignId={campaignId!} />
           </div>
           <div className="flex flex-row justify-start flex-wrap gap-x-3 w-full">
-            {campaignLinks.data?.urls.length > 0 ? (
-              campaignLinks.data?.urls.map(
+            {campaignLinks.isPending ? (
+              <>
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+              </>
+            ) : campaignLinks.data?.urls.length > 0 ? (
+              campaignLinks.data.urls.map(
                 (
                   linkData: {
                     _id: LinkCardI["link_id"];
