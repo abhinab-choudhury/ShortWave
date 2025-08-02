@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-date:/data.db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    command: ["mongod", "--replSet", "rs0"]
+
+  redis:
+    image: redis/redis-stack
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  server:
+    build:
+      context: ./apps/server
+    container_name: express-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server:/app
+    depends_on:
+      - mongo
+      - redis
+
+  client:
+    build:
+      context: ./apps/client
+    container_name: react-client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
