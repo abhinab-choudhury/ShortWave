@@ -38,12 +38,11 @@ export default function CreateCampaign() {
       createCampaignQC.invalidateQueries({ queryKey: ["recentLinks"] });
       createCampaignQC.invalidateQueries({ queryKey: ["dashboardStats"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         variant: "default",
-        title: "❌ Failed to create a new event!!!!",
+        title: `${error?.response?.data.data.errors[0] || "❌ Failed to create a new event!!!!"}`,
       });
-      console.log("Error : ", error);
     },
   });
 
@@ -59,7 +58,7 @@ export default function CreateCampaign() {
           <PlusCircle className="dark:text-white" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] dark:bg-gray-950">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Campaign</DialogTitle>
@@ -74,13 +73,14 @@ export default function CreateCampaign() {
                 id="campaign_name"
                 name="name"
                 value={name}
+                className="dark:bg-gray-900"
                 onChange={(event) => setName(event.currentTarget.value)}
               />
             </div>
             <div className="grid gap-3 mb-3">
               <Label htmlFor="campaign_description">Description</Label>
               <Textarea
-                className="h-20 resize-none"
+                className="h-20 resize-none dark:bg-gray-900"
                 id="campaign_description"
                 name="description"
                 onChange={(event) => setDescription(event.currentTarget.value)}
@@ -91,7 +91,9 @@ export default function CreateCampaign() {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" className="dark:bg-gray-900">
+                Cancel
+              </Button>
             </DialogClose>
             <Button type="submit" disabled={createCampaign.isPending}>
               {createCampaign.isPaused ? "Saving..." : "Save"}

@@ -68,39 +68,13 @@ const AnalyticsPage = () => {
           </h1>
         </div>
 
-        <div className="flex flex-col p-4 gap-2 flex-1 border rounded-lg bg-gray-50 dark:bg-slate-900 min-h-[85vh] overflow-scroll scrollbar-slim">
-          <h1 className="text-xl font-bold flex gap-2 text-slate-800 dark:text-white">
+        <div className="flex flex-col p-4 gap-2 flex-1 border rounded-lg bg-gray-50 dark:bg-slate-900 min-h-[85vh]">
+          <h1 className="text-xl font-bold flex gap-2 text-slate-800 dark:text-white my-5">
             <IconBrandCampaignmonitor />
             All Campaigns
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Cards />
-          </div>
-          <div className="mt-auto">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious href="#" />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#" isActive>
-                    2
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
           </div>
         </div>
       </div>

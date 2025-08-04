@@ -52,7 +52,7 @@ function CreateLinkBtn(props: { campaignId: string }) {
       <DialogTrigger asChild>
         <Button variant="default">Create Link</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md dark:bg-gray-950">
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           <DialogHeader>
             <DialogTitle>Create link</DialogTitle>
@@ -71,7 +71,7 @@ function CreateLinkBtn(props: { campaignId: string }) {
                 required
                 value={link}
                 onChange={(e) => setLink(e.currentTarget.value)}
-                className="col-span-3"
+                className="col-span-3 dark:bg-gray-900"
                 disabled={createCampaignLink.isPending}
               />
             </div>

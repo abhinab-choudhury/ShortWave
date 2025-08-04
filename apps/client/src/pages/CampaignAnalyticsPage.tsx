@@ -43,21 +43,11 @@ const CampaignAnalyticsPage = () => {
           </div>
         </div>
 
-        <div className="border-0 dark:border p-5 bg-gray-100 dark:bg-slate-800 rounded-xl grid gap-4 lg:grid-cols-3">
+        <div className="border-0 dark:border p-5 bg-gray-100 dark:bg-slate-800 rounded-xl">
           <ChartCard
             chatType="line"
             title="Revenue Growth"
             description="Monthly revenue trends"
-          />
-          <ChartCard
-            chatType="area"
-            title="User Engagement"
-            description="Daily active users"
-          />
-          <ChartCard
-            chatType="bar"
-            title="Conversion Rate"
-            description="Sales conversion metrics"
           />
         </div>
 

@@ -17,43 +17,47 @@ export default function LinkCard({
   created_at,
 }: LinkCardI) {
   return (
-    <div className="w-[32%] border dark:border-gray-800 rounded-lg mb-3 px-4 py-5 bg-white dark:bg-gray-900 shadow-sm transition-all hover:shadow-md">
-      <div className="flex justify-between items-start w-full">
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex justify-between items-center gap-2 text-sm font-medium break-all">
+    <div className="w-full md:w-[32%] my-2 border border-transparent rounded-xl p-5 bg-white dark:bg-gray-900 shadow-sm hover:shadow-mdshadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
+      <div className="flex flex-col gap-4">
+        {/* Original Link with Actions */}
+        <div className="flex justify-between items-start gap-3">
+          <div className="flex-1">
             <Link
               to={`/analytics/${campaign_id}/${link_id}`}
-              className="line-clamp-1"
+              className="text-sm font-medium text-foreground hover:underline line-clamp-2 break-all"
             >
               {original_link}
             </Link>
-            <div className="flex flex-row gap-2">
-              <button
-                className="p-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                aria-label="Copy original link"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
-              <button
-                className="p-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                aria-label="Show QR code"
-              >
-                <QrCode className="w-4 h-4" />
-              </button>
-            </div>
           </div>
 
-          <div className="w-full flex flex-row justify-between items-center text-sm text-muted-foreground">
-            <div className="flex flex-row items-center align-middle gap-1">
-              <span className="p-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <Link2 className="w-4 h-4" />
-              </span>
-              <span>{short_link}</span>
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap mt-1">
-              {created_at}
-            </div>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button
+              className="p-2 rounded-md border border-border dark:hover:bg-gray-800 hover:bg-gray-100 transition"
+              aria-label="Copy original link"
+            >
+              <Copy className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
+              className="p-2 rounded-md border border-border dark:hover:bg-gray-800 hover:bg-gray-100 transition"
+              aria-label="Show QR code"
+            >
+              <QrCode className="w-4 h-4 text-muted-foreground" />
+            </button>
           </div>
+        </div>
+
+        {/* Short link and Created At */}
+        <div className="flex justify-between items-center text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <Link2 className="w-4 h-4 text-muted-foreground" />
+            </span>
+            <span className="text-foreground font-medium">{short_link}</span>
+          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+            {created_at}
+          </span>
         </div>
       </div>
     </div>

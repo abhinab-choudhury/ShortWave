@@ -3,8 +3,6 @@ import DashboardQuickInfoCard from "@/components/DashoardQuickInfoCard";
 import CampaignCard, { CampaignCardI } from "@/components/CampaignCard";
 import CreateCampaign from "@/components/CreateCampaignBtn";
 import {
-  ChevronLeft,
-  ChevronRight,
   Link2,
   ListFilter,
   Megaphone,
@@ -163,15 +161,6 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 h-full w-full">
             <CampaignCards />
           </div>
-
-          <Button
-            variant="outline"
-            className="w-fit mx-auto flex items-center gap-1"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Show More
-            <ChevronRight className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </div>

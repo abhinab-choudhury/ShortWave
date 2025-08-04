@@ -112,7 +112,7 @@ export function DashboardLayout() {
                   <img
                     src={user.profilePic}
                     alt="Avatar"
-                    className="-p-2 h-10 w-10 rounded-full border-transparent shadow-sm object-cover"
+                    className="-p-2 h-10 w-14 border rounded-full border-transparent shadow-sm object-cover dark:border-white"
                   />
                 ) : (
                   <User className="h-8 w-8 rounded-full shadow-none object-cover" />

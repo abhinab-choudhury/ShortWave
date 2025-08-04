@@ -15,7 +15,7 @@ const SettingsPage = () => {
         </h1>
 
         {/* Profile Info Section */}
-        <section className="border border-gray-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 bg-white dark:bg-slate-900 shadow-sm">
+        <section className="border border-gray-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 bg-white dark:bg-slate-800 shadow-sm">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-8">
             Profile Information
           </h2>
@@ -34,7 +34,7 @@ const SettingsPage = () => {
                   type="text"
                   value={user?.name || ""}
                   disabled
-                  className="w-full bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-slate-700 rounded-md px-4 py-2 cursor-not-allowed"
+                  className="w-full bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-slate-700 rounded-md px-4 py-2 cursor-not-allowed"
                 />
               </div>
 
@@ -51,7 +51,7 @@ const SettingsPage = () => {
                   type="email"
                   value={user?.email}
                   disabled
-                  className="w-full bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-slate-700 rounded-md px-4 py-2 cursor-not-allowed"
+                  className="w-full bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-slate-700 rounded-md px-4 py-2 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -62,7 +62,7 @@ const SettingsPage = () => {
                 <img
                   src={user?.profilePic}
                   alt="Profile"
-                  className="rounded-xl shadow-md max-w-xs w-full object-cover transition-transform hover:scale-105 duration-300 ease-in-out"
+                  className="rounded-xl dark:bg-slate-700 shadow-md max-w-xs w-full object-cover transition-transform duration-300 ease-in-out"
                 />
               ) : (
                 <div className="grid place-content-center border border-black border-dotted p-14 rounded-2xl">
@@ -138,6 +138,7 @@ const SettingsPage = () => {
                       type="file"
                       placeholder="File"
                       accept="image/*"
+                      className="dark:bg-slate-700"
                     />
                   </div>
                   {/* Save button */}
