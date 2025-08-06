@@ -17,7 +17,7 @@ import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-function AlertDeleteBtn(props: { campaignId: string }) {
+function AlertDeleteCampaignBtn(props: { campaignId: string }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
 
@@ -75,4 +75,34 @@ function AlertDeleteBtn(props: { campaignId: string }) {
   );
 }
 
-export default AlertDeleteBtn;
+function AlertDeleteUrlBtn(props: { campaignId: string }) {
+  const [open, setOpen] = useState<boolean>(false);
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" className="text-white">
+          <DeleteIcon className="mr-2 w-4.5 h-4.5" />
+          Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete all your
+            data releted to this URL from our servers.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction className="border-red-700 bg-red-500 hover:bg-red-600 hover:border-red-800 text-white">
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export { AlertDeleteCampaignBtn, AlertDeleteUrlBtn };

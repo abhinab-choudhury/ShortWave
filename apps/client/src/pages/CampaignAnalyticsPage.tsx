@@ -2,13 +2,13 @@ import { CircleDot } from "lucide-react";
 import LinkCard, { LinkCardI } from "@/components/LinkCard";
 import { Button } from "@/components/ui/button";
 import { IconLink } from "@tabler/icons-react";
-import AlertDeleteBtn from "@/components/AlertDeleteBtn";
-import ChartCard from "@/components/AnalyticsChartCard";
+import { AlertDeleteCampaignBtn } from "@/components/AlertDeleteBtn";
 import CreateLinkBtn from "@/components/CreateLinkBtn";
 import { useQueries } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils";
 import { useParams } from "react-router-dom";
 import { CardSkeleton } from "@/components/CardSkeleton";
+import { ChartAreaInteractive } from "@/components/InteractiveAreaChart";
 
 const CampaignAnalyticsPage = () => {
   const { campaignId } = useParams();
@@ -39,17 +39,11 @@ const CampaignAnalyticsPage = () => {
                 ? "Loading..."
                 : campaignLinks.data?.name || "unknown"}
             </Button>
-            <AlertDeleteBtn campaignId={campaignId!} />
+            <AlertDeleteCampaignBtn campaignId={campaignId!} />
           </div>
         </div>
 
-        <div className="border-0 dark:border p-5 bg-gray-100 dark:bg-slate-800 rounded-xl">
-          <ChartCard
-            chatType="line"
-            title="Revenue Growth"
-            description="Monthly revenue trends"
-          />
-        </div>
+        <ChartAreaInteractive />
 
         <div className="h-full w-full rounded-lg bg-muted p-4 mt-10 dark:bg-slate-800">
           <div className="flex flex-row items-center align-middle justify-between gap-3">

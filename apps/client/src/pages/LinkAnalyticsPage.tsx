@@ -1,3 +1,9 @@
+import { AlertDeleteUrlBtn } from "@/components/AlertDeleteBtn";
+import {
+  InteractiveBarChartLabel,
+  InteractiveBarChartMixed,
+} from "@/components/InteractiveBarChart";
+import { ChartLineInteractive } from "@/components/InteractiveLineChart";
 import {
   Select,
   SelectContent,
@@ -28,25 +34,36 @@ const LinkAnalyticsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Analytics
           </h1>
-          <div className="relative flex gap-2 flex-col">
+          <div className="relative flex gap-2 flex-row">
             <Select value={currentLink}>
-              <SelectTrigger className="w-[280px]">
+              <SelectTrigger className="w-[280px] dark:bg-gray-800 shadow-none">
                 <SelectValue placeholder="Select Link" />
               </SelectTrigger>
-              <SelectContent className="w-full">
+              <SelectContent className="w-full dark:bg-gray-800">
                 <SelectGroup>
                   <SelectLabel>Links</SelectLabel>
                   {linkList.map((link, index) => (
-                    <SelectItem value={link} key={index}>
+                    <SelectItem
+                      value={link}
+                      key={index}
+                      className=" focus:bg-gray-400/30 dark:focus:bg-teal-800"
+                    >
                       {link}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
+            <AlertDeleteUrlBtn campaignId="" />
           </div>
         </div>
-        <div className="border rounded-xl h-full min-h-[80vh] w-full"></div>
+        <div className="h-full min-h-[80vh] w-full">
+          <ChartLineInteractive />
+          <div className="md:flex gap-2">
+            <InteractiveBarChartMixed className="my-2 md:w-[50%]" />
+            <InteractiveBarChartLabel className="my-2 md:w-[50%]" />
+          </div>
+        </div>
       </div>
     </div>
   );
