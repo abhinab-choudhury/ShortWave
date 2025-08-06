@@ -1,10 +1,7 @@
 import ChangeProfilePicForm from "@/components/ChangeProfilePicForm";
 import ChangeUsernameForm from "@/components/ChangeUsernameForm";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { FileIcon, User } from "lucide-react";
+import { User } from "lucide-react";
 
 const SettingsPage = () => {
   const { user } = useAuth();

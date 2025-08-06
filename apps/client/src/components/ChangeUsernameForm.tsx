@@ -50,6 +50,7 @@ export default function ChangeUsernameForm() {
           <input
             type="text"
             name="username"
+            required
             value={username}
             onChange={(e) => setUsername(e.currentTarget.value)}
             placeholder="Enter new username"
