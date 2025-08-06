@@ -23,6 +23,10 @@ const LocationSchema = new mongoose.Schema<ILocation>(
       unique: true,
       required: true,
     },
+    country: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

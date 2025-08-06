@@ -28,6 +28,7 @@ export interface ILocation extends Document {
   url_id: IUrl["_id"];
   click: IClick["_id"];
   ip: string;
+  country: string;
 }
 
 export interface IUrl extends Document {
