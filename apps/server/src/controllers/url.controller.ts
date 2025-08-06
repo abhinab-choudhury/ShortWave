@@ -36,7 +36,7 @@ export async function deleteUserUrl(
 ) {
   try {
     const { shortUrl } = req.params;
-    await deleteUrl(shortUrl);
+    await deleteUrl(req.user?._id, shortUrl);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));

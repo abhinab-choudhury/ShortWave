@@ -12,6 +12,7 @@ import { getUserById } from "./services/user.services";
 import authRoute from "./routes/auth.route";
 import campaignRoute from "./routes/campaign.route";
 import urlRoute from "./routes/url.route";
+import userRoute from "./routes/user.route";
 import redirectRoute from "./routes/redirect.route";
 import globalErrorHandler from "./middlewares/error.middleware";
 import path from "node:path";
@@ -76,6 +77,7 @@ app.get("/", (_req, res) => {
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/campaign", campaignRoute);
 app.use("/api/v1/url", urlRoute);
+app.use("/api/v1/user", userRoute);
 app.use("/:shortId", redirectRoute);
 app.use(globalErrorHandler);
 

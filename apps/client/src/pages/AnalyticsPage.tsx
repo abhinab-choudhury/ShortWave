@@ -1,14 +1,5 @@
 import { IconBrandCampaignmonitor } from "@tabler/icons-react";
 import CampaignCard, { CampaignCardI } from "@/components/CampaignCard";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";

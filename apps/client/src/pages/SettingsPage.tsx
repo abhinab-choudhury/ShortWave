@@ -1,3 +1,5 @@
+import ChangeProfilePicForm from "@/components/ChangeProfilePicForm";
+import ChangeUsernameForm from "@/components/ChangeUsernameForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,71 +83,10 @@ const SettingsPage = () => {
 
           <div className="flex flex-col gap-4 md:flex-row">
             {/* Change Username */}
-            <form className="space-y-6 w-full md:w-[50%]">
-              {/* Username */}
-              <div className="md:flex-col md:items-start">
-                <div className="md:w-4/6">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Username
-                  </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 my-2">
-                    This is your unique profile identifier. You can change it,
-                    but be cautious as links may break.
-                  </p>
-                </div>
-                <div className="mt-2 md:mt-0 md:w-7/8">
-                  <input
-                    type="text"
-                    placeholder="Enter new username"
-                    className="w-full bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-slate-700 rounded-md px-3 py-2"
-                  />
-                </div>
-              </div>
+            <ChangeUsernameForm />
 
-              {/* Save button */}
-              <div className="md:flex md:justify-start">
-                <Button variant="default" type="submit">
-                  Update Username
-                </Button>
-              </div>
-            </form>
             {/* Profile Pic Upload */}
-            <form className="space-y-6 w-full md:w-[50%]">
-              {/* Username */}
-              <div className="md:flex-col md:items-start">
-                <div className="md:w-full">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Profile Picture
-                  </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Upload your desired profile picture.
-                  </p>
-                </div>
-                <div className="mt-2 md:my-3 md:w-full">
-                  <div className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-6 items-center">
-                    <FileIcon className="w-12 h-12" />
-                    <span className="text-sm font-medium text-gray-500">
-                      Drag and drop a file or click to browse
-                    </span>
-                    <span className="text-xs text-gray-500">Images only</span>
-                  </div>
-                  <div className="space-y-2 text-sm my-4">
-                    <Label htmlFor="file" className="text-sm font-medium">
-                      File
-                    </Label>
-                    <Input
-                      id="file"
-                      type="file"
-                      placeholder="File"
-                      accept="image/*"
-                      className="dark:bg-slate-700"
-                    />
-                  </div>
-                  {/* Save button */}
-                  <Button size="lg">Upload</Button>
-                </div>
-              </div>
-            </form>
+            <ChangeProfilePicForm />
           </div>
         </section>
       </div>

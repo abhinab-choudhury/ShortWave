@@ -41,3 +41,17 @@ export async function createUser(
   const user = new User(data);
   return await user.save();
 }
+
+/*
+ * Change username
+ */
+export async function changeUsername(
+  userId: IUser["_id"],
+  data: Pick<IUser, "name">,
+): Promise<IUser | null> {
+  return await User.findByIdAndUpdate(
+    userId,
+    { name: data.name },
+    { new: true },
+  );
+}
