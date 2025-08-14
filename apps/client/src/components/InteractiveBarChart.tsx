@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
-import { MousePointerClick, TextCursorIcon } from "lucide-react";
+import { MousePointerClick } from "lucide-react";
 
 export const description = "A mixed bar chart";
 

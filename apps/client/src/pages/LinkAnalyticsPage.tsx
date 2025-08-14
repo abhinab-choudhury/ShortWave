@@ -29,7 +29,7 @@ const LinkAnalyticsPage = () => {
   }, [linkList]);
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
-      <div className="p-2 md:p-10 max-w-7xl mx-auto">
+      <div className="p-2 md:p-10 mx-auto">
         <div className="flex flex-col justify-start items-start mb-6 gap-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Analytics
