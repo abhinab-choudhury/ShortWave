@@ -69,7 +69,7 @@ export function DashboardLayout() {
 
   useEffect(() => {
     if (!user) {
-      // navigate("/signin");
+      navigate("/signin");
     }
   }, [navigate, user]);
   return (
