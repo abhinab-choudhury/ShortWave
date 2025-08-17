@@ -11,5 +11,12 @@
       "src": "/(.*)",
       "dest": "dist/index.js"
     }
+  ],
+  "cron": [
+    {
+      "path": "/dist/cron/sync-analytics.js",
+      "schedule": "*/10 * * * *",
+      "method": "GET"
+    }
   ]
 }

@@ -12,13 +12,13 @@ const router = express.Router();
  * @desc    Get details of a specific short URL which includes analytics
  * @access  Authenticated
  */
-router.get("/:shortUrl", isAuthenticated, getUserUrlDetails);
+router.get("/:urlId", isAuthenticated, getUserUrlDetails);
 
 /**
  * @route   DELETE /api/v1/url/:urlId
  * @desc    Delete a short URL
  * @access  Authenticated
  */
-router.delete("/:shortUrl", isAuthenticated, deleteUserUrl);
+router.delete("/:urlId", isAuthenticated, deleteUserUrl);
 
 export default router;

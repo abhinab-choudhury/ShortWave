@@ -3,27 +3,66 @@ import { IClick } from "../../interfaces/model";
 
 const ClickSchema = new mongoose.Schema<IClick>(
   {
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    short_url: {
+      type: String,
       required: true,
     },
-    url_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Url",
+    date: {
+      type: String,
+      required: true,
     },
-    device_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Device",
+    click_cnt: {
+      type: Number,
+      required: true,
     },
-    location_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
-    },
-    click_log: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ClickLog",
-    },
+    device: [
+      {
+        device_name: {
+          type: String,
+          required: true,
+        },
+        count: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    country: [
+      {
+        country_name: {
+          type: String,
+          required: true,
+        },
+        count: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    os: [
+      {
+        os_name: {
+          type: String,
+          required: true,
+        },
+        count: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    browser: [
+      {
+        browser_name: {
+          type: String,
+          required: true,
+        },
+        count: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

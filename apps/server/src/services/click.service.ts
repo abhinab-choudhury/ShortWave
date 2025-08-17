@@ -9,7 +9,7 @@ export async function getClickById(urlId: string): Promise<IClick> {
 export async function createClick(
   data: Pick<
     IClick,
-    "user_id" | "url_id" | "device_id" | "location_id" | "click_log"
+    "short_url" | "date" | "click_cnt" | "device" | "country" | "os" | "browser"
   >,
 ): Promise<IClick> {
   const response = new Click(data);

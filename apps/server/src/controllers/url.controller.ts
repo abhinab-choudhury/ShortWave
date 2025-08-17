@@ -19,14 +19,14 @@ const urlSchema = z.object({
 
 /**
  * @desc    Get details of a specific short URL
- * @route   GET /api/v1/url/:shortUrl
+ * @route   GET /api/v1/url/:urlId
  * @access  Authenticated
  */
 export async function getUserUrlDetails() {}
 
 /**
  * @desc    Delete a short URL
- * @route   DELETE /api/v1/url/:shortUrl
+ * @route   DELETE /api/v1/url/:urlId
  * @access  Authenticated
  */
 export async function deleteUserUrl(
@@ -35,8 +35,9 @@ export async function deleteUserUrl(
   next: NextFunction,
 ) {
   try {
-    const { shortUrl } = req.params;
-    await deleteUrl(req.user?._id, shortUrl);
+    const { urlId } = req.params;
+    console.log("URL ID: ", urlId);
+    await deleteUrl(req.user?._id, urlId);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));

@@ -5,6 +5,26 @@ export interface IAuthProvider {
   providerId: string;
 }
 
+export interface ICountry {
+  country_name: string;
+  count: number;
+}
+
+export interface IDevice {
+  device_name: string;
+  count: number;
+}
+
+export interface IOS {
+  os_name: string;
+  count: number;
+}
+
+export interface IBrowser {
+  browser_name: string;
+  count: number;
+}
+
 export interface IBlockJWT extends Document {
   jwt: string;
 }
@@ -23,14 +43,6 @@ export interface ICampaign extends Document {
   description: string;
 }
 
-export interface ILocation extends Document {
-  user_id: IUser["_id"];
-  url_id: IUrl["_id"];
-  click: IClick["_id"];
-  ip: string;
-  country: string;
-}
-
 export interface IUrl extends Document {
   user_id: IUser["_id"];
   campaign_id: ICampaign["_id"];
@@ -40,26 +52,12 @@ export interface IUrl extends Document {
   to_date?: Date;
 }
 
-export interface IClickLog extends Document {
-  user_id: IUser["_id"];
-  url_id: IUrl["_id"];
-  data: Date;
-  click_cnt: number;
-}
-
 export interface IClick extends Document {
-  user_id: IUser["_id"];
-  url_id: IUrl["_id"];
-  device_id: IDevice["_id"];
-  location_id: ILocation["_id"];
-  click_log: IClickLog["_id"];
-}
-
-export interface IDevice extends Document {
-  user_id: IUser["_id"];
-  url_id: IUrl["_id"];
-  click: IClick["_id"];
-  device: string;
-  os: string;
-  browser: string;
+  short_url: IUrl["short_url"];
+  date: string;
+  click_cnt: number;
+  device: Array<IDevice>;
+  country: Array<ICountry>;
+  os: Array<IOS>;
+  browser: Array<IBrowser>;
 }

@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import Campaign from "../database/models/campaign.model";
 import { ICampaign, IUser } from "../interfaces/model";
 import Url from "../database/models/url.model";
-import Location from "../database/models/location.model";
 import Click from "../database/models/click.model";
 import { getActiveLinkCnt, getTotalLinkCnt } from "./url.services";
 import { getTotalCGRPercent } from "./click.service";
@@ -68,9 +67,6 @@ export async function deleteCampaign(
     );
     const urlIds = urls.map((url) => url._id);
 
-    await Location.deleteMany({ url_id: { $in: urlIds } }).session(
-      deleteCampaignSession,
-    );
     await Click.deleteMany({ url_id: { $in: urlIds } }).session(
       deleteCampaignSession,
     );

@@ -4,6 +4,7 @@ import { redisClient } from "../database/redis-connect";
 import { IUrl, IUser } from "../interfaces/model";
 import Campaign from "../database/models/campaign.model";
 import User from "../database/models/user.model";
+import Click from "../database/models/click.model";
 
 /* Create a new URL in DB */
 export async function createCampaignUrl(
@@ -23,9 +24,8 @@ export async function createCampaignUrl(
 
 export async function getLongUrl(short_url: IUrl["short_url"]) {
   const longUrl = await Url.findOne({ short_url })
-    .select("original_url -_id")
+    .select("original_url")
     .lean();
-
   return longUrl?.original_url;
 }
 
@@ -50,7 +50,12 @@ export async function getLongUrlHandler(
 
   if (urlFromDb && redisClient.isReady) {
     try {
-      await redisClient.set(short_url, urlFromDb, { EX: 3600 }); // ✅ Cache Population
+      await redisClient.set(short_url, urlFromDb, {
+        expiration: {
+          type: "EX",
+          value: 3600,
+        },
+      }); // ✅ Cache Population
     } catch (error) {
       console.error("Failed to write to Redis cache:", error);
     }
@@ -99,8 +104,29 @@ export async function getAllCampaignUrls(campaignId: string): Promise<IUrl[]> {
 }
 
 /* delete a specific url from a campaign by the help of short_url */
-export async function deleteUrl(userId: IUser["_id"], shortUrl: string) {
-  return await Url.deleteOne({ user_id: userId, short_url: shortUrl });
+export async function deleteUrl(userId: IUser["_id"], urlId: IUrl["_id"]) {
+  const deleteUrlSession = await mongoose.startSession();
+  deleteUrlSession.startTransaction();
+  try {
+    const urlDoc = await Url.findOne({
+      _id: urlId,
+      user_id: userId,
+    }).session(deleteUrlSession);
+
+    if (!urlDoc) {
+      throw new Error("URL not found or not authorized");
+    }
+    await Url.deleteOne({ _id: urlDoc._id }).session(deleteUrlSession);
+    await Click.deleteMany({ url_id: urlDoc._id }).session(deleteUrlSession);
+
+    await deleteUrlSession.commitTransaction();
+  } catch (error) {
+    await deleteUrlSession.abortTransaction();
+    console.error("Error during url deletion: ", error);
+    throw error;
+  } finally {
+    deleteUrlSession.endSession();
+  }
 }
 
 /* get Count of URL which is created */
