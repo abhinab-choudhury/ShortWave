@@ -14,19 +14,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import PageNotFound from "./PageNotFound";
 
 const LinkAnalyticsPage = () => {
   const [linkList, setLinkList] = useState<string[]>([]);
   const [currentLink, setCurrentLink] = useState<string>();
 
+  const { campaignId, linkId } = useParams<{
+    campaignId: string;
+    linkId: string;
+  }>();
+
   useEffect(() => {
-    setLinkList([
+    const mockLinks = [
       "github.com/abhinab-choudhury",
       "fiver.com/abhinab",
       "upwork.com/abhinab",
-    ]);
-    setCurrentLink(linkList[0]);
-  }, [linkList]);
+    ];
+    setLinkList(mockLinks);
+    setCurrentLink(mockLinks[0]);
+  }, []);
+
+  if (!campaignId || !linkId) {
+    return <PageNotFound />;
+  }
+
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
       <div className="p-2 md:p-10 mx-auto">
@@ -54,7 +67,7 @@ const LinkAnalyticsPage = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <AlertDeleteUrlBtn campaignId="" />
+            <AlertDeleteUrlBtn campaignId={campaignId} urlId={linkId} />
           </div>
         </div>
         <div className="h-full min-h-[80vh] w-full">

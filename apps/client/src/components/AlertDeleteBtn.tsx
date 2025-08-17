@@ -18,12 +18,13 @@ import { toast } from "./ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function AlertDeleteCampaignBtn(props: { campaignId: string }) {
+  const { campaignId } = props;
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
 
   const deleteCampaignQC = useQueryClient();
   const deleteCampaign = useMutation({
-    mutationFn: () => axiosInstance.delete(`/campaign/${props.campaignId}`),
+    mutationFn: () => axiosInstance.delete(`/campaign/${campaignId}`),
     onSuccess: () => {
       navigate("/dashboard");
       deleteCampaignQC.invalidateQueries({
@@ -75,8 +76,24 @@ function AlertDeleteCampaignBtn(props: { campaignId: string }) {
   );
 }
 
-function AlertDeleteUrlBtn(props: { campaignId: string }) {
+function AlertDeleteUrlBtn(props: { campaignId: string; urlId: string }) {
+  const { campaignId, urlId } = props;
+  const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
+
+  const deleteUrlQC = useQueryClient();
+  const deleteUrl = useMutation({
+    mutationFn: () => axiosInstance.delete(`/url/${urlId}`),
+    onSuccess: () => {
+      navigate(`/analytics/${campaignId}`);
+      deleteUrlQC.invalidateQueries({
+        queryKey: ["campaignLink"],
+      });
+    },
+  });
+  const handleDelete = async () => {
+    await deleteUrl.mutateAsync();
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -96,7 +113,10 @@ function AlertDeleteUrlBtn(props: { campaignId: string }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction className="border-red-700 bg-red-500 hover:bg-red-600 hover:border-red-800 text-white">
+          <AlertDialogAction
+            className="border-red-700 bg-red-500 hover:bg-red-600 hover:border-red-800 text-white"
+            onClick={handleDelete}
+          >
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>
