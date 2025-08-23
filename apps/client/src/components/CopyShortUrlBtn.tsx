@@ -17,7 +17,11 @@ export function CopyShortUrlBtn(props: { shortLink: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size={"icon"}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="p-2 cursor-pointer active:scale-95 active:bg-accent/40 transition"
+        >
           <Copy className="w-4 h-4 text-muted-foreground" />
         </Button>
       </DialogTrigger>
@@ -36,7 +40,11 @@ export function CopyShortUrlBtn(props: { shortLink: string }) {
         </div>
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
-            <Button type="button" variant="secondary">
+            <Button
+              type="button"
+              variant="default"
+              className="cursor-pointer active:scale-95"
+            >
               Close
             </Button>
           </DialogClose>

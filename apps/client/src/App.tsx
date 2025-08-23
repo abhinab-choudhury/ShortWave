@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "./providers/ThemeProvider";
-import Home from "./pages/Home";
+import Home from "./pages/HomePage";
 import PageNotFound from "./pages/PageNotFound";
 import DashboardPage from "./pages/DashboardPage";
 import SigninPage from "./pages/SigninPage";
@@ -13,8 +13,6 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/toaster";
-import AboutPage from "./pages/AboutPage";
-import ServicesPage from "./pages/ServicesPage";
 
 const queryClient = new QueryClient();
 

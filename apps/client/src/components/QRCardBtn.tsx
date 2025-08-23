@@ -1,5 +1,6 @@
-import { QrCode } from "lucide-react";
+import { Download, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import QRCode from "react-qrcode-logo";
 import {
   Dialog,
   DialogClose,
@@ -10,130 +11,120 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import html2canvas from "html2canvas-pro";
+
+export function QRCard({ shortLink }: { shortLink: string }) {
+  return (
+    <div className="relative m-6 flex w-full max-w-xs mx-auto flex-col items-center overflow-hidden rounded-2xl border border-[#e5e7eb] bg-[#ffffff] dark:border-[#030712] dark:bg-[#101828] shadow-lg p-6">
+      <div className="flex flex-col align-middle items-center justify-center mb-3">
+        <img src="/shortwave_logo.png" className="w-10 h-10" />
+        <span className="text-lg font-bold">Shortwave</span>
+      </div>
+      <div className="flex h-52 w-52 items-center justify-center rounded-xl bg-[#f9fafb] p-4">
+        <QRCode
+          value={shortLink}
+          size={180}
+          logoImage="https://short-wave.vercel.app/shortwave_logo.png"
+          logoWidth={40}
+          logoHeight={40}
+          logoOpacity={1}
+          removeQrCodeBehindLogo={true}
+          quietZone={10}
+          qrStyle="dots"
+          eyeRadius={8}
+          fgColor="#000000"
+          bgColor="#ffffff"
+          id="shortlink-qr"
+        />
+      </div>
+
+      <div className="mt-6 w-full text-center">
+        <h5 className="text-lg font-semibold text-[#1d293d] dark:text-[#ffffff]">
+          Scan this QR Code
+        </h5>
+        <p className="mt-1 text-sm text-[#62748e]">
+          <a
+            href={shortLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-light text-[#000000] dark:text-[#ffffff]"
+          >
+            {shortLink}
+          </a>
+        </p>
+      </div>
+
+      <span
+        className="absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full
+                   text-[#0b4f4a] dark:text-[#cbfbf1]
+                   bg-[#96f7e4] dark:bg-[#14b8a633]
+                   border border-[#46ecd5] dark:border-[#0f766e80]
+                   backdrop-blur-md shadow-sm"
+      >
+        QR
+      </span>
+    </div>
+  );
+}
 
 export function QRCardBtn(props: { shortLink: string }) {
   const { shortLink } = props;
+  const handleDownload = async () => {
+    const element = document.getElementById("qr-card")!;
+    const canvas = await html2canvas(element, {
+      scale: window.devicePixelRatio * 2,
+      useCORS: true,
+      backgroundColor: null,
+    });
+
+    const dataUrl = canvas.toDataURL("image/png", 1.0);
+    const link = document.createElement("a");
+    link.download = "qr-card.png";
+    link.href = dataUrl;
+    link.click();
+  };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size={"icon"}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="p-2 cursor-pointer active:scale-95 active:bg-accent/40 transition"
+        >
           <QrCode className="w-4 h-4 text-muted-foreground" />
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>QR Card</DialogTitle>
           <DialogDescription>
-            Anyone who has this link will be able to view this.
+            Anyone who has this QR will be able to view this.
           </DialogDescription>
         </DialogHeader>
-        <div className="relative m-10 flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md">
-          <a
-            className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl"
-            href="#"
-          >
-            <img
-              className="object-cover"
-              src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60"
-              alt="product image"
-            />
-            <span className="absolute top-0 left-0 m-2 rounded-full bg-black px-2 text-center text-sm font-medium text-white">
-              39% OFF
-            </span>
-          </a>
-          <div className="mt-4 px-5 pb-5">
-            <a href="#">
-              <h5 className="text-xl tracking-tight text-slate-900">
-                Nike Air MX Super 2500 - Red
-              </h5>
-            </a>
-            <div className="mt-2 mb-5 flex items-center justify-between">
-              <p>
-                <span className="text-3xl font-bold text-slate-900">$449</span>
-                <span className="text-sm text-slate-900 line-through">
-                  $699
-                </span>
-              </p>
-              <div className="flex items-center">
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5 text-yellow-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5 text-yellow-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5 text-yellow-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5 text-yellow-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5 text-yellow-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                <span className="mr-2 ml-3 rounded bg-yellow-200 px-2.5 py-0.5 text-xs font-semibold">
-                  5.0
-                </span>
-              </div>
-            </div>
-          </div>
+
+        <div id="qr-card" className="w-full mx-auto">
+          <QRCard
+            shortLink={`${import.meta.env.VITE_SERVER_URL}/${shortLink}`}
+          />
         </div>
-        <DialogFooter className="sm:justify-start">
+
+        <DialogFooter className="sm:justify-start gap-2">
           <DialogClose asChild>
-            <Button type="button" variant="secondary">
+            <Button type="button" variant="destructive" className="text-white">
               Close
             </Button>
-            <a
-              href="#"
-              className="flex items-center justify-center rounded-md bg-slate-900 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="mr-2 h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              Download
-            </a>
           </DialogClose>
+
+          <Button
+            onClick={handleDownload}
+            variant={"secondary"}
+            className="flex gap-2 align-middle items-center justify-center rounded-md bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+          >
+            <Download className="w-4 h-4" />
+            Download
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

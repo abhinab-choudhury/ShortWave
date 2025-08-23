@@ -15,12 +15,39 @@ import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { MousePointerClick } from "lucide-react";
 
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
+const browserData = [
+  { name: "Chrome", visitors: 275 },
+  { name: "Safari", visitors: 200 },
+  { name: "Firefox", visitors: 187 },
+  { name: "Edge", visitors: 173 },
+  { name: "Other", visitors: 90 },
+];
+
+const countryData = [
+  { name: "India", visitors: 320 },
+  { name: "USA", visitors: 210 },
+  { name: "Germany", visitors: 150 },
+  { name: "Brazil", visitors: 95 },
+  { name: "Australia", visitors: 180 },
+  { name: "Japan", visitors: 240 },
+  { name: "Canada", visitors: 160 },
+  { name: "France", visitors: 131 },
+  { name: "South Korea", visitors: 152 },
+];
+
+const deviceData = [
+  { name: "Mobile", visitors: 480 },
+  { name: "Desktop", visitors: 320 },
+  { name: "Tablet", visitors: 140 },
+  { name: "Others", visitors: 40 },
+];
+
+const osData = [
+  { name: "Windows", visitors: 300 },
+  { name: "macOS", visitors: 180 },
+  { name: "Linux", visitors: 120 },
+  { name: "Android", visitors: 260 },
+  { name: "iOS", visitors: 200 },
 ];
 
 const locationChartData = [
@@ -38,9 +65,6 @@ const locationChartData = [
 ];
 
 const barChartConfig = {
-  views: {
-    label: "Visitors",
-  },
   country: {
     label: "Country",
     color: "var(--char-2)",
@@ -48,9 +72,6 @@ const barChartConfig = {
 } satisfies ChartConfig;
 
 const mixedBarChartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
   browser: {
     label: "Browser",
     color: "var(--char-2)",
@@ -124,6 +145,12 @@ export function InteractiveBarChartLabel(props: { className?: string }) {
 export function InteractiveBarChartMixed(props: { className: string }) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof mixedBarChartConfig>("browser");
+  const datasets = {
+    browser: browserData,
+    country: countryData,
+    device: deviceData,
+    os: osData,
+  };
 
   return (
     <Card
@@ -162,27 +189,28 @@ export function InteractiveBarChartMixed(props: { className: string }) {
         <ChartContainer config={mixedBarChartConfig}>
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={datasets[activeChart]}
             layout="vertical"
             margin={{ left: 12 }}
           >
             <YAxis
-              dataKey="browser"
+              dataKey="name"
               type="category"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) =>
-                mixedBarChartConfig[value as keyof typeof mixedBarChartConfig]
-                  ?.label
-              }
             />
             <XAxis dataKey="visitors" type="number" hide />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="visitors" layout="vertical" radius={6} />
+            <Bar
+              fill="var(--chart-2)"
+              dataKey="visitors"
+              layout="vertical"
+              radius={6}
+            />
           </BarChart>
         </ChartContainer>
       </CardContent>

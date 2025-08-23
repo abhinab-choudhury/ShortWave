@@ -4,37 +4,15 @@ import {
   InteractiveBarChartMixed,
 } from "@/components/InteractiveBarChart";
 import { ChartLineInteractive } from "@/components/InteractiveLineChart";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import PageNotFound from "./PageNotFound";
+import { IconCircleFilled } from "@tabler/icons-react";
 
 const LinkAnalyticsPage = () => {
-  const [linkList, setLinkList] = useState<string[]>([]);
-  const [currentLink, setCurrentLink] = useState<string>();
-
   const { campaignId, linkId } = useParams<{
     campaignId: string;
     linkId: string;
   }>();
-
-  useEffect(() => {
-    const mockLinks = [
-      "github.com/abhinab-choudhury",
-      "fiver.com/abhinab",
-      "upwork.com/abhinab",
-    ];
-    setLinkList(mockLinks);
-    setCurrentLink(mockLinks[0]);
-  }, []);
 
   if (!campaignId || !linkId) {
     return <PageNotFound />;
@@ -44,29 +22,23 @@ const LinkAnalyticsPage = () => {
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
       <div className="p-2 md:p-10 mx-auto">
         <div className="flex flex-col justify-start items-start mb-6 gap-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Analytics
-          </h1>
-          <div className="relative flex gap-2 flex-row">
-            <Select value={currentLink}>
-              <SelectTrigger className="w-[280px] dark:bg-gray-800 shadow-none">
-                <SelectValue placeholder="Select Link" />
-              </SelectTrigger>
-              <SelectContent className="w-full dark:bg-gray-800">
-                <SelectGroup>
-                  <SelectLabel>Links</SelectLabel>
-                  {linkList.map((link, index) => (
-                    <SelectItem
-                      value={link}
-                      key={index}
-                      className=" focus:bg-gray-400/30 dark:focus:bg-teal-800"
-                    >
-                      {link}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-row items-center gap-3">
+            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+              Analytics
+            </h1>
+
+            <div
+              className="flex flex-row align-middle items-center justify-between gap-2 px-4 py-1.5 rounded-2xl text-sm font-semibold
+                bg-teal-500/10 backdrop-blur-lg border border-teal-500/30 shadow-sm
+                text-teal-700 dark:text-teal-200
+                dark:bg-teal-400/10 dark:border-teal-400/20
+                transition-all duration-300 hover:scale-105 hover:shadow-md"
+            >
+              <IconCircleFilled className="w-3 h-3" />
+              dbf0f4
+            </div>
+          </div>
+          <div className="relative w-full flex gap-2 flex-row">
             <AlertDeleteUrlBtn campaignId={campaignId} urlId={linkId} />
           </div>
         </div>

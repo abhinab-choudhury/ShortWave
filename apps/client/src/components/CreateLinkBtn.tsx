@@ -50,7 +50,13 @@ function CreateLinkBtn(props: { campaignId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">Create Link</Button>
+        <Button
+          variant="default"
+          size="sm"
+          className="cursor-pointer active:scale-95 transition"
+        >
+          Create Link
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
