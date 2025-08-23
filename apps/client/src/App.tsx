@@ -13,6 +13,8 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/toaster";
+import AboutPage from "./pages/AboutPage";
+import ServicesPage from "./pages/ServicesPage";
 
 const queryClient = new QueryClient();
 

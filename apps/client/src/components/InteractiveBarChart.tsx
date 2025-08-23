@@ -15,8 +15,6 @@ import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { MousePointerClick } from "lucide-react";
 
-export const description = "A mixed bar chart";
-
 const chartData = [
   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
   { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
@@ -24,32 +22,6 @@ const chartData = [
   { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
   { browser: "other", visitors: 90, fill: "var(--color-other)" },
 ];
-
-const mixedChartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "var(--chart-2)",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "var(--chart-2)",
-  },
-  edge: {
-    label: "Edge",
-    color: "var(--chart-2)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
 
 const locationChartData = [
   { country: "India", visits: 320 },
@@ -65,50 +37,81 @@ const locationChartData = [
   { country: "South Korea", visits: 152 },
 ];
 
+const barChartConfig = {
+  views: {
+    label: "Visitors",
+  },
+  country: {
+    label: "Country",
+    color: "var(--char-2)",
+  },
+} satisfies ChartConfig;
+
+const mixedBarChartConfig = {
+  visitors: {
+    label: "Visitors",
+  },
+  browser: {
+    label: "Browser",
+    color: "var(--char-2)",
+  },
+  device: {
+    label: "Device",
+    color: "var(--char-2)",
+  },
+  os: {
+    label: "OS",
+    color: "var(--char-2)",
+  },
+} satisfies ChartConfig;
+
 export function InteractiveBarChartLabel(props: { className?: string }) {
-  const [activeChart, setActiveChart] = React.useState();
+  const [activeChart, setActiveChart] =
+    React.useState<keyof typeof barChartConfig>("country");
 
   return (
     <Card
       className={cn(
-        "flex flex-col justify-between dark:bg-gray-800",
+        "flex flex-col justify-between dark:bg-gray-800 shadow-sm",
         props.className,
       )}
     >
+      {/* Header */}
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-          <CardDescription className="flex gap-3 justify-start items-center align-middle">
+          <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
             <MousePointerClick className="w-5 h-5" />
           </CardDescription>
         </div>
         <div className="flex">
-          {["Countries", "Cities"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
+          {["country"].map((key) => {
+            const chart = key as keyof typeof barChartConfig;
             return (
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-gray-300/30 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+                className="data-[active=true]:bg-gray-200/40 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center border-t px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-5 transition-colors"
                 onClick={() => setActiveChart(chart)}
               >
-                <span className="text-muted-foreground text-sm">{key}</span>
+                {barChartConfig[chart].label}
               </button>
             );
           })}
         </div>
       </CardHeader>
 
-      <CardContent className="h-[300px] my-4 flex flex-col gap-2 overflow-y-auto">
+      {/* Content */}
+      <CardContent className="h-[300px] my-4 flex flex-col gap-3 overflow-y-auto">
         {locationChartData.map((data, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between bg-teal-300/20  dark:bg-teal-400/20 border border-teal-600/20 px-4 py-2 rounded-lg shadow-sm"
+            className="flex items-center justify-between bg-teal-300/20 dark:bg-teal-400/20 border border-teal-600/20 px-4 py-2 rounded-lg shadow-sm"
           >
             <div className="text-sm font-medium text-gray-800 dark:text-white">
               {data.country}
             </div>
-            <div className="text-sm font-bold text-teal-700 dark:text-teal-500">
+            <div className="text-sm font-semibold text-teal-700 dark:text-teal-400">
               {data.visits.toLocaleString()} visits
             </div>
           </div>
@@ -119,42 +122,49 @@ export function InteractiveBarChartLabel(props: { className?: string }) {
 }
 
 export function InteractiveBarChartMixed(props: { className: string }) {
-  const [activeChart, setActiveChart] = React.useState();
+  const [activeChart, setActiveChart] =
+    React.useState<keyof typeof mixedBarChartConfig>("browser");
 
   return (
-    <Card className={cn("flex flex-col dark:bg-gray-800", props.className)}>
+    <Card
+      className={cn(
+        "flex flex-col dark:bg-gray-800 shadow-sm",
+        props.className,
+      )}
+    >
+      {/* Header */}
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-          <CardDescription className="flex gap-3 justify-start items-center align-middle">
+          <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
             <MousePointerClick className="w-5 h-5" />
           </CardDescription>
         </div>
         <div className="flex">
-          {["Browser", "Device", "OS"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
+          {["browser", "device", "os"].map((key) => {
+            const chart = key as keyof typeof mixedBarChartConfig;
             return (
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-gray-300/30 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+                className="data-[active=true]:bg-gray-200/40 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center border-t px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-5 transition-colors"
                 onClick={() => setActiveChart(chart)}
               >
-                <span className="text-muted-foreground text-sm">{key}</span>
+                {mixedBarChartConfig[chart].label}
               </button>
             );
           })}
         </div>
       </CardHeader>
-      <CardContent className="mt-4">
-        <ChartContainer config={mixedChartConfig}>
+
+      {/* Chart */}
+      <CardContent className="mt-6">
+        <ChartContainer config={mixedBarChartConfig}>
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{
-              left: 0,
-            }}
+            margin={{ left: 12 }}
           >
             <YAxis
               dataKey="browser"
@@ -163,7 +173,8 @@ export function InteractiveBarChartMixed(props: { className: string }) {
               tickMargin={10}
               axisLine={false}
               tickFormatter={(value) =>
-                mixedChartConfig[value as keyof typeof mixedChartConfig]?.label
+                mixedBarChartConfig[value as keyof typeof mixedBarChartConfig]
+                  ?.label
               }
             />
             <XAxis dataKey="visitors" type="number" hide />
@@ -171,7 +182,7 @@ export function InteractiveBarChartMixed(props: { className: string }) {
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="visitors" layout="vertical" radius={5} />
+            <Bar dataKey="visitors" layout="vertical" radius={6} />
           </BarChart>
         </ChartContainer>
       </CardContent>

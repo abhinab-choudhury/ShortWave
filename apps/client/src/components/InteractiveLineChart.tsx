@@ -15,8 +15,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export const description = "An interactive line chart";
-
 const chartData = [
   { date: "2025-07-01", desktop: 143, mobile: 238, tablet: 61, others: 13 },
   { date: "2025-07-02", desktop: 198, mobile: 312, tablet: 78, others: 15 },

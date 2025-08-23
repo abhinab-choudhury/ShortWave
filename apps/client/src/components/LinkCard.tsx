@@ -1,5 +1,7 @@
-import { Copy, Link2, QrCode } from "lucide-react";
+import { Link2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { CopyShortUrlBtn } from "./CopyShortUrlBtn";
+import { QRCardBtn } from "./QRCardBtn";
 
 export interface LinkCardI {
   link_id: string;
@@ -17,7 +19,7 @@ export default function LinkCard({
   created_at,
 }: LinkCardI) {
   return (
-    <div className="w-full md:w-[32%] my-2 border border-transparent rounded-xl p-5 bg-white dark:bg-gray-900 shadow-sm hover:shadow-mdshadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
+    <div className="w-full md:w-[32%] my-2 border border-transparent rounded-md p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-mdshadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
       <div className="flex flex-col gap-4">
         {/* Original Link with Actions */}
         <div className="flex justify-between items-start gap-3">
@@ -32,18 +34,8 @@ export default function LinkCard({
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <button
-              className="p-2 rounded-md border border-border dark:hover:bg-gray-800 hover:bg-gray-100 transition"
-              aria-label="Copy original link"
-            >
-              <Copy className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button
-              className="p-2 rounded-md border border-border dark:hover:bg-gray-800 hover:bg-gray-100 transition"
-              aria-label="Show QR code"
-            >
-              <QrCode className="w-4 h-4 text-muted-foreground" />
-            </button>
+            <CopyShortUrlBtn shortLink={short_link} />
+            <QRCardBtn shortLink={short_link} />
           </div>
         </div>
 
