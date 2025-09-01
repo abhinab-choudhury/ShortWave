@@ -77,15 +77,16 @@ app.use((0, express_session_1.default)({
     saveUninitialized: false,
     rolling: true,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        sameSite: "lax",
-        secure: secret_1.env.NODE_ENV !== "development",
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        sameSite: "none", // required for cross-site
+        secure: secret_1.env.NODE_ENV === "production", // only over HTTPS
         httpOnly: true,
+        domain: secret_1.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
     },
     store: connect_mongo_1.default.create({
         mongoUrl: db_connect_1.MONGODB_URI,
         collectionName: "sessions",
-        ttl: 14 * 24 * 60 * 60,
+        ttl: 14 * 24 * 60 * 60, // 14 days
         autoRemove: "native",
     }),
 }));
