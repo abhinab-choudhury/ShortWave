@@ -5,7 +5,7 @@ import ApiError, { normalizeError } from "../utils/api-error-handling";
 import {
   createCampaignUrl,
   deleteUrl,
-  getAllCampaignUrls,
+  getAllCampaignUrlsClick,
   getLongUrlHandler,
 } from "../services/url.services";
 import { IUrl } from "../interfaces/model";
@@ -35,9 +35,8 @@ export async function deleteUserUrl(
   next: NextFunction,
 ) {
   try {
-    const { urlId } = req.params;
-    console.log("URL ID: ", urlId);
-    await deleteUrl(req.user?._id, urlId);
+    const { shortLink } = req.params;
+    await deleteUrl(req.user?._id, shortLink);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));
@@ -124,7 +123,7 @@ export async function getUserUrlsBycampaign(
 ) {
   try {
     const { campaignId } = req.params;
-    const campaignUrls = await getAllCampaignUrls(campaignId);
+    const campaignUrls = await getAllCampaignUrlsClick(campaignId);
     res
       .status(200)
       .json(

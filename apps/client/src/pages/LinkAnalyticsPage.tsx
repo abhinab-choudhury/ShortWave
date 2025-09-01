@@ -9,12 +9,12 @@ import PageNotFound from "./PageNotFound";
 import { IconCircleFilled } from "@tabler/icons-react";
 
 const LinkAnalyticsPage = () => {
-  const { campaignId, linkId } = useParams<{
+  const { campaignId, shortUrl } = useParams<{
     campaignId: string;
-    linkId: string;
+    shortUrl: string;
   }>();
 
-  if (!campaignId || !linkId) {
+  if (!campaignId || !shortUrl) {
     return <PageNotFound />;
   }
 
@@ -35,18 +35,18 @@ const LinkAnalyticsPage = () => {
                 transition-all duration-300 hover:scale-105 hover:shadow-md"
             >
               <IconCircleFilled className="w-3 h-3" />
-              dbf0f4
+              {shortUrl}
             </div>
           </div>
           <div className="relative w-full flex gap-2 flex-row">
-            <AlertDeleteUrlBtn campaignId={campaignId} urlId={linkId} />
+            <AlertDeleteUrlBtn campaignId={campaignId} shortUrl={shortUrl} />
           </div>
         </div>
         <div className="h-full min-h-[80vh] w-full">
-          <ChartLineInteractive />
+          <ChartLineInteractive campaignId={campaignId} shortUrl={shortUrl} />
           <div className="md:flex gap-2">
-            <InteractiveBarChartMixed className="my-2 md:w-[50%]" />
-            <InteractiveBarChartLabel className="my-2 md:w-[50%]" />
+            <InteractiveBarChartMixed campaignId={campaignId} className="my-2 md:w-[50%]" />
+            <InteractiveBarChartLabel campaignId={campaignId} className="my-2 md:w-[50%]" />
           </div>
         </div>
       </div>

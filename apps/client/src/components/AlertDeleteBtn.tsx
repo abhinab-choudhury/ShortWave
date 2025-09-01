@@ -76,14 +76,14 @@ function AlertDeleteCampaignBtn(props: { campaignId: string }) {
   );
 }
 
-function AlertDeleteUrlBtn(props: { campaignId: string; urlId: string }) {
-  const { campaignId, urlId } = props;
+function AlertDeleteUrlBtn(props: { campaignId: string; shortUrl: string }) {
+  const { campaignId, shortUrl } = props;
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
 
   const deleteUrlQC = useQueryClient();
   const deleteUrl = useMutation({
-    mutationFn: () => axiosInstance.delete(`/url/${urlId}`),
+    mutationFn: () => axiosInstance.delete(`/url/${shortUrl}`),
     onSuccess: () => {
       navigate(`/analytics/${campaignId}`);
       deleteUrlQC.invalidateQueries({

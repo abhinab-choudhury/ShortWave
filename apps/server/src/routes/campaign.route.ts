@@ -69,13 +69,6 @@ router.post("/:campaignId/url", isAuthenticated, createUserUrl);
  * @desc    Get all URLs inside a campaign
  * @access  Authenticated
  */
-router.get("/:campaignId/url", isAuthenticated, getUserUrlsBycampaign);
-
-/**
- * @route   GET /api/v1/campaign/:campaignId/stats
- * @desc    Get the campaign stats for a specific campaign by its id.
- * @access  Authenticated
- */
-// router.get("/:campaignId/stats", isAuthenticated, getUserCampaigStatsByCampaignId);
+router.get("/:campaignId/url", getUserUrlsBycampaign);
 
 export default router;

@@ -25,6 +25,7 @@ const CampaignAnalyticsPage = () => {
     ],
   });
 
+
   return (
     <div className="min-h-screen w-full border border-slate-200 dark:border-slate-900 dark:bg-slate-900 overflow-y-scroll scrollbar-slim">
       <div className="p-2 md:p-10 w-full mx-auto">
@@ -43,7 +44,7 @@ const CampaignAnalyticsPage = () => {
           </div>
         </div>
 
-        <ChartAreaInteractive />
+        <ChartAreaInteractive campaignId={campaignId!} />
 
         <div className="h-full w-full rounded-lg bg-muted p-4 mt-10 dark:bg-slate-800">
           <div className="flex flex-row items-center align-middle justify-between gap-3">
@@ -64,7 +65,6 @@ const CampaignAnalyticsPage = () => {
               campaignLinks.data.urls.map(
                 (
                   linkData: {
-                    _id: LinkCardI["link_id"];
                     campaign_id: LinkCardI["campaign_id"];
                     original_url: LinkCardI["original_link"];
                     short_url: LinkCardI["short_link"];
@@ -74,8 +74,7 @@ const CampaignAnalyticsPage = () => {
                 ) => (
                   <LinkCard
                     key={index}
-                    link_id={linkData._id}
-                    campaign_id={linkData.campaign_id}
+                    campaign_id={campaignLinks.data?._id}
                     original_link={linkData.original_url}
                     short_link={linkData.short_url}
                     created_at={linkData.createdAt}

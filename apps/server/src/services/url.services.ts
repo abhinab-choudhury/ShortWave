@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import Url from "../database/models/url.model";
 import { redisClient } from "../database/redis-connect";
-import { IUrl, IUser } from "../interfaces/model";
+import { IClick, IUrl, IUser } from "../interfaces/model";
 import Campaign from "../database/models/campaign.model";
-import User from "../database/models/user.model";
 import Click from "../database/models/click.model";
 
 /* Create a new URL in DB */
@@ -72,12 +71,45 @@ async function getAllUrl(userId: IUser["_id"]): Promise<IUrl[]> {
   return await Url.find({ user_id: userId });
 }
 
-/* get all urls for a given campaign */
-export async function getAllCampaignUrls(campaignId: string): Promise<IUrl[]> {
+/* delete a specific url from a campaign by the help of short_url */
+export async function deleteUrl(
+  userId: IUser["_id"],
+  shortUrl: IUrl["short_url"],
+) {
+  const deleteUrlSession = await mongoose.startSession();
+  deleteUrlSession.startTransaction();
+  try {
+    const urlDoc = await Url.findOne({
+      short_url: shortUrl,
+    }).session(deleteUrlSession);
+
+    if (!urlDoc) {
+      throw new Error("URL not found or not authorized");
+    }
+    await Url.deleteOne({ short_url: urlDoc.short_url }).session(
+      deleteUrlSession,
+    );
+    await Click.deleteMany({ short_url: urlDoc.short_url }).session(
+      deleteUrlSession,
+    );
+
+    await deleteUrlSession.commitTransaction();
+  } catch (error) {
+    await deleteUrlSession.abortTransaction();
+    console.error("Error during url deletion: ", error);
+    throw error;
+  } finally {
+    deleteUrlSession.endSession();
+  }
+}
+
+// get all the urls data from that campaign.
+export async function getAllCampaignUrlsClick(campaignId: string) {
   if (!mongoose.Types.ObjectId.isValid(campaignId)) {
     console.log("Invalid Campaign ID.");
-    return [];
+    return null;
   }
+
   const result = await Campaign.aggregate([
     {
       $match: {
@@ -93,40 +125,38 @@ export async function getAllCampaignUrls(campaignId: string): Promise<IUrl[]> {
       },
     },
     {
+      $unwind: "$urls",
+    },
+    {
+      $lookup: {
+        from: "clicks",
+        localField: "urls.short_url",
+        foreignField: "short_url",
+        as: "urls.clicks",
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        name: { $first: "$name" },
+        urls: { $push: "$urls" },
+      },
+    },
+    {
       $project: {
         _id: 1,
         name: 1,
-        urls: 1,
+        urls: {
+          short_url: 1,
+          original_url: 1,
+          createdAt: 1,
+          clicks: 1,
+        },
       },
     },
   ]);
-  return result.length > 0 ? result[0] : [];
-}
 
-/* delete a specific url from a campaign by the help of short_url */
-export async function deleteUrl(userId: IUser["_id"], urlId: IUrl["_id"]) {
-  const deleteUrlSession = await mongoose.startSession();
-  deleteUrlSession.startTransaction();
-  try {
-    const urlDoc = await Url.findOne({
-      _id: urlId,
-      user_id: userId,
-    }).session(deleteUrlSession);
-
-    if (!urlDoc) {
-      throw new Error("URL not found or not authorized");
-    }
-    await Url.deleteOne({ _id: urlDoc._id }).session(deleteUrlSession);
-    await Click.deleteMany({ url_id: urlDoc._id }).session(deleteUrlSession);
-
-    await deleteUrlSession.commitTransaction();
-  } catch (error) {
-    await deleteUrlSession.abortTransaction();
-    console.error("Error during url deletion: ", error);
-    throw error;
-  } finally {
-    deleteUrlSession.endSession();
-  }
+  return result.length > 0 ? result[0] : null;
 }
 
 /* get Count of URL which is created */

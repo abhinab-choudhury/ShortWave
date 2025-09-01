@@ -86,9 +86,22 @@ const mixedBarChartConfig = {
   },
 } satisfies ChartConfig;
 
-export function InteractiveBarChartLabel(props: { className?: string }) {
+function BlurFallback({ message }: { message: string }) {
+  return (
+    <div className="flex h-[300px] items-center justify-center rounded-lg border bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-md">
+      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+        {message}
+      </p>
+    </div>
+  );
+}
+
+export function InteractiveBarChartLabel(props: { campaignId: string; className?: string }) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof barChartConfig>("country");
+
+  // 👉 Check for data
+  const hasData = locationChartData.length > 0;
 
   return (
     <Card
@@ -123,34 +136,47 @@ export function InteractiveBarChartLabel(props: { className?: string }) {
       </CardHeader>
 
       {/* Content */}
-      <CardContent className="h-[300px] my-4 flex flex-col gap-3 overflow-y-auto">
-        {locationChartData.map((data, idx) => (
-          <div
-            key={idx}
-            className="flex items-center justify-between bg-teal-300/20 dark:bg-teal-400/20 border border-teal-600/20 px-4 py-2 rounded-lg shadow-sm"
-          >
-            <div className="text-sm font-medium text-gray-800 dark:text-white">
-              {data.country}
+      <CardContent className="h-[300px] my-4 flex flex-col gap-1 overflow-y-auto">
+        {hasData ? (
+          locationChartData.map((data, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-5 py-3 dark:border-slate-700 dark:bg-slate-900"
+            >
+              <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {data.country}
+              </div>
+
+              <div className="text-sm font-semibold text-teal-600 dark:text-teal-400">
+                {data.visits.toLocaleString()}{" "}
+                <span className="font-normal text-slate-500 dark:text-slate-400">
+                  visits
+                </span>
+              </div>
             </div>
-            <div className="text-sm font-semibold text-teal-700 dark:text-teal-400">
-              {data.visits.toLocaleString()} visits
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <BlurFallback message="No data available" />
+        )}
       </CardContent>
     </Card>
   );
 }
 
-export function InteractiveBarChartMixed(props: { className: string }) {
+
+export function InteractiveBarChartMixed(props: { campaignId: string; className?: string }) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof mixedBarChartConfig>("browser");
+
   const datasets = {
     browser: browserData,
     country: countryData,
     device: deviceData,
     os: osData,
   };
+
+  // 👉 Check for data
+  const hasData = datasets[activeChart]?.length > 0;
 
   return (
     <Card
@@ -186,34 +212,39 @@ export function InteractiveBarChartMixed(props: { className: string }) {
 
       {/* Chart */}
       <CardContent className="mt-6">
-        <ChartContainer config={mixedBarChartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={datasets[activeChart]}
-            layout="vertical"
-            margin={{ left: 12 }}
-          >
-            <YAxis
-              dataKey="name"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
-            <XAxis dataKey="visitors" type="number" hide />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar
-              fill="var(--chart-2)"
-              dataKey="visitors"
+        {hasData ? (
+          <ChartContainer config={mixedBarChartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={datasets[activeChart]}
               layout="vertical"
-              radius={6}
-            />
-          </BarChart>
-        </ChartContainer>
+              margin={{ left: 12 }}
+            >
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <XAxis dataKey="visitors" type="number" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar
+                fill="var(--chart-2)"
+                dataKey="visitors"
+                layout="vertical"
+                radius={6}
+              />
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <BlurFallback message="No data to display" />
+        )}
       </CardContent>
     </Card>
   );
 }
+

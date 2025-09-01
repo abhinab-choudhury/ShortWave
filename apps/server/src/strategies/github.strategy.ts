@@ -2,7 +2,11 @@ import passport from "passport";
 import { Strategy as GithubStrategy, Profile } from "passport-github2";
 import oauth2 from "passport-oauth2";
 import { env } from "../utils/secret";
-import { createUser, getUserByAuthProviderId } from "../services/user.services";
+import {
+  createUser,
+  getUserByAuthProviderId,
+  getUserByEmail,
+} from "../services/user.services";
 import { IUser } from "../interfaces/model";
 import { sendWelcomeEmail } from "../utils/email";
 
@@ -23,29 +27,56 @@ passport.use(
     ) {
       try {
         const user = await getUserByAuthProviderId(profile.id);
-        if (!user) {
-          const newUser: Pick<
-            IUser,
-            "email" | "authProviders" | "name" | "profilePic" | "admin"
-          > = {
-            email: profile.emails?.[0]?.value!,
-            authProviders: [
-              {
-                provider: "github",
-                providerId: profile.id,
-              },
-            ],
-            name: profile.displayName,
-            profilePic: profile.photos?.[0]?.value!,
-            admin: false,
-          };
-          const response = await createUser(newUser);
-          await sendWelcomeEmail(response?.name!, response?.email!);
 
-          cb(null, response);
-        } else {
-          cb(null, user);
+        if (user) {
+          user.name = profile.displayName || user.name;
+          user.profilePic = profile.photos?.[0]?.value || user.profilePic;
+          await user.save();
+
+          return cb(null, user);
         }
+
+        const email = profile.emails?.[0]?.value;
+        if (!email) {
+          return cb(new Error("Github account has no email associated"), false);
+        }
+        let existingUser = await getUserByEmail(email);
+        if (existingUser) {
+          if (
+            !existingUser.authProviders.some((p) => p.provider === "github")
+          ) {
+            existingUser.authProviders.push({
+              provider: "github",
+              providerId: profile.id,
+            });
+          }
+
+          existingUser.name = profile.displayName || existingUser.name;
+          existingUser.profilePic =
+            profile.photos?.[0]?.value || existingUser.profilePic;
+
+          await existingUser.save();
+          return cb(null, existingUser);
+        }
+        const newUser: Pick<
+          IUser,
+          "email" | "authProviders" | "name" | "profilePic" | "admin"
+        > = {
+          email: profile.emails?.[0]?.value!,
+          authProviders: [
+            {
+              provider: "github",
+              providerId: profile.id,
+            },
+          ],
+          name: profile.displayName,
+          profilePic: profile.photos?.[0]?.value!,
+          admin: false,
+        };
+        const response = await createUser(newUser);
+        await sendWelcomeEmail(response?.name!, response?.email!);
+
+        cb(null, response);
       } catch (error) {
         cb(error, false);
       }

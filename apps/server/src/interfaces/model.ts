@@ -31,7 +31,7 @@ export interface IBlockJWT extends Document {
 
 export interface IUser extends Document {
   email: string;
-  authProviders?: Array<IAuthProvider>;
+  authProviders: Array<IAuthProvider>;
   name: string;
   profilePic?: string;
   admin: boolean;

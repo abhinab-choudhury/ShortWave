@@ -10,7 +10,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <main className="relative w-full">
-      <header className="bg-white dark:bg-slate-800 top-0 sticky z-10">
+      <header className="bg-white dark:bg-gray-900 top-0 sticky z-10">
         <div className="mx-auto flex h-16 max-w-screen-xl items-center gap-8 px-4 sm:px-6 lg:px-8 shadow-2xs">
           <Link
             className="flex gap-2 items-center text-teal-600 dark:text-teal-300"

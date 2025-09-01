@@ -15,10 +15,10 @@ const router = express.Router();
 router.get("/:urlId", isAuthenticated, getUserUrlDetails);
 
 /**
- * @route   DELETE /api/v1/url/:urlId
+ * @route   DELETE /api/v1/url/:shortLink
  * @desc    Delete a short URL
  * @access  Authenticated
  */
-router.delete("/:urlId", isAuthenticated, deleteUserUrl);
+router.delete("/:shortLink", isAuthenticated, deleteUserUrl);
 
 export default router;

@@ -41,7 +41,7 @@ function App() {
                     element={<CampaignAnalyticsPage />}
                   />
                   <Route
-                    path="/analytics/:campaignId/:linkId"
+                    path="/analytics/:campaignId/:shortUrl"
                     element={<LinkAnalyticsPage />}
                   />
                   <Route path="/settings" element={<SettingsPage />} />
