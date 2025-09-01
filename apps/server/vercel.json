@@ -2,21 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "./dist/index.js",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "./dist/index.js"
+      "dest": "dist/index.js"
     }
   ],
-  "cron": [
+  "crons": [
     {
-      "path": "/cron/flush",
-      "schedule": "*/5 * * * *",
-      "method": "GET"
+      "path": "/api/cron/flush",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
