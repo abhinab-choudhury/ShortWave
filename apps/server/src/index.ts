@@ -41,7 +41,7 @@ app.use(
       sameSite: "none",                         // required for cross-site
       secure: env.NODE_ENV === "production",    // only over HTTPS
       httpOnly: true,
-      domain: env.NODE_ENV === "production" ? "short-wave.vercel.app" : undefined,
+      // domain: env.NODE_ENV === "production" ? ".vercel.app" : undefined,
     },
     store: MongoStore.create({
       mongoUrl: MONGODB_URI,
