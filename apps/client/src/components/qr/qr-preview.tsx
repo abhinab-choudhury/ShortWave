@@ -28,6 +28,7 @@ export function QRCardPreview({
 
   return (
     <div
+      id="qr-card"
       className={cn(
         "relative mx-auto flex w-full max-w-sm flex-col items-center gap-4 overflow-hidden rounded-xl",
         "border border-border bg-card p-6 text-card-foreground shadow-sm",

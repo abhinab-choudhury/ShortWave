@@ -132,7 +132,7 @@ export function QRCardBtn(props: { shortLink: string }) {
           </div>
 
           <div className="order-1 flex items-start justify-center md:order-1">
-            <div id="qr-card" className="w-full max-w-md self-start md:sticky md:top-4 md:max-w-lg lg:max-w-xl">
+            <div className="w-full max-w-md self-start md:sticky md:top-4 md:max-w-lg lg:max-w-xl">
               <QRCardPreview shortLink={`${import.meta.env.VITE_SERVER_URL}/${shortLink}`} config={config} />
               <p className="mt-3 text-center text-xs text-muted-foreground">Preview updates live</p>
             </div>
