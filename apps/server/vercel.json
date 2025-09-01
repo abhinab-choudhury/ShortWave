@@ -14,8 +14,8 @@
   ],
   "cron": [
     {
-      "path": "/dist/cron/sync-analytics.js",
-      "schedule": "*/10 * * * *",
+      "path": "/cron/flush",
+      "schedule": "*/5 * * * *",
       "method": "GET"
     }
   ]
