@@ -188,12 +188,10 @@ export function InteractiveBarChartLabel(props: {
       },
     ],
   });
-  console.log("Inslide fun", campaignLinks.data);
   const countryData = parseCampaignLinksCountryData(
     campaignLinks.data,
     props.shortUrl
   );
-  console.log("Parsed Country Data: " + countryData);
   const hasData = countryData.length > 0;
 
   return (

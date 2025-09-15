@@ -121,7 +121,6 @@ export function ChartLineInteractive({
       },
     ],
   });
-  console.log("Campaign Links:", campaignLinks);
   const chartData = parseCampaignLinksDeviceData(campaignLinks.data, shortUrl);
 
   const [activeChart, setActiveChart] =
