@@ -51,7 +51,6 @@ Got it 👍 here’s the improved snippet with **Docker Compose info** included:
 
 Here’s the updated snippet with a **linter command** added:
 
-````markdown
 ## 🔧 Development
 
 Run the frontend, backend, and supporting services easily.
@@ -67,7 +66,6 @@ Available scripts:
 yarn run start:frontend   # Start only the frontend (apps/client)
 yarn run start:backend    # Start only the backend (apps/server)
 yarn run dev              # Start both frontend & backend concurrently
-yarn run lint             # Run linting across the project
 ```
 
 ### 🐳 Running Databases with Docker Compose
