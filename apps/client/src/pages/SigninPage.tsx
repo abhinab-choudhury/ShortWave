@@ -41,13 +41,18 @@ const SigninPage: React.FC = () => {
   const navigate = useNavigate();
   const { isLoading, user } = useAuth();
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [oauthLoading, setOauthLoading] = useState<{
+    google: boolean;
+    github: boolean;
+  }>({ google: false, github: false });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSending(true);
       const response = await axiosInstance.post("/auth/signin", {
         data: values,
       });
-      if (response.status == 200) {
+      if (response.status === 200) {
         toast({
           variant: "default",
           title: response.data.message || "Check Your Email",
@@ -63,17 +68,31 @@ const SigninPage: React.FC = () => {
       console.log("Error: ", error);
       toast({
         variant: "default",
-        title: "❌ Unknow Error has Occured.",
+        title: "❌ Unknown Error has Occurred.",
       });
     } finally {
       setIsSending(false);
     }
   };
+
+  const handleOAuthLogin = async (provider: "google" | "github") => {
+    try {
+      setOauthLoading((prev) => ({ ...prev, [provider]: true }));
+      window.open(
+        `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/${provider}`,
+        "_self"
+      );
+    } finally {
+      setOauthLoading((prev) => ({ ...prev, [provider]: false }));
+    }
+  };
+
   useEffect(() => {
     if (user) {
       navigate("/dashboard");
     }
   }, [navigate, user]);
+
   return (
     <AuthLayout>
       <Form {...form}>
@@ -133,36 +152,29 @@ const SigninPage: React.FC = () => {
           <div className="flex flex-col gap-2">
             <Button
               type="button"
-              onClick={() =>
-                window.open(
-                  `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/google`,
-                  "_self",
-                )
-              }
+              onClick={() => handleOAuthLogin("google")}
+              disabled={oauthLoading.google}
               className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"
             >
-              <img
-                src={GoogleLogo}
-                alt="Google logo"
-                className="h-6 w-6 mr-2"
-              />
+              {oauthLoading.google ? (
+                <Loader2 className="h-5 w-5 animate-spin mr-2 text-black dark:text-white" />
+              ) : (
+                <img src={GoogleLogo} alt="Google logo" className="h-6 w-6 mr-2" />
+              )}
               Google
             </Button>
+
             <Button
               type="button"
-              onClick={() =>
-                window.open(
-                  `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/github`,
-                  "_self",
-                )
-              }
+              onClick={() => handleOAuthLogin("github")}
+              disabled={oauthLoading.github}
               className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"
             >
-              <img
-                src={GithubLogo}
-                alt="Github logo"
-                className="h-5 w-5 mr-2"
-              />
+              {oauthLoading.github ? (
+                <Loader2 className="h-5 w-5 animate-spin mr-2 text-black dark:text-white" />
+              ) : (
+                <img src={GithubLogo} alt="Github logo" className="h-5 w-5 mr-2" />
+              )}
               Github
             </Button>
           </div>
