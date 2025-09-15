@@ -144,7 +144,6 @@ export function ChartLineInteractive({
           <CardDescription>
             Showing total visitors for the last 3 month
           </CardDescription>
-          ChartLineInteractive
         </div>
         <div className="flex">
           {["desktop", "tablet", "mobile", "others"].map((key) => {

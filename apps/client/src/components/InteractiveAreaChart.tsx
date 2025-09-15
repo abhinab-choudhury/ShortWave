@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { useQueries } from "@tanstack/react-query";
+import { axiosInstance } from "@/lib/utils";
 
 import {
   Card,
@@ -23,8 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQueries } from "@tanstack/react-query";
-import { axiosInstance } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 
 export const description = "An interactive area chart";
@@ -35,19 +35,20 @@ interface IDeviceData {
   mobile: number;
 }
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  desktop: {
-    label: "Desktop",
-    color: "var(--chart-1)",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
+interface ICampaignLink {
+  urls: {
+    clicks?: {
+      date: string;
+      device?: { device_name: string; count: number }[];
+    }[];
+  }[];
+}
+
+const chartConfig: ChartConfig = {
+  visitors: { label: "Visitors" },
+  desktop: { label: "Desktop", color: "var(--chart-1)" },
+  mobile: { label: "Mobile", color: "var(--chart-2)" },
+};
 
 function BlurFallback({ message }: { message: string }) {
   return (
@@ -59,39 +60,38 @@ function BlurFallback({ message }: { message: string }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-function parseCampaignLinksDeviceData(data): IDeviceData[] {
+function parseCampaignLinksDeviceData(data?: ICampaignLink): IDeviceData[] {
   if (!data?.urls?.length) return [];
 
   const parsedData: Record<string, IDeviceData> = {};
 
-  for (const url of data.urls) {
-    for (const click of url.clicks ?? []) {
-      const date = click.date;
+  data.urls.forEach((url) => {
+    url.clicks?.forEach((click) => {
+      const [year, month, day] = click.date
+        .split("-")
+        .map((v) => parseInt(v, 10));
+      const isoDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-      if (!parsedData[date]) {
-        parsedData[date] = { date, desktop: 0, mobile: 0 };
-      }
+      if (!parsedData[isoDate])
+        parsedData[isoDate] = { date: isoDate, desktop: 0, mobile: 0 };
 
-      for (const device of click.device ?? []) {
+      click.device?.forEach((device) => {
         switch (device.device_name.toLowerCase()) {
           case "desktop":
-            parsedData[date].desktop += device.count;
+            parsedData[isoDate].desktop += device.count;
             break;
           case "mobile":
-            parsedData[date].mobile += device.count;
+            parsedData[isoDate].mobile += device.count;
             break;
         }
-      }
-    }
-  }
+      });
+    });
+  });
 
   return Object.values(parsedData).sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 }
-
 
 export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
   const [campaignLinks] = useQueries({
@@ -105,26 +105,27 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
       },
     ],
   });
-  const chartData = parseCampaignLinksDeviceData(campaignLinks.data);
-  const [timeRange, setTimeRange] = React.useState("90d");
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date);
-    const referenceDate = new Date("2024-06-30");
-    let daysToSubtract = 90;
-    if (timeRange === "30d") {
-      daysToSubtract = 30;
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7;
-    }
-    const startDate = new Date(referenceDate);
-    startDate.setDate(startDate.getDate() - daysToSubtract);
-    return date >= startDate;
-  });
+  const chartData = parseCampaignLinksDeviceData(campaignLinks.data);
+
+  const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("90d");
+
+  const filteredData = React.useMemo(() => {
+    const today = new Date();
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - days);
+
+    return chartData.filter((item) => new Date(item.date) >= startDate);
+  }, [chartData, timeRange]);
 
   if (campaignLinks.isLoading) {
     return (
-      <Card className="w-full p-4 md:p-6 dark:bg-gray-800" aria-busy="true" aria-live="polite">
+      <Card
+        className="w-full p-4 md:p-6 dark:bg-gray-800"
+        aria-busy="true"
+        aria-live="polite"
+      >
         <div className="mb-4 flex items-center justify-between">
           <Skeleton className="h-6 w-40 dark:bg-gray-900" />
           <Skeleton className="h-6 w-20 dark:bg-gray-900" />
@@ -138,17 +139,20 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
           <Skeleton className="h-4 w-full dark:bg-gray-900" />
         </div>
       </Card>
-    )
+    );
   }
 
   if (campaignLinks.isError) {
     return (
       <Card className="w-full p-4 md:p-6" role="status" aria-live="polite">
         <p className="text-sm text-red-600 dark:text-red-400">
-          Failed to load analytics{campaignLinks.error instanceof Error ? `: ${campaignLinks.error.message}` : "."}
+          Failed to load analytics
+          {campaignLinks.error instanceof Error
+            ? `: ${campaignLinks.error.message}`
+            : "."}
         </p>
       </Card>
-    )
+    );
   }
 
   return (
@@ -157,15 +161,18 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
         <div className="grid flex-1 gap-1">
           <CardTitle>Area Chart - Interactive</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            Showing total visitors for the selected period
           </CardDescription>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
+        <Select
+          value={timeRange}
+          onValueChange={(value) => setTimeRange(value as "7d" | "30d" | "90d")}
+        >
           <SelectTrigger
             className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="Last 3 months" />
+            <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             <SelectItem value="90d" className="rounded-lg">
@@ -181,9 +188,10 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
         </Select>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        {filteredData.length === 0 ?
-          (<BlurFallback message={"No data available"} />)
-          : (<ChartContainer
+        {filteredData.length === 0 ? (
+          <BlurFallback message="No data available" />
+        ) : (
+          <ChartContainer
             config={chartConfig}
             className="aspect-auto h-[250px] w-full"
           >
@@ -233,12 +241,12 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
                 cursor={false}
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString("en-US", {
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
-                      });
-                    }}
+                      })
+                    }
                     indicator="dot"
                   />
                 }
@@ -259,7 +267,8 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
               />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
-          </ChartContainer>)}
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

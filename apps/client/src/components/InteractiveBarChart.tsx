@@ -207,7 +207,6 @@ export function InteractiveBarChartLabel(props: {
           <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
             <MousePointerClick className="w-5 h-5" />
-            InteractiveBarChartLabel
           </CardDescription>
         </div>
         <div className="flex">
