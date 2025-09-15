@@ -124,18 +124,18 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
 
   if (campaignLinks.isLoading) {
     return (
-      <Card className="w-full p-4 md:p-6" aria-busy="true" aria-live="polite">
+      <Card className="w-full p-4 md:p-6 dark:bg-gray-800" aria-busy="true" aria-live="polite">
         <div className="mb-4 flex items-center justify-between">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-40 dark:bg-gray-900" />
+          <Skeleton className="h-6 w-20 dark:bg-gray-900" />
         </div>
-        <div className="h-[260px] w-full">
+        <div className="h-[260px] w-full dark:bg-gray-900">
           <div className="h-full w-full rounded-md bg-muted/50 animate-pulse" />
         </div>
         <div className="mt-4 grid grid-cols-3 gap-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full dark:bg-gray-900" />
+          <Skeleton className="h-4 w-full dark:bg-gray-900" />
+          <Skeleton className="h-4 w-full dark:bg-gray-900" />
         </div>
       </Card>
     )

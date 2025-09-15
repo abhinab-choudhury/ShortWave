@@ -9,6 +9,7 @@ import { axiosInstance } from "@/lib/utils";
 import { useParams } from "react-router-dom";
 import { CardSkeleton } from "@/components/CardSkeleton";
 import { ChartAreaInteractive } from "@/components/InteractiveAreaChart";
+import ReloadBtn from "@/components/ReloadBtn";
 
 const CampaignAnalyticsPage = () => {
   const { campaignId } = useParams();
@@ -41,6 +42,7 @@ const CampaignAnalyticsPage = () => {
                 : campaignLinks.data?.name || "unknown"}
             </Button>
             <AlertDeleteCampaignBtn campaignId={campaignId!} />
+            <ReloadBtn />
           </div>
         </div>
 

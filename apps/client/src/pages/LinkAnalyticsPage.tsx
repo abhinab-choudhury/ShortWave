@@ -7,6 +7,7 @@ import { ChartLineInteractive } from "@/components/InteractiveLineChart";
 import { useParams } from "react-router-dom";
 import PageNotFound from "./PageNotFound";
 import { IconCircleFilled } from "@tabler/icons-react";
+import ReloadBtn from "@/components/ReloadBtn";
 
 const LinkAnalyticsPage = () => {
   const { campaignId, shortUrl } = useParams<{
@@ -40,13 +41,14 @@ const LinkAnalyticsPage = () => {
           </div>
           <div className="relative w-full flex gap-2 flex-row">
             <AlertDeleteUrlBtn campaignId={campaignId} shortUrl={shortUrl} />
+            <ReloadBtn />
           </div>
         </div>
         <div className="h-full min-h-[80vh] w-full">
           <ChartLineInteractive campaignId={campaignId} shortUrl={shortUrl} />
           <div className="md:flex gap-2">
-            <InteractiveBarChartMixed campaignId={campaignId} className="my-2 md:w-[50%]" />
-            <InteractiveBarChartLabel campaignId={campaignId} className="my-2 md:w-[50%]" />
+            <InteractiveBarChartMixed campaignId={campaignId} shortUrl={shortUrl} className="my-2 md:w-[50%]" />
+            <InteractiveBarChartLabel campaignId={campaignId} shortUrl={shortUrl} className="my-2 md:w-[50%]" />
           </div>
         </div>
       </div>

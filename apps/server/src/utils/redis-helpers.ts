@@ -30,7 +30,7 @@ export async function flushRedishStatsToMongo(req: Request, res: Response) {
   const url_stats_keys = await redisClient.keys("url_stats:*");
 
   if (url_stats_keys.length === 0) {
-    return res.status(200).json({ message: "No stats found" });
+    return res.status(200).json({ status:200, message: "No stats found" });
   }
 
   for (const key of url_stats_keys) {
@@ -88,6 +88,7 @@ export async function flushRedishStatsToMongo(req: Request, res: Response) {
       await createClick(clickData);
     } catch (error) {
       console.error("Error during MongoDB insert:", error);
+      return res.status(500).json({ status:500, message: "Internal Server Error" });
     }
   }
 
@@ -97,5 +98,5 @@ export async function flushRedishStatsToMongo(req: Request, res: Response) {
   }
 
   console.log(`Flushed and deleted Redis keys`);
-  return res.status(200).json({ message: "CRON hit and data flushed" });
+  return res.status(200).json({ status:200, message: "CRON hit and data flushed" });
 }

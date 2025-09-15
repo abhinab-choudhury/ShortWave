@@ -12,57 +12,24 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
-import { cn } from "@/lib/utils";
+import { axiosInstance, cn } from "@/lib/utils";
 import { MousePointerClick } from "lucide-react";
+import { useQueries } from "@tanstack/react-query";
 
-const browserData = [
-  { name: "Chrome", visitors: 275 },
-  { name: "Safari", visitors: 200 },
-  { name: "Firefox", visitors: 187 },
-  { name: "Edge", visitors: 173 },
-  { name: "Other", visitors: 90 },
-];
+interface ICountryData {
+  country: string;
+  visitors: number;
+}
 
-const countryData = [
-  { name: "India", visitors: 320 },
-  { name: "USA", visitors: 210 },
-  { name: "Germany", visitors: 150 },
-  { name: "Brazil", visitors: 95 },
-  { name: "Australia", visitors: 180 },
-  { name: "Japan", visitors: 240 },
-  { name: "Canada", visitors: 160 },
-  { name: "France", visitors: 131 },
-  { name: "South Korea", visitors: 152 },
-];
+interface IOSData {
+  name: string;
+  visitors: number;
+}
 
-const deviceData = [
-  { name: "Mobile", visitors: 480 },
-  { name: "Desktop", visitors: 320 },
-  { name: "Tablet", visitors: 140 },
-  { name: "Others", visitors: 40 },
-];
-
-const osData = [
-  { name: "Windows", visitors: 300 },
-  { name: "macOS", visitors: 180 },
-  { name: "Linux", visitors: 120 },
-  { name: "Android", visitors: 260 },
-  { name: "iOS", visitors: 200 },
-];
-
-const locationChartData = [
-  { country: "India", visits: 320 },
-  { country: "USA", visits: 210 },
-  { country: "Germany", visits: 150 },
-  { country: "Brazil", visits: 95 },
-  { country: "Australia", visits: 180 },
-  { country: "Japan", visits: 240 },
-  { country: "Canada", visits: 160 },
-  { country: "Australia", visits: 148 },
-  { country: "France", visits: 131 },
-  { country: "Japan", visits: 198 },
-  { country: "South Korea", visits: 152 },
-];
+interface IDeviceData {
+  name: string;
+  visitors: number;
+}
 
 const barChartConfig = {
   country: {
@@ -96,18 +63,144 @@ function BlurFallback({ message }: { message: string }) {
   );
 }
 
-export function InteractiveBarChartLabel(props: { campaignId: string; className?: string }) {
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+function parseCampaignLinksBrowserData(data, shortUrl): IDeviceData[] {
+  const parsedData: Record<string, IDeviceData> = {};
+
+  for (const url of data.urls) {
+    if (url.short_url != shortUrl) continue;
+
+    for (const click of url.clicks) {
+      for (const browser of click.browser) {
+        const key = browser.browser_name || "unknown";
+
+        if (!parsedData[key]) {
+          parsedData[key] = {
+            name: key,
+            visitors: 0,
+          };
+        }
+
+        parsedData[key].visitors += browser.count;
+      }
+    }
+  }
+
+  return Object.values(parsedData);
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+function parseCampaignLinksDeviceData(data, shortUrl): IDeviceData[] {
+  const parsedData: Record<string, IDeviceData> = {};
+
+  for (const url of data.urls) {
+    if (url.short_url != shortUrl) continue;
+
+    for (const click of url.clicks) {
+      for (const device of click.device) {
+        const key = device.device_name || "unknown";
+
+        if (!parsedData[key]) {
+          parsedData[key] = {
+            name: key,
+            visitors: 0,
+          };
+        }
+
+        parsedData[key].visitors += device.count;
+      }
+    }
+  }
+
+  return Object.values(parsedData);
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+function parseCampaignLinksOSData(data, shortUrl): IOSData[] {
+  const parsedData: Record<string, IOSData> = {};
+
+  for (const url of data.urls) {
+    if (url.short_url != shortUrl) continue;
+
+    for (const click of url.clicks) {
+      for (const os of click.os) {
+        const key = os.os_name || "unknown";
+
+        if (!parsedData[key]) {
+          parsedData[key] = {
+            name: key,
+            visitors: 0,
+          };
+        }
+
+        parsedData[key].visitors += os.count;
+      }
+    }
+  }
+
+  return Object.values(parsedData);
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+function parseCampaignLinksCountryData(data,shortUrl): ICountryData[] {
+  if (!data?.urls) return [];
+
+  const parsedData: Record<string, ICountryData> = {};
+
+  for (const url of data.urls) {
+    if (url.short_url !== shortUrl) continue;
+
+    for (const click of url.clicks || []) {
+      for (const country of click.country || []) {
+        const key = country.country_name || "unknown";
+
+        if (!parsedData[key]) {
+          parsedData[key] = { country: key, visitors: 0 };
+        }
+
+        parsedData[key].visitors += country.count;
+      }
+    }
+  }
+
+  return Object.values(parsedData).sort((a, b) => b.visitors - a.visitors);
+}
+
+export function InteractiveBarChartLabel(props: {
+  campaignId: string;
+  shortUrl: string;
+  className?: string;
+}) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof barChartConfig>("country");
-
-  // 👉 Check for data
-  const hasData = locationChartData.length > 0;
+  const [campaignLinks] = useQueries({
+    queries: [
+      {
+        queryKey: ["campaignLink", props.campaignId],
+        queryFn: () =>
+          axiosInstance
+            .get(`/campaign/${props.campaignId}/url`)
+            .then((res) => res.data.data),
+      },
+    ],
+  });
+  console.log("Inslide fun", campaignLinks.data);
+  const countryData = parseCampaignLinksCountryData(
+    campaignLinks.data,
+    props.shortUrl
+  );
+  console.log("Parsed Country Data: " + countryData);
+  const hasData = countryData.length > 0;
 
   return (
     <Card
       className={cn(
         "flex flex-col justify-between dark:bg-gray-800 shadow-sm",
-        props.className,
+        props.className
       )}
     >
       {/* Header */}
@@ -116,6 +209,7 @@ export function InteractiveBarChartLabel(props: { campaignId: string; className?
           <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
             <MousePointerClick className="w-5 h-5" />
+            InteractiveBarChartLabel
           </CardDescription>
         </div>
         <div className="flex">
@@ -138,7 +232,7 @@ export function InteractiveBarChartLabel(props: { campaignId: string; className?
       {/* Content */}
       <CardContent className="h-[300px] my-4 flex flex-col gap-1 overflow-y-auto">
         {hasData ? (
-          locationChartData.map((data, idx) => (
+          countryData.map((data, idx) => (
             <div
               key={idx}
               className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-5 py-3 dark:border-slate-700 dark:bg-slate-900"
@@ -148,7 +242,7 @@ export function InteractiveBarChartLabel(props: { campaignId: string; className?
               </div>
 
               <div className="text-sm font-semibold text-teal-600 dark:text-teal-400">
-                {data.visits.toLocaleString()}{" "}
+                {data.visitors.toLocaleString()}{" "}
                 <span className="font-normal text-slate-500 dark:text-slate-400">
                   visits
                 </span>
@@ -163,26 +257,39 @@ export function InteractiveBarChartLabel(props: { campaignId: string; className?
   );
 }
 
-
-export function InteractiveBarChartMixed(props: { campaignId: string; className?: string }) {
+export function InteractiveBarChartMixed(props: {
+  campaignId: string;
+  shortUrl: string;
+  className?: string;
+}) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof mixedBarChartConfig>("browser");
+  const [campaignLinks] = useQueries({
+    queries: [
+      {
+        queryKey: ["campaignLink", props.campaignId],
+        queryFn: () =>
+          axiosInstance
+            .get(`/campaign/${props.campaignId}/url`)
+            .then((res) => res.data.data),
+      },
+    ],
+  });
 
   const datasets = {
-    browser: browserData,
-    country: countryData,
-    device: deviceData,
-    os: osData,
+    browser: parseCampaignLinksBrowserData(campaignLinks.data, props.shortUrl),
+    country: parseCampaignLinksCountryData(campaignLinks.data, props.shortUrl),
+    device: parseCampaignLinksDeviceData(campaignLinks.data, props.shortUrl),
+    os: parseCampaignLinksOSData(campaignLinks.data, props.shortUrl),
   };
 
-  // 👉 Check for data
   const hasData = datasets[activeChart]?.length > 0;
 
   return (
     <Card
       className={cn(
         "flex flex-col dark:bg-gray-800 shadow-sm",
-        props.className,
+        props.className
       )}
     >
       {/* Header */}
@@ -247,4 +354,3 @@ export function InteractiveBarChartMixed(props: { campaignId: string; className?
     </Card>
   );
 }
-
