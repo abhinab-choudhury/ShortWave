@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import ApiResponse from "../utils/api-response-handling";
 import ApiError from "../utils/api-error-handling";
 import { changeUsername } from "../services/user.services";
+import { Types } from "mongoose";
 
 export async function changeUsersUsername(
   req: Request,
@@ -11,7 +12,7 @@ export async function changeUsersUsername(
   try {
     const data: { username: string } = req.body;
     if (data.username.trim()) {
-      const newUser = await changeUsername(req.user?._id, {
+      const newUser = await changeUsername(req.user?._id as Types.ObjectId, {
         name: data.username.trim(),
       });
       res

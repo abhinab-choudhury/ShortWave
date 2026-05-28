@@ -55,6 +55,7 @@ const campaign_service_1 = require("../services/campaign.service");
 const zod_1 = require("zod");
 const api_response_handling_1 = __importDefault(require("../utils/api-response-handling"));
 const api_error_handling_1 = __importStar(require("../utils/api-error-handling"));
+const mongoose_1 = require("mongoose");
 const campaignSchema = zod_1.z.object({
     name: zod_1.z
         .string()
@@ -131,7 +132,7 @@ function updateUserCampaign(req, res, next) {
                 name: parsed.data.name,
                 description: parsed.data.description,
             };
-            const updatedCampaign = yield (0, campaign_service_1.updateCampaign)(campaignId, (_a = req.user) === null || _a === void 0 ? void 0 : _a.id, data);
+            const updatedCampaign = yield (0, campaign_service_1.updateCampaign)(new mongoose_1.Types.ObjectId(campaignId.toString()), (_a = req.user) === null || _a === void 0 ? void 0 : _a.id, data);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "Campaign updated successfully", true, updatedCampaign));
@@ -150,7 +151,7 @@ function deleteUserCampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         const { campaignId } = req.params;
-        (0, campaign_service_1.deleteCampaign)(campaignId, (_a = req.user) === null || _a === void 0 ? void 0 : _a.id)
+        (0, campaign_service_1.deleteCampaign)(new mongoose_1.Types.ObjectId(campaignId.toString()), (_a = req.user) === null || _a === void 0 ? void 0 : _a.id)
             .then(() => {
             res
                 .status(200)

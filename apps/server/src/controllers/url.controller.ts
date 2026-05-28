@@ -10,6 +10,7 @@ import {
 } from "../services/url.services";
 import { IUrl } from "../interfaces/model";
 import ApiResponse from "../utils/api-response-handling";
+import { Types } from "mongoose";
 
 const urlSchema = z.object({
   url: z.string().url(),
@@ -35,8 +36,8 @@ export async function deleteUserUrl(
   next: NextFunction,
 ) {
   try {
-    const { shortLink } = req.params;
-    await deleteUrl(req.user?._id, shortLink);
+    const { urlId } = req.params;
+    await deleteUrl(req.user?._id as Types.ObjectId, urlId.toString());
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));
@@ -44,7 +45,7 @@ export async function deleteUserUrl(
     return next(
       normalizeError(error, "Unexprected error occured while deleting the url"),
     );
-  }
+  } 
 }
 
 /**
@@ -86,8 +87,8 @@ export async function createUserUrl(
       | "from_date"
       | "to_date"
     > = {
-      user_id: req.user?._id,
-      campaign_id: campaignId,
+      user_id: req.user?._id as Types.ObjectId,
+      campaign_id: new Types.ObjectId(campaignId.toString()),
       original_url: parsed.data.url,
       short_url: shortened_url,
       from_date: parsed.data.from_date,
@@ -123,7 +124,7 @@ export async function getUserUrlsBycampaign(
 ) {
   try {
     const { campaignId } = req.params;
-    const campaignUrls = await getAllCampaignUrlsClick(campaignId);
+    const campaignUrls = await getAllCampaignUrlsClick(campaignId.toString());
     res
       .status(200)
       .json(

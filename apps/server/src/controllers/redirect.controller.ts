@@ -24,7 +24,7 @@ export async function handleRedirect(
   }
 
   try {
-    const longUrl = await getLongUrlHandler(shortCode);
+    const longUrl = await getLongUrlHandler(shortCode.toString());
     if (!longUrl) {
       return next(new ApiError(404, "Short URL Not Found"));
     }

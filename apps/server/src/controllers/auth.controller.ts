@@ -12,6 +12,7 @@ import { sendSignInEmail, sendWelcomeEmail } from "../utils/email";
 import { env } from "../utils/secret";
 import { blockJWT, findBlockedJWT } from "../services/blockjwt.service";
 import ApiResponse from "../utils/api-response-handling";
+import { Types } from "mongoose";
 
 const signinReqSchema = z.object({
   email: z.string().email().trim(),
@@ -43,7 +44,7 @@ export async function signinUser(
     const parsedReq = signinReqSchema.parse(req.body.data);
     let user = (await getUserByEmail(parsedReq.email)) as IUser;
 
-    let userId = user?._id as string;
+    let userId = user?._id;
     if (!user) {
       const newUser: Pick<IUser, "email" | "name" | "admin"> = {
         email: parsedReq.email,
@@ -52,7 +53,7 @@ export async function signinUser(
       };
       await sendWelcomeEmail(newUser.name, newUser.email);
       const response = await createUser(newUser);
-      userId = response._id as string;
+      userId = response._id;
       user = response;
     }
 
@@ -99,7 +100,7 @@ export async function verifyToken(
     return next(new ApiError(400, "Invalid Token"));
   }
   try {
-    const payload = jwt.verify(token, env.JWT_SECRET) as { userId: string };
+    const payload = jwt.verify(token, env.JWT_SECRET) as { userId: Types.ObjectId };
 
     const user = await getUserById(payload.userId);
     if (!user) return next(new ApiError(400, "User not found"));

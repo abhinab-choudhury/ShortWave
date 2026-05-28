@@ -32,7 +32,7 @@ function handleRedirect(req, res, next) {
             return next(new api_error_handling_1.default(400, "ShortCode Not Provided"));
         }
         try {
-            const longUrl = yield (0, url_services_1.getLongUrlHandler)(shortCode);
+            const longUrl = yield (0, url_services_1.getLongUrlHandler)(shortCode.toString());
             if (!longUrl) {
                 return next(new api_error_handling_1.default(404, "Short URL Not Found"));
             }

@@ -12,6 +12,7 @@ import { ICampaign } from "../interfaces/model";
 import ApiResponse from "../utils/api-response-handling";
 import ApiError, { normalizeError } from "../utils/api-error-handling";
 import Campaign from "../database/models/campaign.model";
+import { Types } from "mongoose";
 
 const campaignSchema = z.object({
   name: z
@@ -34,7 +35,7 @@ export async function getAllUserCampaigns(
   next: NextFunction,
 ) {
   try {
-    const campaigns = await getAllCampaigns(req.user?._id);
+    const campaigns = await getAllCampaigns(req.user?._id as Types.ObjectId);
     res
       .status(200)
       .json(new ApiResponse(200, "All Campaigns", true, campaigns!));
@@ -69,7 +70,7 @@ export async function createUserCampaign(
     const data: Pick<ICampaign, "name" | "description" | "user_id"> = {
       name: parsed.data.name,
       description: parsed.data.description,
-      user_id: req.user?._id,
+      user_id: req.user?._id as Types.ObjectId,
     };
 
     const newCampaign = await createCampaign(data);
@@ -119,8 +120,8 @@ export async function updateUserCampaign(
     };
 
     const updatedCampaign = await updateCampaign(
-      campaignId,
-      req.user?.id,
+      new Types.ObjectId(campaignId.toString()),
+      req.user?.id as Types.ObjectId,
       data,
     );
     res
@@ -155,7 +156,7 @@ export async function deleteUserCampaign(
 ) {
   const { campaignId } = req.params;
 
-  deleteCampaign(campaignId, req.user?.id)
+  deleteCampaign(new Types.ObjectId(campaignId.toString()), req.user?.id as Types.ObjectId)
     .then(() => {
       res
         .status(200)
@@ -183,7 +184,7 @@ export async function getUserCampaignStats(
 ) {
   try {
     const { total_links, crg, active_links } = await getCampaignStats(
-      req.user?._id,
+      req.user?._id as Types.ObjectId,
     );
     res.status(200).json(
       new ApiResponse(200, "Campaign Stats", true, {
@@ -213,7 +214,7 @@ export async function getUsersRecentCampaigns(
   next: NextFunction,
 ) {
   try {
-    const links = await getRecentCampaigns(req.user?._id);
+    const links = await getRecentCampaigns(req.user?._id as Types.ObjectId);
     res
       .status(200)
       .json(new ApiResponse(200, "Recent Campaigns", true, { links }));

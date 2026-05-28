@@ -17,6 +17,7 @@ import redirectRoute from "./routes/redirect.route";
 import globalErrorHandler from "./middlewares/error.middleware";
 import path from "node:path";
 import { flushRedishStatsToMongo } from "./utils/redis-helpers";
+import { Types } from "mongoose";
 
 const app = express();
 
@@ -62,7 +63,7 @@ app.use(passport.session());
 passport.serializeUser((user: Express.User, done) => {
   done(null, user._id);
 });
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (id: Types.ObjectId, done) => {
   try {
     const user = await getUserById(id);
     done(null, user);

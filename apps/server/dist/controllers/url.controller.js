@@ -54,6 +54,7 @@ const sha256_1 = __importDefault(require("sha256"));
 const api_error_handling_1 = __importStar(require("../utils/api-error-handling"));
 const url_services_1 = require("../services/url.services");
 const api_response_handling_1 = __importDefault(require("../utils/api-response-handling"));
+const mongoose_1 = require("mongoose");
 const urlSchema = zod_1.default.object({
     url: zod_1.default.string().url(),
     to_date: zod_1.default.date().optional(),
@@ -76,8 +77,8 @@ function deleteUserUrl(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
-            const { shortLink } = req.params;
-            yield (0, url_services_1.deleteUrl)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id, shortLink);
+            const { urlId } = req.params;
+            yield (0, url_services_1.deleteUrl)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id, urlId.toString());
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "short-url deleted successfully", true));
@@ -113,7 +114,7 @@ function createUserUrl(req, res, next) {
             } while (longUrl);
             const data = {
                 user_id: (_a = req.user) === null || _a === void 0 ? void 0 : _a._id,
-                campaign_id: campaignId,
+                campaign_id: new mongoose_1.Types.ObjectId(campaignId.toString()),
                 original_url: parsed.data.url,
                 short_url: shortened_url,
                 from_date: parsed.data.from_date,
@@ -138,7 +139,7 @@ function getUserUrlsBycampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { campaignId } = req.params;
-            const campaignUrls = yield (0, url_services_1.getAllCampaignUrlsClick)(campaignId);
+            const campaignUrls = yield (0, url_services_1.getAllCampaignUrlsClick)(campaignId.toString());
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "All Urls for the Campaign", true, campaignUrls));
