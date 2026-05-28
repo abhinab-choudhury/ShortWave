@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import morgan from "morgan";
 import session from "express-session";
 import passport from "passport";
@@ -9,6 +10,7 @@ import { env } from "./utils/secret";
 import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
 import { REDIS_CONNECT } from "./database/redis-connect";
 import { getUserById } from "./services/user.services";
+import { IUser } from "./interfaces/model";
 import authRoute from "./routes/auth.route";
 import campaignRoute from "./routes/campaign.route";
 import urlRoute from "./routes/url.route";
@@ -62,7 +64,7 @@ app.use(passport.session());
 passport.serializeUser((user: Express.User, done) => {
   done(null, user._id);
 });
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (id: IUser["_id"], done) => {
   try {
     const user = await getUserById(id);
     done(null, user);

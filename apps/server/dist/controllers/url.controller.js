@@ -49,6 +49,7 @@ exports.getUserUrlDetails = getUserUrlDetails;
 exports.deleteUserUrl = deleteUserUrl;
 exports.createUserUrl = createUserUrl;
 exports.getUserUrlsBycampaign = getUserUrlsBycampaign;
+const mongoose_1 = __importDefault(require("mongoose"));
 const zod_1 = __importDefault(require("zod"));
 const sha256_1 = __importDefault(require("sha256"));
 const api_error_handling_1 = __importStar(require("../utils/api-error-handling"));
@@ -74,10 +75,11 @@ function getUserUrlDetails() {
  */
 function deleteUserUrl(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const { shortLink } = req.params;
-            yield (0, url_services_1.deleteUrl)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id, shortLink);
+            const shortLink = req.params.shortLink;
+            yield (0, url_services_1.deleteUrl)(req.user._id, shortLink);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "short-url deleted successfully", true));
@@ -94,14 +96,13 @@ function deleteUserUrl(req, res, next) {
  */
 function createUserUrl(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         const parsed = urlSchema.safeParse(req.body);
         if (!parsed.success) {
             const message = parsed.error.issues.map((issue) => issue.message);
             return next(new api_error_handling_1.default(400, "Validation Failed", message));
         }
         try {
-            const { campaignId } = req.params;
+            const campaignId = req.params.campaignId;
             let attempt = 0;
             let shortened_url;
             let longUrl;
@@ -111,9 +112,11 @@ function createUserUrl(req, res, next) {
                 longUrl = yield (0, url_services_1.getLongUrlHandler)(shortened_url);
                 attempt++;
             } while (longUrl);
+            if (!req.user)
+                return next(new api_error_handling_1.default(401, "Unauthorized"));
             const data = {
-                user_id: (_a = req.user) === null || _a === void 0 ? void 0 : _a._id,
-                campaign_id: campaignId,
+                user_id: req.user._id,
+                campaign_id: new mongoose_1.default.Types.ObjectId(campaignId),
                 original_url: parsed.data.url,
                 short_url: shortened_url,
                 from_date: parsed.data.from_date,
@@ -137,7 +140,7 @@ function createUserUrl(req, res, next) {
 function getUserUrlsBycampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { campaignId } = req.params;
+            const campaignId = req.params.campaignId;
             const campaignUrls = yield (0, url_services_1.getAllCampaignUrlsClick)(campaignId);
             res
                 .status(200)

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
 import ApiError from "../utils/api-error-handling";
 import {
   createUser,
@@ -43,7 +44,7 @@ export async function signinUser(
     const parsedReq = signinReqSchema.parse(req.body.data);
     let user = (await getUserByEmail(parsedReq.email)) as IUser;
 
-    let userId = user?._id as string;
+    let userId: string;
     if (!user) {
       const newUser: Pick<IUser, "email" | "name" | "admin"> = {
         email: parsedReq.email,
@@ -52,8 +53,10 @@ export async function signinUser(
       };
       await sendWelcomeEmail(newUser.name, newUser.email);
       const response = await createUser(newUser);
-      userId = response._id as string;
+      userId = response._id.toString();
       user = response;
+    } else {
+      userId = user._id.toString();
     }
 
     const emailToken = jwt.sign({ userId }, env.JWT_SECRET, {
@@ -101,7 +104,7 @@ export async function verifyToken(
   try {
     const payload = jwt.verify(token, env.JWT_SECRET) as { userId: string };
 
-    const user = await getUserById(payload.userId);
+    const user = await getUserById(new mongoose.Types.ObjectId(payload.userId));
     if (!user) return next(new ApiError(400, "User not found"));
 
     await new Promise<void>((resolve, reject) => {

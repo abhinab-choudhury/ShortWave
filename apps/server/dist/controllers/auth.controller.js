@@ -19,6 +19,7 @@ exports.logoutUser = logoutUser;
 exports.googleOAuth = googleOAuth;
 exports.githubOAuth = githubOAuth;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const api_error_handling_1 = __importDefault(require("../utils/api-error-handling"));
 const user_services_1 = require("../services/user.services");
 const zod_1 = require("zod");
@@ -53,7 +54,7 @@ function signinUser(req, res, next) {
         try {
             const parsedReq = signinReqSchema.parse(req.body.data);
             let user = (yield (0, user_services_1.getUserByEmail)(parsedReq.email));
-            let userId = user === null || user === void 0 ? void 0 : user._id;
+            let userId;
             if (!user) {
                 const newUser = {
                     email: parsedReq.email,
@@ -62,8 +63,11 @@ function signinUser(req, res, next) {
                 };
                 yield (0, email_1.sendWelcomeEmail)(newUser.name, newUser.email);
                 const response = yield (0, user_services_1.createUser)(newUser);
-                userId = response._id;
+                userId = response._id.toString();
                 user = response;
+            }
+            else {
+                userId = user._id.toString();
             }
             const emailToken = jsonwebtoken_1.default.sign({ userId }, secret_1.env.JWT_SECRET, {
                 expiresIn: "1h",
@@ -92,7 +96,7 @@ function verifyToken(req, res, next) {
         }
         try {
             const payload = jsonwebtoken_1.default.verify(token, secret_1.env.JWT_SECRET);
-            const user = yield (0, user_services_1.getUserById)(payload.userId);
+            const user = yield (0, user_services_1.getUserById)(new mongoose_1.default.Types.ObjectId(payload.userId));
             if (!user)
                 return next(new api_error_handling_1.default(400, "User not found"));
             yield new Promise((resolve, reject) => {

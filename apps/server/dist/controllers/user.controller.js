@@ -18,11 +18,12 @@ const api_error_handling_1 = __importDefault(require("../utils/api-error-handlin
 const user_services_1 = require("../services/user.services");
 function changeUsersUsername(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
             const data = req.body;
             if (data.username.trim()) {
-                const newUser = yield (0, user_services_1.changeUsername)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id, {
+                const newUser = yield (0, user_services_1.changeUsername)(req.user._id, {
                     name: data.username.trim(),
                 });
                 res
