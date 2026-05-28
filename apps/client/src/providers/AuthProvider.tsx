@@ -55,6 +55,10 @@ export function AuthProvider({
     queryFn: async () => {
       try {
         const response = await axiosInstance.get("/auth/me");
+        const token = response.data?.data?.token;
+        if (token) {
+          localStorage.setItem(AUTH_TOKEN_KEY, token);
+        }
         setUser(response.data?.data?.user);
         return response.data?.data?.user;
       } catch (error) {

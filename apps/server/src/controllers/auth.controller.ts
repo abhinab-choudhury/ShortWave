@@ -20,6 +20,7 @@ const signinReqSchema = z.object({
 
 export async function me(req: Request, res: Response, next: NextFunction) {
   if (req.user?._id) {
+    const token = generateAuthToken(req.user._id);
     res.status(200).json(
       new ApiResponse(200, "User Authenticated", true, {
         user: {
@@ -28,6 +29,7 @@ export async function me(req: Request, res: Response, next: NextFunction) {
           name: req.user?.name,
           profilePic: req.user?.profilePic,
         },
+        token,
       }),
     );
   } else {
