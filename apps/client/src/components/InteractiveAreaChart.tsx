@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { useQueries } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Card,
@@ -13,8 +13,6 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -29,25 +27,22 @@ import { Skeleton } from "./ui/skeleton";
 
 export const description = "An interactive area chart";
 
-interface IDeviceData {
+interface IVisitorData {
   date: string;
-  desktop: number;
-  mobile: number;
+  visitors: number;
 }
 
 interface ICampaignLink {
   urls: {
     clicks?: {
       date: string;
-      device?: { device_name: string; count: number }[];
+      click_cnt: number;
     }[];
   }[];
 }
 
 const chartConfig: ChartConfig = {
-  visitors: { label: "Visitors" },
-  desktop: { label: "Desktop", color: "var(--chart-1)" },
-  mobile: { label: "Mobile", color: "var(--chart-2)" },
+  visitors: { label: "Visitors", color: "var(--chart-1)" },
 };
 
 function BlurFallback({ message }: { message: string }) {
@@ -60,67 +55,43 @@ function BlurFallback({ message }: { message: string }) {
   );
 }
 
-function normalizeDateString(dateStr: string): string {
-  if (!dateStr) return "";
-  const parts = dateStr.split("-").map((v) => parseInt(v, 10));
-  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
-  let year = parts[0];
-  let month = parts[1];
-  let day = parts[2];
-  // Handle legacy fragile date format from toLocaleDateString split (e.g. YYYY-DD-MM)
-  if (month > 12) {
-    const temp = month;
-    month = day;
-    day = temp;
-  }
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function parseCampaignLinksDeviceData(data?: ICampaignLink): IDeviceData[] {
+function parseCampaignVisitorData(data?: ICampaignLink): IVisitorData[] {
   if (!data?.urls?.length) return [];
 
-  const parsedData: Record<string, IDeviceData> = {};
+  const parsedData: Record<string, number> = {};
 
   data.urls.forEach((url) => {
     url.clicks?.forEach((click) => {
-      const isoDate = normalizeDateString(click.date);
-      if (!isoDate) return;
-
-      if (!parsedData[isoDate])
-        parsedData[isoDate] = { date: isoDate, desktop: 0, mobile: 0 };
-
-      click.device?.forEach((device) => {
-        switch (device.device_name.toLowerCase()) {
-          case "desktop":
-            parsedData[isoDate].desktop += device.count;
-            break;
-          case "mobile":
-            parsedData[isoDate].mobile += device.count;
-            break;
-        }
-      });
+      const date = click.date;
+      if (!date) return;
+      parsedData[date] = (parsedData[date] || 0) + click.click_cnt;
     });
   });
 
-  return Object.values(parsedData).sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  return Object.entries(parsedData)
+    .map(([date, visitors]) => ({ date, visitors }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
-export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
-  const [campaignLinks] = useQueries({
-    queries: [
-      {
-        queryKey: ["campaignLink", campaignId],
-        queryFn: () =>
-          axiosInstance
-            .get(`/campaign/${campaignId}/url`)
-            .then((res) => res.data.data),
-      },
-    ],
+export function ChartAreaInteractive({
+  campaignId,
+  data,
+}: {
+  campaignId: string;
+  data?: any;
+}) {
+  const campaignLinks = useQuery({
+    queryKey: ["campaignLink", campaignId],
+    queryFn: () =>
+      axiosInstance
+        .get(`/campaign/${campaignId}/url`)
+        .then((res) => res.data.data),
+    enabled: !data,
   });
 
-  const chartData = parseCampaignLinksDeviceData(campaignLinks.data);
+  const resolvedData = data ?? campaignLinks.data;
+
+  const chartData = parseCampaignVisitorData(resolvedData);
 
   const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("90d");
 
@@ -133,7 +104,7 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
     return chartData.filter((item) => new Date(item.date) >= startDate);
   }, [chartData, timeRange]);
 
-  if (campaignLinks.isLoading) {
+  if (!resolvedData && campaignLinks.isLoading) {
     return (
       <Card
         className="w-full p-4 md:p-6 dark:bg-gray-800"
@@ -156,7 +127,7 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
     );
   }
 
-  if (campaignLinks.isError) {
+  if (!resolvedData && campaignLinks.isError) {
     return (
       <Card className="w-full p-4 md:p-6" role="status" aria-live="polite">
         <p className="text-sm text-red-600 dark:text-red-400">
@@ -211,27 +182,15 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
           >
             <AreaChart data={filteredData}>
               <defs>
-                <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="fillVisitors" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="var(--color-desktop)"
+                    stopColor="var(--color-visitors)"
                     stopOpacity={0.8}
                   />
                   <stop
                     offset="95%"
-                    stopColor="var(--color-desktop)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-                <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-mobile)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-mobile)"
+                    stopColor="var(--color-visitors)"
                     stopOpacity={0.1}
                   />
                 </linearGradient>
@@ -266,20 +225,11 @@ export function ChartAreaInteractive({ campaignId }: { campaignId: string }) {
                 }
               />
               <Area
-                dataKey="mobile"
+                dataKey="visitors"
                 type="natural"
-                fill="url(#fillMobile)"
-                stroke="var(--color-mobile)"
-                stackId="a"
+                fill="url(#fillVisitors)"
+                stroke="var(--color-visitors)"
               />
-              <Area
-                dataKey="desktop"
-                type="natural"
-                fill="url(#fillDesktop)"
-                stroke="var(--color-desktop)"
-                stackId="a"
-              />
-              <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
         )}

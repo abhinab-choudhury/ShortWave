@@ -37,7 +37,7 @@ const CampaignAnalyticsPage = () => {
             <ReloadBtn />
           </div>
         </div>
-        <ChartAreaInteractive campaignId={campaignId!} />
+        <ChartAreaInteractive campaignId={campaignId!} data={campaignLinks.data} />
         <div className="w-full rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 p-6 mt-8 shadow-sm">
           <div className="flex flex-row items-center justify-between gap-3">
             <h2 className="text-lg font-semibold flex gap-2.5 items-center text-slate-800 dark:text-white">

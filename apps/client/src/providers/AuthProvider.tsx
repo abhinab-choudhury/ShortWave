@@ -1,6 +1,6 @@
 import { axiosInstance } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, createContext, useMemo, useCallback } from "react";
+import { useState, createContext, useMemo, useCallback, useEffect } from "react";
 
 export interface IUser {
   userId: string;
@@ -17,6 +17,19 @@ export interface AuthContextType {
   refreshUser: () => Promise<void>;
 }
 
+const AUTH_TOKEN_KEY = "authToken";
+
+function getTokenFromUrl(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("token");
+}
+
+function removeTokenFromUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("token");
+  window.history.replaceState({}, "", url.pathname + url.search);
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -28,6 +41,15 @@ export function AuthProvider({
 }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<IUser | null>(null);
+
+  useEffect(() => {
+    const token = getTokenFromUrl();
+    if (token) {
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      removeTokenFromUrl();
+    }
+  }, []);
+
   const { isLoading, refetch: refreshUser } = useQuery<IUser | null>({
     queryKey: ["me"],
     queryFn: async () => {
@@ -37,6 +59,7 @@ export function AuthProvider({
         return response.data?.data?.user;
       } catch (error) {
         setUser(null);
+        localStorage.removeItem(AUTH_TOKEN_KEY);
         console.error("Error fetching user: ", error);
         return null;
       }
@@ -52,6 +75,7 @@ export function AuthProvider({
     } catch (error) {
       console.error("Logout failed: ", error);
     } finally {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
       setUser(null);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     }

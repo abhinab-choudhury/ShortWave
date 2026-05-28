@@ -36,7 +36,7 @@ export async function getUserByEmail(
  * Creates a new user in the database
  */
 export async function createUser(
-  data: Pick<IUser, "email" | "name" | "admin">,
+  data: Pick<IUser, "email" | "name" | "admin"> & Partial<Pick<IUser, "authProviders" | "profilePic">>,
 ): Promise<IUser> {
   const user = new User(data);
   return await user.save();

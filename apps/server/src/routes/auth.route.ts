@@ -6,6 +6,8 @@ import {
   verifyToken,
   googleOAuth,
   githubOAuth,
+  googleOAuthCallback,
+  githubOAuthCallback,
 } from "../controllers/auth.controller";
 import passport from "passport";
 import { env } from "../utils/secret";
@@ -68,10 +70,10 @@ router.get(
   "/google/callback",
   oauthCallbackLimiter,
   passport.authenticate("google-strategy", {
-    successRedirect: `${env.CLIENT_URL}/dashboard`,
     failureRedirect: `${env.CLIENT_URL}/signin`,
     keepSessionInfo: true,
   }),
+  googleOAuthCallback,
 );
 
 /**
@@ -95,10 +97,10 @@ router.get(
   "/github/callback",
   oauthCallbackLimiter,
   passport.authenticate("github-strategy", {
-    successRedirect: `${env.CLIENT_URL}/dashboard`,
     failureRedirect: `${env.CLIENT_URL}/signin`,
     keepSessionInfo: true,
   }),
+  githubOAuthCallback,
 );
 
 export default router;

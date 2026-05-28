@@ -5,7 +5,7 @@
   "private": "true",
   "main": "index.js",
   "scripts": {
-    "install": "cd apps/client && yarn install && cd ../server && yarn install",
+    "install": "yarn install && cd apps/client && yarn install && cd ../server && yarn install",
     "start:frontend": "cd apps/client && yarn dev",
     "start:backend": "cd apps/server && yarn dev",
     "dev": "concurrently \"yarn start:frontend\" \"yarn start:backend\""

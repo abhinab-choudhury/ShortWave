@@ -25,7 +25,7 @@ function App() {
     <>
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools />
-        <ThemeProvider storageKey="vite-ui-theme">
+        <ThemeProvider storageKey="vite-ui-theme" defaultTheme="light">
           <AuthProvider>
             <BrowserRouter>
               <Suspense fallback={<LoadingScreen />}>

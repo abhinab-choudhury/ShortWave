@@ -88,6 +88,10 @@ export async function signinUser(
   }
 }
 
+function generateAuthToken(userId: Types.ObjectId): string {
+  return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: "7d" });
+}
+
 export async function verifyToken(
   req: Request,
   res: Response,
@@ -115,7 +119,8 @@ export async function verifyToken(
 
     await blockJWT(token);
 
-    res.redirect(`${env.CLIENT_URL}/dashboard`);
+    const authToken = generateAuthToken(user._id);
+    res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
   } catch (error: any) {
     return next(new ApiError(400, "Invalid Token or Expired", [error.message]));
   }
@@ -132,17 +137,23 @@ export async function logoutUser(
   next: NextFunction,
 ) {
   try {
-    req.session.destroy((error) => {
-      if (error) {
-        return next(
-          new ApiError(500, "Failed to destroy session", [error.messaege]),
-        );
-      }
-      res.clearCookie("connect.sid");
+    if (req.session) {
+      req.session.destroy((error) => {
+        if (error) {
+          return next(
+            new ApiError(500, "Failed to destroy session", [error.message]),
+          );
+        }
+        res.clearCookie("connect.sid");
+        return res
+          .status(200)
+          .json(new ApiResponse(200, "User logged out successfully"));
+      });
+    } else {
       return res
         .status(200)
         .json(new ApiResponse(200, "User logged out successfully"));
-    });
+    }
   } catch (error: any) {
     return next(
       error instanceof ApiError
@@ -150,6 +161,30 @@ export async function logoutUser(
         : new ApiError(500, "Unexpcted error during logout", error),
     );
   }
+}
+
+export async function googleOAuthCallback(
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) {
+  if (!req.user) {
+    return res.redirect(`${env.CLIENT_URL}/signin`);
+  }
+  const authToken = generateAuthToken(req.user._id);
+  return res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
+}
+
+export async function githubOAuthCallback(
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) {
+  if (!req.user) {
+    return res.redirect(`${env.CLIENT_URL}/signin`);
+  }
+  const authToken = generateAuthToken(req.user._id);
+  return res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
 }
 
 export function googleOAuth(_req: Request, res: Response) {
