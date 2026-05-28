@@ -48,10 +48,9 @@ router.get("/google", ratelimter_middleware_1.signinRateLimiter, passport_1.defa
  * @access  Public
  */
 router.get("/google/callback", ratelimter_middleware_1.oauthCallbackLimiter, passport_1.default.authenticate("google-strategy", {
-    successRedirect: `${secret_1.env.CLIENT_URL}/dashboard`,
     failureRedirect: `${secret_1.env.CLIENT_URL}/signin`,
     keepSessionInfo: true,
-}));
+}), auth_controller_1.googleOAuthCallback);
 /**
  * @route   GET /api/v1/auth/github
  * @desc    Initiates GitHub OAuth login
@@ -64,8 +63,7 @@ router.get("/github", ratelimter_middleware_1.signinRateLimiter, passport_1.defa
  * @access  Public
  */
 router.get("/github/callback", ratelimter_middleware_1.oauthCallbackLimiter, passport_1.default.authenticate("github-strategy", {
-    successRedirect: `${secret_1.env.CLIENT_URL}/dashboard`,
     failureRedirect: `${secret_1.env.CLIENT_URL}/signin`,
     keepSessionInfo: true,
-}));
+}), auth_controller_1.githubOAuthCallback);
 exports.default = router;

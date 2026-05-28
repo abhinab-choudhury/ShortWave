@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { getLongUrlHandler } from "../services/url.services";
 import ApiError from "../utils/api-error-handling";
 import { parseUserAgent } from "../utils/parse-ua";
@@ -18,7 +18,7 @@ export async function handleRedirect(
     return next(new ApiError(405, "POST method not allowed"));
   }
 
-  const { shortCode } = req.params;
+  const shortCode = req.params.shortCode as string;
   if (!shortCode) {
     return next(new ApiError(400, "ShortCode Not Provided"));
   }

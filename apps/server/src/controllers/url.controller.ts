@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
 import z from "zod";
 import sha256 from "sha256";
 import ApiError, { normalizeError } from "../utils/api-error-handling";
@@ -35,9 +36,10 @@ export async function deleteUserUrl(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const { urlId } = req.params;
-    await deleteUrl(req.user?._id as Types.ObjectId, urlId.toString());
+    const urlId = req.params.urlId as string;
+    await deleteUrl(req.user._id, urlId);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));
@@ -65,7 +67,7 @@ export async function createUserUrl(
   }
 
   try {
-    const { campaignId } = req.params;
+    const campaignId = req.params.campaignId as string;
     let attempt = 0;
     let shortened_url;
     let longUrl;
@@ -78,6 +80,7 @@ export async function createUserUrl(
       attempt++;
     } while (longUrl);
 
+    if (!req.user) return next(new ApiError(401, "Unauthorized"));
     const data: Pick<
       IUrl,
       | "user_id"
@@ -87,8 +90,8 @@ export async function createUserUrl(
       | "from_date"
       | "to_date"
     > = {
-      user_id: req.user?._id as Types.ObjectId,
-      campaign_id: new Types.ObjectId(campaignId.toString()),
+      user_id: req.user._id,
+      campaign_id: new Types.ObjectId(campaignId),
       original_url: parsed.data.url,
       short_url: shortened_url,
       from_date: parsed.data.from_date,
@@ -123,8 +126,8 @@ export async function getUserUrlsBycampaign(
   next: NextFunction,
 ) {
   try {
-    const { campaignId } = req.params;
-    const campaignUrls = await getAllCampaignUrlsClick(campaignId.toString());
+    const campaignId = req.params.campaignId as string;
+    const campaignUrls = await getAllCampaignUrlsClick(campaignId);
     res
       .status(200)
       .json(

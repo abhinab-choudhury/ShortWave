@@ -27,7 +27,7 @@ function handleRedirect(req, res, next) {
         if (req.method === "POST") {
             return next(new api_error_handling_1.default(405, "POST method not allowed"));
         }
-        const { shortCode } = req.params;
+        const shortCode = req.params.shortCode;
         if (!shortCode) {
             return next(new api_error_handling_1.default(400, "ShortCode Not Provided"));
         }

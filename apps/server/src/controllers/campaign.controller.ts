@@ -34,8 +34,9 @@ export async function getAllUserCampaigns(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const campaigns = await getAllCampaigns(req.user?._id as Types.ObjectId);
+    const campaigns = await getAllCampaigns(req.user._id);
     res
       .status(200)
       .json(new ApiResponse(200, "All Campaigns", true, campaigns!));
@@ -66,11 +67,12 @@ export async function createUserCampaign(
     return next(new ApiError(400, "Validation Failed", messages));
   }
 
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
     const data: Pick<ICampaign, "name" | "description" | "user_id"> = {
       name: parsed.data.name,
       description: parsed.data.description,
-      user_id: req.user?._id as Types.ObjectId,
+      user_id: req.user._id,
     };
 
     const newCampaign = await createCampaign(data);
@@ -105,8 +107,9 @@ export async function updateUserCampaign(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const { campaignId } = req.params;
+    const campaignId = req.params.campaignId as string;
     const parsed = campaignSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -120,8 +123,8 @@ export async function updateUserCampaign(
     };
 
     const updatedCampaign = await updateCampaign(
-      new Types.ObjectId(campaignId.toString()),
-      req.user?.id as Types.ObjectId,
+      new Types.ObjectId(campaignId),
+      req.user._id,
       data,
     );
     res
@@ -154,9 +157,10 @@ export async function deleteUserCampaign(
   res: Response,
   next: NextFunction,
 ) {
-  const { campaignId } = req.params;
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
+  const campaignId = req.params.campaignId as string;
 
-  deleteCampaign(new Types.ObjectId(campaignId.toString()), req.user?.id as Types.ObjectId)
+  deleteCampaign(new Types.ObjectId(campaignId), req.user._id)
     .then(() => {
       res
         .status(200)
@@ -182,9 +186,10 @@ export async function getUserCampaignStats(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
     const { total_links, crg, active_links } = await getCampaignStats(
-      req.user?._id as Types.ObjectId,
+      req.user._id,
     );
     res.status(200).json(
       new ApiResponse(200, "Campaign Stats", true, {
@@ -213,8 +218,9 @@ export async function getUsersRecentCampaigns(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const links = await getRecentCampaigns(req.user?._id as Types.ObjectId);
+    const links = await getRecentCampaigns(req.user._id);
     res
       .status(200)
       .json(new ApiResponse(200, "Recent Campaigns", true, { links }));

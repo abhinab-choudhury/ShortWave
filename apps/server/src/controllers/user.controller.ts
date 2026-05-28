@@ -9,10 +9,11 @@ export async function changeUsersUsername(
   res: Response,
   next: NextFunction,
 ) {
+  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
     const data: { username: string } = req.body;
     if (data.username.trim()) {
-      const newUser = await changeUsername(req.user?._id as Types.ObjectId, {
+      const newUser = await changeUsername(req.user._id, {
         name: data.username.trim(),
       });
       res

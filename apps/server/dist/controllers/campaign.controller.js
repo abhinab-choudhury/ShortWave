@@ -72,9 +72,10 @@ const campaignSchema = zod_1.z.object({
  */
 function getAllUserCampaigns(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const campaigns = yield (0, campaign_service_1.getAllCampaigns)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id);
+            const campaigns = yield (0, campaign_service_1.getAllCampaigns)(req.user._id);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "All Campaigns", true, campaigns));
@@ -91,17 +92,18 @@ function getAllUserCampaigns(req, res, next) {
  */
 function createUserCampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         const parsed = campaignSchema.safeParse(req.body);
         if (!parsed.success) {
             const messages = parsed.error.issues.map((issue) => issue.message);
             return next(new api_error_handling_1.default(400, "Validation Failed", messages));
         }
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
             const data = {
                 name: parsed.data.name,
                 description: parsed.data.description,
-                user_id: (_a = req.user) === null || _a === void 0 ? void 0 : _a._id,
+                user_id: req.user._id,
             };
             const newCampaign = yield (0, campaign_service_1.createCampaign)(data);
             res
@@ -120,9 +122,10 @@ function createUserCampaign(req, res, next) {
  */
 function updateUserCampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const { campaignId } = req.params;
+            const campaignId = req.params.campaignId;
             const parsed = campaignSchema.safeParse(req.body);
             if (!parsed.success) {
                 const messages = parsed.error.issues.map((issue) => issue.message);
@@ -132,7 +135,7 @@ function updateUserCampaign(req, res, next) {
                 name: parsed.data.name,
                 description: parsed.data.description,
             };
-            const updatedCampaign = yield (0, campaign_service_1.updateCampaign)(new mongoose_1.Types.ObjectId(campaignId.toString()), (_a = req.user) === null || _a === void 0 ? void 0 : _a.id, data);
+            const updatedCampaign = yield (0, campaign_service_1.updateCampaign)(new mongoose_1.Types.ObjectId(campaignId), req.user._id, data);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "Campaign updated successfully", true, updatedCampaign));
@@ -149,9 +152,10 @@ function updateUserCampaign(req, res, next) {
  */
 function deleteUserCampaign(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const { campaignId } = req.params;
-        (0, campaign_service_1.deleteCampaign)(new mongoose_1.Types.ObjectId(campaignId.toString()), (_a = req.user) === null || _a === void 0 ? void 0 : _a.id)
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
+        const campaignId = req.params.campaignId;
+        (0, campaign_service_1.deleteCampaign)(new mongoose_1.Types.ObjectId(campaignId), req.user._id)
             .then(() => {
             res
                 .status(200)
@@ -169,9 +173,10 @@ function deleteUserCampaign(req, res, next) {
  */
 function getUserCampaignStats(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const { total_links, crg, active_links } = yield (0, campaign_service_1.getCampaignStats)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id);
+            const { total_links, crg, active_links } = yield (0, campaign_service_1.getCampaignStats)(req.user._id);
             res.status(200).json(new api_response_handling_1.default(200, "Campaign Stats", true, {
                 total_links,
                 crg,
@@ -190,9 +195,10 @@ function getUserCampaignStats(req, res, next) {
  */
 function getUsersRecentCampaigns(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        if (!req.user)
+            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const links = yield (0, campaign_service_1.getRecentCampaigns)((_a = req.user) === null || _a === void 0 ? void 0 : _a._id);
+            const links = yield (0, campaign_service_1.getRecentCampaigns)(req.user._id);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "Recent Campaigns", true, { links }));

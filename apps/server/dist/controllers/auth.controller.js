@@ -16,9 +16,12 @@ exports.me = me;
 exports.signinUser = signinUser;
 exports.verifyToken = verifyToken;
 exports.logoutUser = logoutUser;
+exports.googleOAuthCallback = googleOAuthCallback;
+exports.githubOAuthCallback = githubOAuthCallback;
 exports.googleOAuth = googleOAuth;
 exports.githubOAuth = githubOAuth;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const api_error_handling_1 = __importDefault(require("../utils/api-error-handling"));
 const user_services_1 = require("../services/user.services");
 const zod_1 = require("zod");
@@ -33,6 +36,7 @@ function me(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
         if ((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) {
+            const token = generateAuthToken(req.user._id);
             res.status(200).json(new api_response_handling_1.default(200, "User Authenticated", true, {
                 user: {
                     userId: (_b = req.user) === null || _b === void 0 ? void 0 : _b._id,
@@ -40,6 +44,7 @@ function me(req, res, next) {
                     name: (_d = req.user) === null || _d === void 0 ? void 0 : _d.name,
                     profilePic: (_e = req.user) === null || _e === void 0 ? void 0 : _e.profilePic,
                 },
+                token,
             }));
         }
         else {
@@ -53,7 +58,7 @@ function signinUser(req, res, next) {
         try {
             const parsedReq = signinReqSchema.parse(req.body.data);
             let user = (yield (0, user_services_1.getUserByEmail)(parsedReq.email));
-            let userId = user === null || user === void 0 ? void 0 : user._id;
+            let userId;
             if (!user) {
                 const newUser = {
                     email: parsedReq.email,
@@ -62,8 +67,11 @@ function signinUser(req, res, next) {
                 };
                 yield (0, email_1.sendWelcomeEmail)(newUser.name, newUser.email);
                 const response = yield (0, user_services_1.createUser)(newUser);
-                userId = response._id;
+                userId = response._id.toString();
                 user = response;
+            }
+            else {
+                userId = user._id.toString();
             }
             const emailToken = jsonwebtoken_1.default.sign({ userId }, secret_1.env.JWT_SECRET, {
                 expiresIn: "1h",
@@ -83,6 +91,9 @@ function signinUser(req, res, next) {
         }
     });
 }
+function generateAuthToken(userId) {
+    return jsonwebtoken_1.default.sign({ userId }, secret_1.env.JWT_SECRET, { expiresIn: "7d" });
+}
 function verifyToken(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = req.query.token;
@@ -92,7 +103,7 @@ function verifyToken(req, res, next) {
         }
         try {
             const payload = jsonwebtoken_1.default.verify(token, secret_1.env.JWT_SECRET);
-            const user = yield (0, user_services_1.getUserById)(payload.userId);
+            const user = yield (0, user_services_1.getUserById)(new mongoose_1.default.Types.ObjectId(payload.userId));
             if (!user)
                 return next(new api_error_handling_1.default(400, "User not found"));
             yield new Promise((resolve, reject) => {
@@ -103,7 +114,8 @@ function verifyToken(req, res, next) {
                 });
             });
             yield (0, blockjwt_service_1.blockJWT)(token);
-            res.redirect(`${secret_1.env.CLIENT_URL}/dashboard`);
+            const authToken = generateAuthToken(user._id);
+            res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
         }
         catch (error) {
             return next(new api_error_handling_1.default(400, "Invalid Token or Expired", [error.message]));
@@ -118,21 +130,46 @@ function verifyToken(req, res, next) {
 function logoutUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            req.session.destroy((error) => {
-                if (error) {
-                    return next(new api_error_handling_1.default(500, "Failed to destroy session", [error.messaege]));
-                }
-                res.clearCookie("connect.sid");
+            if (req.session) {
+                req.session.destroy((error) => {
+                    if (error) {
+                        return next(new api_error_handling_1.default(500, "Failed to destroy session", [error.message]));
+                    }
+                    res.clearCookie("connect.sid");
+                    return res
+                        .status(200)
+                        .json(new api_response_handling_1.default(200, "User logged out successfully"));
+                });
+            }
+            else {
                 return res
                     .status(200)
                     .json(new api_response_handling_1.default(200, "User logged out successfully"));
-            });
+            }
         }
         catch (error) {
             return next(error instanceof api_error_handling_1.default
                 ? error
                 : new api_error_handling_1.default(500, "Unexpcted error during logout", error));
         }
+    });
+}
+function googleOAuthCallback(req, res, _next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!req.user) {
+            return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
+        }
+        const authToken = generateAuthToken(req.user._id);
+        return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
+    });
+}
+function githubOAuthCallback(req, res, _next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!req.user) {
+            return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
+        }
+        const authToken = generateAuthToken(req.user._id);
+        return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
     });
 }
 function googleOAuth(_req, res) {
