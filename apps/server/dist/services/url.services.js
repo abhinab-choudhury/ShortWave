@@ -107,7 +107,6 @@ function deleteUrl(userId, shortUrl) {
         }
     });
 }
-// get all the urls data from that campaign.
 function getAllCampaignUrlsClick(campaignId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!mongoose_1.default.Types.ObjectId.isValid(campaignId)) {
@@ -123,27 +122,19 @@ function getAllCampaignUrlsClick(campaignId) {
             {
                 $lookup: {
                     from: "urls",
-                    localField: "_id",
-                    foreignField: "campaign_id",
+                    let: { campaign_id: "$_id" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$campaign_id", "$$campaign_id"] } } },
+                        {
+                            $lookup: {
+                                from: "clicks",
+                                localField: "short_url",
+                                foreignField: "short_url",
+                                as: "clicks",
+                            },
+                        },
+                    ],
                     as: "urls",
-                },
-            },
-            {
-                $unwind: "$urls",
-            },
-            {
-                $lookup: {
-                    from: "clicks",
-                    localField: "urls.short_url",
-                    foreignField: "short_url",
-                    as: "urls.clicks",
-                },
-            },
-            {
-                $group: {
-                    _id: "$_id",
-                    name: { $first: "$name" },
-                    urls: { $push: "$urls" },
                 },
             },
             {

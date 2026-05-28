@@ -38,7 +38,7 @@ app.use(
     rolling: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,          // 7 days
-      sameSite: "none",                         // not-recommended for real world usercase ❌❌❌
+      sameSite: "lax",                         // not-recommended for real world usercase ❌❌❌
       secure: env.NODE_ENV === "production",    // only over HTTPS
       httpOnly: true,
       // domain: env.NODE_ENV === "production" ? ".vercel.app" : undefined,

@@ -57,16 +57,35 @@ function BlurFallback({ message }: { message: string }) {
   );
 }
 
+function normalizeDateString(dateStr: string): string {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-").map((v) => parseInt(v, 10));
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
+  let year = parts[0];
+  let month = parts[1];
+  let day = parts[2];
+  // Handle legacy fragile date format from toLocaleDateString split (e.g. YYYY-DD-MM)
+  if (month > 12) {
+    const temp = month;
+    month = day;
+    day = temp;
+  }
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 function parseCampaignLinksDeviceData(data, shortUrl: string): IDeviceData[] {
+  if (!data?.urls) return [];
+
   const parsedData: Record<string, IDeviceData> = {};
 
   for (const url of data.urls) {
     if (url.short_url !== shortUrl) continue;
 
-    for (const click of url.clicks) {
-      const date = click.date;
+    for (const click of url.clicks || []) {
+      const date = normalizeDateString(click.date);
+      if (!date) continue;
 
       if (!parsedData[date]) {
         parsedData[date] = {
@@ -78,7 +97,7 @@ function parseCampaignLinksDeviceData(data, shortUrl: string): IDeviceData[] {
         };
       }
 
-      for (const device of click.device) {
+      for (const device of click.device || []) {
         switch (device.device_name.toLowerCase()) {
           case "desktop":
             parsedData[date].desktop += device.count;

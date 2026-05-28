@@ -103,7 +103,6 @@ export async function deleteUrl(
   }
 }
 
-// get all the urls data from that campaign.
 export async function getAllCampaignUrlsClick(campaignId: string) {
   if (!mongoose.Types.ObjectId.isValid(campaignId)) {
     console.log("Invalid Campaign ID.");
@@ -119,27 +118,19 @@ export async function getAllCampaignUrlsClick(campaignId: string) {
     {
       $lookup: {
         from: "urls",
-        localField: "_id",
-        foreignField: "campaign_id",
+        let: { campaign_id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$campaign_id", "$$campaign_id"] } } },
+          {
+            $lookup: {
+              from: "clicks",
+              localField: "short_url",
+              foreignField: "short_url",
+              as: "clicks",
+            },
+          },
+        ],
         as: "urls",
-      },
-    },
-    {
-      $unwind: "$urls",
-    },
-    {
-      $lookup: {
-        from: "clicks",
-        localField: "urls.short_url",
-        foreignField: "short_url",
-        as: "urls.clicks",
-      },
-    },
-    {
-      $group: {
-        _id: "$_id",
-        name: { $first: "$name" },
-        urls: { $push: "$urls" },
       },
     },
     {

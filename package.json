@@ -5,9 +5,10 @@
   "private": "true",
   "main": "index.js",
   "scripts": {
-    "start:frontend": "cd apps/client && npm run dev",
-    "start:backend": "cd apps/server && npm run dev",
-    "dev": "concurrently 'npm run start:frontend' 'npm run start:backend'"
+    "install": "cd apps/client && yarn install && cd ../server && yarn install",
+    "start:frontend": "cd apps/client && yarn dev",
+    "start:backend": "cd apps/server && yarn dev",
+    "dev": "concurrently \"yarn start:frontend\" \"yarn start:backend\""
   },
   "dependencies": {
     "concurrently": "^9.2.0"

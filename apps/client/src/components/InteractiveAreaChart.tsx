@@ -60,6 +60,22 @@ function BlurFallback({ message }: { message: string }) {
   );
 }
 
+function normalizeDateString(dateStr: string): string {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-").map((v) => parseInt(v, 10));
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
+  let year = parts[0];
+  let month = parts[1];
+  let day = parts[2];
+  // Handle legacy fragile date format from toLocaleDateString split (e.g. YYYY-DD-MM)
+  if (month > 12) {
+    const temp = month;
+    month = day;
+    day = temp;
+  }
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 function parseCampaignLinksDeviceData(data?: ICampaignLink): IDeviceData[] {
   if (!data?.urls?.length) return [];
 
@@ -67,10 +83,8 @@ function parseCampaignLinksDeviceData(data?: ICampaignLink): IDeviceData[] {
 
   data.urls.forEach((url) => {
     url.clicks?.forEach((click) => {
-      const [year, month, day] = click.date
-        .split("-")
-        .map((v) => parseInt(v, 10));
-      const isoDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const isoDate = normalizeDateString(click.date);
+      if (!isoDate) return;
 
       if (!parsedData[isoDate])
         parsedData[isoDate] = { date: isoDate, desktop: 0, mobile: 0 };

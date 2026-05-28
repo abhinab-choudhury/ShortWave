@@ -46,7 +46,7 @@ function handleRedirect(req, res, next) {
             const browserType = (browser === null || browser === void 0 ? void 0 : browser.name) || "unknown";
             const fingerprint = (0, redis_helpers_1.getDeviceFingerprint)(req);
             const hitKey = `device_hit:${shortCode}:${fingerprint}`;
-            const statsKey = `url_stats:${shortCode}:${new Date().toLocaleDateString().split("/").reverse().join("-")}`;
+            const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
             try {
                 // Set device fingerprint to prevent duplicate stats
                 const isUniqueDevice = yield redis_connect_1.redisClient.set(hitKey, "1", {

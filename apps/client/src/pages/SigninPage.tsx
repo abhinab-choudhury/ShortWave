@@ -96,31 +96,34 @@ const SigninPage: React.FC = () => {
   return (
     <AuthLayout>
       <Form {...form}>
-        <div className="max-w-[420px] w-full flex flex-col gap-6 bg-white dark:bg-slate-900 shadow-md rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
-          <h1 className="text-3xl text-center font-semibold text-slate-800 dark:text-white">
-            Welcome to Shortwave
-          </h1>
-          <p className="text-sm text-center text-slate-600 dark:text-slate-300">
-            Create an account
-          </p>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="max-w-[420px] w-full flex flex-col gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 rounded-2xl p-8 border border-slate-200/60 dark:border-slate-700/50">
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Welcome to Shortwave
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Sign in to your account to continue
+            </p>
+          </div>
+
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-700 dark:text-slate-300">
+                  <FormLabel className="text-slate-700 dark:text-slate-300 text-sm font-medium">
                     Email
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="name@example.com"
-                      className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-primary focus:border-primary"
+                      className="h-11 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-all duration-200 rounded-lg"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription className="text-xs text-slate-500 dark:text-slate-400">
+                  <FormDescription className="text-xs text-slate-400 dark:text-slate-500">
                     Enter your email address to receive your secure login link.
                   </FormDescription>
                   <FormMessage />
@@ -131,51 +134,51 @@ const SigninPage: React.FC = () => {
               disabled={isLoading || isSending}
               type="submit"
               variant="default"
-              className="w-full bg-primary hover:bg-primary/90 text-white dark:text-black"
+              className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] dark:bg-teal-500 dark:hover:bg-teal-400 dark:text-slate-950"
             >
               {isLoading || isSending ? (
-                <Loader2 className="h-5 w-5 animate-spin text-white" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 "Sign In"
               )}
             </Button>
           </form>
 
-          <div className="flex w-auto items-center justify-center text-slate-500 dark:text-slate-400">
-            <Separator className="mx-2 w-24 bg-slate-300 dark:bg-slate-600" />
-            <p className="uppercase font-medium text-xs tracking-wide">
+          <div className="flex w-auto items-center justify-center gap-3 text-slate-400 dark:text-slate-500">
+            <Separator className="flex-1 bg-slate-200 dark:bg-slate-700" />
+            <p className="uppercase font-medium text-[11px] tracking-widest whitespace-nowrap">
               Or continue with
             </p>
-            <Separator className="mx-2 w-24 bg-slate-300 dark:bg-slate-600" />
+            <Separator className="flex-1 bg-slate-200 dark:bg-slate-700" />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <Button
               type="button"
               onClick={() => handleOAuthLogin("google")}
               disabled={oauthLoading.google}
-              className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="w-full h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium transition-all duration-200 hover:shadow-sm hover:scale-[1.01] active:scale-[0.99]"
             >
               {oauthLoading.google ? (
-                <Loader2 className="h-5 w-5 animate-spin mr-2 text-black dark:text-white" />
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
               ) : (
-                <img src={GoogleLogo} alt="Google logo" className="h-6 w-6 mr-2" />
+                <img src={GoogleLogo} alt="Google logo" className="h-5 w-5 mr-2.5" />
               )}
-              Google
+              Continue with Google
             </Button>
 
             <Button
               type="button"
               onClick={() => handleOAuthLogin("github")}
               disabled={oauthLoading.github}
-              className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="w-full h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium transition-all duration-200 hover:shadow-sm hover:scale-[1.01] active:scale-[0.99]"
             >
               {oauthLoading.github ? (
-                <Loader2 className="h-5 w-5 animate-spin mr-2 text-black dark:text-white" />
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
               ) : (
-                <img src={GithubLogo} alt="Github logo" className="h-5 w-5 mr-2" />
+                <img src={GithubLogo} alt="Github logo" className="h-5 w-5 mr-2.5" />
               )}
-              Github
+              Continue with GitHub
             </Button>
           </div>
         </div>

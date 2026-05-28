@@ -42,7 +42,7 @@ export async function handleRedirect(
 
     const fingerprint = getDeviceFingerprint(req);
     const hitKey = `device_hit:${shortCode}:${fingerprint}`;
-    const statsKey = `url_stats:${shortCode}:${new Date().toLocaleDateString().split("/").reverse().join("-")}`;
+    const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
 
     try {
       // Set device fingerprint to prevent duplicate stats

@@ -66,13 +66,15 @@ function BlurFallback({ message }: { message: string }) {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 function parseCampaignLinksBrowserData(data, shortUrl): IDeviceData[] {
+  if (!data?.urls) return [];
+
   const parsedData: Record<string, IDeviceData> = {};
 
   for (const url of data.urls) {
     if (url.short_url != shortUrl) continue;
 
-    for (const click of url.clicks) {
-      for (const browser of click.browser) {
+    for (const click of url.clicks || []) {
+      for (const browser of click.browser || []) {
         const key = browser.browser_name || "unknown";
 
         if (!parsedData[key]) {
@@ -93,13 +95,15 @@ function parseCampaignLinksBrowserData(data, shortUrl): IDeviceData[] {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 function parseCampaignLinksDeviceData(data, shortUrl): IDeviceData[] {
+  if (!data?.urls) return [];
+
   const parsedData: Record<string, IDeviceData> = {};
 
   for (const url of data.urls) {
     if (url.short_url != shortUrl) continue;
 
-    for (const click of url.clicks) {
-      for (const device of click.device) {
+    for (const click of url.clicks || []) {
+      for (const device of click.device || []) {
         const key = device.device_name || "unknown";
 
         if (!parsedData[key]) {
@@ -120,13 +124,15 @@ function parseCampaignLinksDeviceData(data, shortUrl): IDeviceData[] {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 function parseCampaignLinksOSData(data, shortUrl): IOSData[] {
+  if (!data?.urls) return [];
+
   const parsedData: Record<string, IOSData> = {};
 
   for (const url of data.urls) {
     if (url.short_url != shortUrl) continue;
 
-    for (const click of url.clicks) {
-      for (const os of click.os) {
+    for (const click of url.clicks || []) {
+      for (const os of click.os || []) {
         const key = os.os_name || "unknown";
 
         if (!parsedData[key]) {

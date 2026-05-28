@@ -36,7 +36,7 @@ function flushRedishStatsToMongo(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const url_stats_keys = yield redis_connect_1.redisClient.keys("url_stats:*");
         if (url_stats_keys.length === 0) {
-            return res.status(200).json({ message: "No stats found" });
+            return res.status(200).json({ status: 200, message: "No stats found" });
         }
         for (const key of url_stats_keys) {
             const data = yield redis_connect_1.redisClient.hGetAll(key);
@@ -81,6 +81,7 @@ function flushRedishStatsToMongo(req, res) {
             }
             catch (error) {
                 console.error("Error during MongoDB insert:", error);
+                return res.status(500).json({ status: 500, message: "Internal Server Error" });
             }
         }
         // cleanup (after all keys processed)
@@ -88,6 +89,6 @@ function flushRedishStatsToMongo(req, res) {
             yield redis_connect_1.redisClient.del(url_stats_keys);
         }
         console.log(`Flushed and deleted Redis keys`);
-        return res.status(200).json({ message: "CRON hit and data flushed" });
+        return res.status(200).json({ status: 200, message: "CRON hit and data flushed" });
     });
 }
