@@ -1,17 +1,19 @@
 {
   "name": "shortwave",
   "version": "0.0.1",
-  "description": "",
-  "private": "true",
+  "description": "URL Shortener with Analytics",
   "main": "index.js",
   "scripts": {
-    "install": "yarn install && cd apps/client && yarn install && cd ../server && yarn install",
-    "start:frontend": "cd apps/client && yarn dev",
-    "start:backend": "cd apps/server && yarn dev",
-    "dev": "concurrently \"yarn start:frontend\" \"yarn start:backend\""
+    "dev:client": "pnpm --filter client dev",
+    "dev:server": "pnpm --filter server dev",
+    "build:client": "pnpm --filter client build",
+    "build:server": "pnpm --filter server build",
+    "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
+    "build": "concurrently \"pnpm run build:client\" \"pnpm run build:server\""
   },
   "dependencies": {
     "concurrently": "^9.2.0"
   },
-  "packageManager": "yarn@1.22.22"
+  "private": true,
+  "packageManager": "pnpm@11.5.1"
 }
