@@ -54,7 +54,7 @@ const CampaignAnalyticsPage = () => {
                 <LinkCard key={index} campaign_id={campaignLinks.data?._id} original_link={linkData.original_url} short_link={linkData.short_url} created_at={linkData.createdAt} />
               ))
             ) : (
-              <div className="flex flex-col justify-center items-center w-full text-slate-400 dark:text-slate-500 min-h-[100px] gap-2">
+              <div className="flex flex-col justify-center items-center w-full text-slate-400 dark:text-slate-500 min-h-25 gap-2">
                 <IconLink className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                 <p className="text-sm font-medium">No links yet</p>
               </div>

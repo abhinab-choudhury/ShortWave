@@ -51,7 +51,7 @@ export function AuthProvider({
   }, []);
 
   const { isLoading, refetch: refreshUser } = useQuery<IUser | null>({
-    queryKey: ["me"],
+    queryKey: ["me", setUser],
     queryFn: async () => {
       try {
         const response = await axiosInstance.get("/auth/me");

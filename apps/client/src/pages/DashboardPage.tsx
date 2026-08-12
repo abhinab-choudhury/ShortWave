@@ -55,7 +55,7 @@ const DashboardPage = () => {
     return (
       <>
         <DashboardQuickInfoCard
-          className="group bg-gradient-to-br from-teal-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-teal-100 dark:border-slate-700"
+          className="group bg-linear-to-br from-teal-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-teal-100 dark:border-slate-700"
           title="Total Links Created"
           data={stats.total_links}
           footer="+10 this week"
@@ -65,7 +65,7 @@ const DashboardPage = () => {
         <DashboardQuickInfoCard
           title="Click Rate Growth"
           data={stats.crg}
-          className="group bg-gradient-to-br from-emerald-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-emerald-100 dark:border-slate-700"
+          className="group bg-linear-to-br from-emerald-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-emerald-100 dark:border-slate-700"
           footer="Since yesterday"
           icon_styles="bg-emerald-100 dark:bg-emerald-500/15"
           icon={<TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
@@ -73,7 +73,7 @@ const DashboardPage = () => {
         <DashboardQuickInfoCard
           title="Active Links"
           data={stats.active_links}
-          className="group bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-indigo-100 dark:border-slate-700"
+          className="group bg-linear-to-br from-indigo-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-indigo-100 dark:border-slate-700"
           footer="Running this week"
           icon_styles="bg-indigo-100 dark:bg-indigo-500/15"
           icon={<Megaphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
@@ -101,7 +101,7 @@ const DashboardPage = () => {
         />
       ))
     ) : (
-      <div className="flex flex-col justify-center items-center col-span-full text-slate-400 dark:text-slate-500 min-h-[200px] gap-2">
+      <div className="flex flex-col justify-center items-center col-span-full text-slate-400 dark:text-slate-500 min-h-50 gap-2">
         <TentIcon className="w-10 h-10 text-slate-300 dark:text-slate-600" />
         <p className="text-sm font-medium">No campaigns yet</p>
         <p className="text-xs text-slate-400 dark:text-slate-600">Create your first campaign to get started</p>

@@ -19,17 +19,17 @@ export function DashboardLayout() {
     {
       label: "Dashboard",
       href: "dashboard",
-      icon: <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 flex-shrink-0" />,
+      icon: <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
     {
       label: "Analytics",
       href: "analytics",
-      icon: <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 flex-shrink-0" />,
+      icon: <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
     {
       label: "Settings",
       href: "settings",
-      icon: <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 flex-shrink-0" />,
+      icon: <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
   ]
   const animate = false
@@ -75,7 +75,16 @@ export function DashboardLayout() {
       )}
     >
       <Sidebar open={open} setOpen={setOpen} animate={animate}>
-        <SidebarBody className="justify-between gap-10 bg-white dark:bg-slate-900 pt-8 overflow-hidden border-r border-slate-200/60 dark:border-slate-800">
+        <SidebarBody
+          className="
+            justify-between
+            gap-10
+            bg-white dark:bg-slate-900
+            pt-4 md:pt-8
+            overflow-visible
+            border-r border-slate-200/60 dark:border-slate-800
+          "
+        >
           <div className="flex flex-col flex-1">
             <Logo />
             <div className="mt-8 flex flex-col gap-1 h-fit">
@@ -84,7 +93,7 @@ export function DashboardLayout() {
                   {isActive(link.href) && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full bg-teal-500 dark:bg-teal-400"
+                      className="absolute left-0 top-0 bottom-0 w-0.75 rounded-r-full bg-teal-500 dark:bg-teal-400"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                     />
                   )}
@@ -98,9 +107,9 @@ export function DashboardLayout() {
                   className="flex items-center justify-start gap-2 group/sidebar w-full py-2 px-3 cursor-pointer rounded-lg transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                 >
                   <div className="rounded-lg p-1.5 bg-slate-100 dark:bg-slate-800 transition-colors group-hover/sidebar:bg-red-100 dark:group-hover/sidebar:bg-red-950/50">
-                    <IconArrowLeft className="h-4 w-4 flex-shrink-0" />
+                    <IconArrowLeft className="h-4 w-4 shrink-0" />
                   </div>
-                  <div className="text-sm font-medium group-hover/sidebar:translate-x-0.5 transition duration-150 whitespace-pre inline-block !p-0 !m-0">
+                  <div className="text-sm font-medium group-hover/sidebar:translate-x-0.5 transition duration-150 whitespace-pre inline-block p-0! m-0!">
                     Logout
                   </div>
                 </button>
@@ -122,7 +131,7 @@ export function DashboardLayout() {
                     className="h-9 w-9 rounded-full ring-2 ring-slate-200 dark:ring-slate-700 shadow-sm object-cover"
                   />
                 ) : (
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+                  <div className="h-9 w-9 rounded-full bg-linear-to-br from-teal-400 to-teal-600 flex items-center justify-center">
                     <User className="h-5 w-5 text-white" />
                   </div>
                 )}
@@ -133,7 +142,7 @@ export function DashboardLayout() {
                   display: animate ? (open ? "inline-block" : "none") : "inline-block",
                   opacity: animate ? (open ? 1 : 0) : 1,
                 }}
-                className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium whitespace-pre inline-block !p-0 !m-0"
+                className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium whitespace-pre inline-block p-0! m-0!"
               >
                 <span>{user?.email || "User"}</span>
               </motion.span>
@@ -146,25 +155,48 @@ export function DashboardLayout() {
     </div>
   )
 }
+
 export const Logo = () => {
   return (
-    <div className="flex gap-3 justify-between mt-12 md:m-0">
-      <Link to="/home" className="font-normal flex space-x-2 items-center text-base text-gray-950 py-1 relative z-20">
-        <div className="flex gap-2.5 items-center">
-          <img width={30} height={30} src={ShortwaveLogo || "/placeholder.svg"} alt="Shortwave Logo" />
+    <div className="flex w-full items-center justify-between gap-3">
+      <Link
+        to="/home"
+        className="relative z-20 flex min-w-0 items-center py-1"
+      >
+        <div className="flex items-center gap-2.5">
+          <img
+            width={30}
+            height={30}
+            src={ShortwaveLogo || "/placeholder.svg"}
+            alt="Shortwave Logo"
+            className="h-7.5 w-7.5 shrink-0"
+          />
+
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="font-bold tracking-tight text-teal-600 text-xl dark:text-teal-400 whitespace-pre font-sans"
+            className="
+              whitespace-nowrap
+              font-sans
+              text-xl
+              font-bold
+              tracking-tight
+              text-teal-600
+              dark:text-teal-400
+            "
           >
             ShortWave
           </motion.span>
         </div>
       </Link>
-      <ThemeToggle />
+
+      <div className="relative z-50 shrink-0">
+        <ThemeToggle />
+      </div>
     </div>
   )
 }
+
 export const LogoIcon = () => {
   return (
     <Link to="/" className="font-normal flex space-x-2 items-center text-sm text-gray-950 py-1 relative z-20">

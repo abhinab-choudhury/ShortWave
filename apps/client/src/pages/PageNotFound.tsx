@@ -6,7 +6,7 @@ const PageNotFound = () => {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen min-w-screen bg-slate-50 dark:bg-slate-950 px-6">
       <div className="text-center space-y-4">
-        <h1 className="text-8xl md:text-9xl font-extrabold tracking-tighter bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
+        <h1 className="text-8xl md:text-9xl font-extrabold tracking-tighter bg-linear-to-br from-teal-500 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
           404
         </h1>
         <p className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-slate-200 tracking-tight">

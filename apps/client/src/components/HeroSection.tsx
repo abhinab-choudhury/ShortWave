@@ -3,16 +3,17 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
+import { useTheme } from "@/hooks/useTheme"
 
 export function Hero() {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-16 px-6 sm:px-10 lg:py-24 lg:px-20 bg-gradient-to-b from-white via-teal-50/20 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
+    <section className="relative py-16 px-6 sm:px-10 lg:py-24 lg:px-20 bg-linear-to-b from-white via-teal-50/20 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 -right-32 h-[500px] w-[500px] rounded-full bg-teal-300/15 blur-3xl dark:bg-teal-500/5" />
-        <div className="absolute -bottom-20 -left-32 h-[400px] w-[400px] rounded-full bg-cyan-300/10 blur-3xl dark:bg-cyan-500/5" />
+        <div className="absolute top-20 -right-32 h-125 w-125 rounded-full bg-teal-300/15 blur-3xl dark:bg-teal-500/5" />
+        <div className="absolute -bottom-20 -left-32 h-100 w-100 rounded-full bg-cyan-300/10 blur-3xl dark:bg-cyan-500/5" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl">
@@ -28,12 +29,12 @@ export function Hero() {
             </Badge>
 
             <h1 className="my-6 max-w-2xl text-balance text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight leading-[1.15]">
-              Shorten, Share & <span className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">Analyze</span> Your Links.
+              Shorten, Share & <span className="bg-linear-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">Analyze</span> Your Links.
               <br className="hidden sm:block" /> All in One Place.
             </h1>
 
             <p className="text-sm md:text-base leading-relaxed text-slate-500 dark:text-slate-400 mb-8 max-w-xl">
-              ShortWave makes URL management effortless. 
+              ShortWave makes URL management effortless.
             </p>
 
             <div className="flex w-full flex-col justify-center gap-3 sm:flex-row lg:justify-start">
@@ -82,6 +83,7 @@ export function Hero() {
 }
 
 function DashboardPreview() {
+  const { theme } = useTheme();
   return (
     <div className="relative mx-auto w-full max-w-2xl rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden transition-transform duration-500 hover:scale-[1.02]">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
@@ -95,7 +97,11 @@ function DashboardPreview() {
       </div>
 
       <div className="relative">
-        <img src={"/hero-image.png"} alt="Dashboard preview" className="w-full h-auto" />
+        {
+          (theme == "dark") ?
+            (<img src={"/dark-hero-image.png"} alt="Dashboard preview" className="w-full h-auto" />) :
+            (<img src={"/light-hero-image.png"} alt="Dashboard preview" className="w-full h-auto" />)
+        }
         <div className="absolute bottom-4 right-4 bg-teal-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-md backdrop-blur-sm">
           Real-time Tracking
         </div>
