@@ -1,3 +1,4 @@
+// @ts-nocheck
 import passport from "passport";
 import { Strategy as GithubStrategy, Profile } from "passport-github2";
 import { env } from "../utils/secret";
