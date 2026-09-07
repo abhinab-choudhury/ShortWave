@@ -52,25 +52,25 @@ const AnalyticsPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50/50 dark:bg-slate-950 overflow-y-scroll scrollbar-slim">
-      <div className="p-5 md:p-10 mx-auto">
-        <div className="flex flex-col justify-start items-start mb-8 gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+    <div className="min-h-screen w-full bg-slate-50/50 dark:bg-slate-950 overflow-y-auto overflow-x-hidden scrollbar-slim">
+      <div className="p-4 sm:p-6 md:p-8 lg:p-10 mx-auto max-w-[1600px]">
+        <div className="flex flex-col justify-start items-start mb-6 sm:mb-8 gap-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Analytics
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Track performance across all your campaigns
           </p>
         </div>
 
-        <div className="flex flex-col p-6 gap-5 flex-1 border border-slate-200/60 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 min-h-[80vh] shadow-sm">
-          <h2 className="text-lg font-semibold flex gap-2.5 items-center text-slate-800 dark:text-white">
-            <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/10">
-              <IconBrandCampaignmonitor className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+        <div className="flex flex-col p-4 sm:p-6 gap-4 sm:gap-5 flex-1 border border-slate-200/60 dark:border-slate-800 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900/50 min-h-[60vh] sm:min-h-[80vh] shadow-sm">
+          <h2 className="text-base sm:text-lg font-semibold flex gap-2 sm:gap-2.5 items-center text-slate-800 dark:text-white">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/10 shrink-0">
+              <IconBrandCampaignmonitor className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-400" />
             </div>
             All Campaigns
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             <Cards />
           </div>
         </div>

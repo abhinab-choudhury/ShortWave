@@ -47,8 +47,8 @@ const chartConfig: ChartConfig = {
 
 function BlurFallback({ message }: { message: string }) {
   return (
-    <div className="flex h-[300px] items-center justify-center rounded-lg border bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-md">
-      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+    <div className="flex h-[220px] sm:h-[300px] items-center justify-center rounded-lg border bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-md p-4 text-center">
+      <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
         {message}
       </p>
     </div>
@@ -107,18 +107,18 @@ export function ChartAreaInteractive({
   if (!resolvedData && campaignLinks.isLoading) {
     return (
       <Card
-        className="w-full p-4 md:p-6 dark:bg-gray-800"
+        className="w-full p-4 sm:p-6 dark:bg-gray-800 overflow-hidden"
         aria-busy="true"
         aria-live="polite"
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Skeleton className="h-6 w-40 dark:bg-gray-900" />
-          <Skeleton className="h-6 w-20 dark:bg-gray-900" />
+          <Skeleton className="h-9 w-full sm:w-32 dark:bg-gray-900 rounded-lg" />
         </div>
-        <div className="h-[260px] w-full dark:bg-gray-900">
+        <div className="h-[220px] sm:h-[260px] w-full dark:bg-gray-900">
           <div className="h-full w-full rounded-md bg-muted/50 animate-pulse" />
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
           <Skeleton className="h-4 w-full dark:bg-gray-900" />
           <Skeleton className="h-4 w-full dark:bg-gray-900" />
           <Skeleton className="h-4 w-full dark:bg-gray-900" />
@@ -141,11 +141,11 @@ export function ChartAreaInteractive({
   }
 
   return (
-    <Card className="pt-0 dark:bg-gray-800">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1">
-          <CardTitle>Area Chart - Interactive</CardTitle>
-          <CardDescription>
+    <Card className="pt-0 dark:bg-gray-800 overflow-hidden w-full">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 space-y-0 border-b p-4 sm:py-5 sm:px-6">
+        <div className="grid flex-1 gap-1 min-w-0">
+          <CardTitle className="text-base sm:text-lg lg:text-xl leading-tight">Area Chart - Interactive</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Showing total visitors for the selected period
           </CardDescription>
         </div>
@@ -154,7 +154,7 @@ export function ChartAreaInteractive({
           onValueChange={(value) => setTimeRange(value as "7d" | "30d" | "90d")}
         >
           <SelectTrigger
-            className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
+            className="w-full sm:w-[160px] rounded-lg sm:ml-auto flex h-9 text-sm shrink-0"
             aria-label="Select a value"
           >
             <SelectValue placeholder="Select period" />
@@ -172,13 +172,13 @@ export function ChartAreaInteractive({
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+      <CardContent className="px-2 sm:px-6 pt-4 sm:pt-6">
         {filteredData.length === 0 ? (
           <BlurFallback message="No data available" />
         ) : (
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-[220px] sm:h-[280px] lg:h-[300px] w-full"
           >
             <AreaChart data={filteredData}>
               <defs>

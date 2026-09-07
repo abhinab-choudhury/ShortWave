@@ -147,12 +147,12 @@ function ChartCard({
   };
 
   return (
-    <Card className="flex flex-col justify-between transition-all duration-200 hover:shadow-lg">
-      <CardHeader className="dark:bg-gray-900 border-gray-950 rounded-t-md">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1">
-            <CardTitle>{title}</CardTitle>
-            <CardDescription className="font-light">
+    <Card className="flex flex-col justify-between transition-all duration-200 hover:shadow-lg overflow-hidden w-full">
+      <CardHeader className="dark:bg-gray-900 border-gray-950 rounded-t-md p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+          <div className="flex flex-col gap-1 min-w-0 flex-1">
+            <CardTitle className="text-base sm:text-lg leading-tight truncate">{title}</CardTitle>
+            <CardDescription className="font-light text-xs sm:text-sm line-clamp-2">
               {description}
             </CardDescription>
           </div>
@@ -162,7 +162,7 @@ function ChartCard({
               setChartType(value)
             }
           >
-            <SelectTrigger className="w-28 dark:bg-gray-800">
+            <SelectTrigger className="w-full sm:w-32 dark:bg-gray-800 h-9 text-sm shrink-0">
               <SelectValue placeholder="Chart Type" />
             </SelectTrigger>
             <SelectContent className="dark:bg-gray-800">
@@ -188,14 +188,14 @@ function ChartCard({
           </Select>
         </div>
       </CardHeader>
-      <CardContent className="dark:bg-gray-900">
-        <ChartContainer config={chartConfig}>{renderChart()}</ChartContainer>
+      <CardContent className="dark:bg-gray-900 px-3 sm:px-6 pb-4">
+        <ChartContainer config={chartConfig} className="aspect-auto h-[220px] sm:h-[260px] w-full">{renderChart()}</ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col dark:bg-gray-900 border-gray-950 rounded-b-md items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+      <CardFooter className="flex-col dark:bg-gray-900 border-gray-950 rounded-b-md items-start gap-1.5 sm:gap-2 text-xs sm:text-sm px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="flex gap-2 font-medium leading-none items-center flex-wrap">
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 shrink-0" />
         </div>
-        <div className="leading-none text-muted-foreground">
+        <div className="leading-snug text-muted-foreground text-xs">
           Showing total visitors for the last 6 months
         </div>
       </CardFooter>

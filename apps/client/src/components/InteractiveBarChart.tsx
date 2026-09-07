@@ -55,8 +55,8 @@ const mixedBarChartConfig = {
 
 function BlurFallback({ message }: { message: string }) {
   return (
-    <div className="flex h-[300px] items-center justify-center rounded-lg border bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-md">
-      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+    <div className="flex h-[220px] sm:h-[300px] items-center justify-center rounded-lg border bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-md p-4 text-center">
+      <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
         {message}
       </p>
     </div>
@@ -203,26 +203,26 @@ export function InteractiveBarChartLabel(props: {
   return (
     <Card
       className={cn(
-        "flex flex-col justify-between dark:bg-gray-800 shadow-sm",
+        "flex flex-col justify-between dark:bg-gray-800 shadow-sm overflow-hidden w-full",
         props.className
       )}
     >
       {/* Header */}
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-          <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-4 sm:px-6 py-3 sm:py-4">
+          <CardDescription className="flex gap-2 items-center text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
-            <MousePointerClick className="w-5 h-5" />
+            <MousePointerClick className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
           </CardDescription>
         </div>
-        <div className="flex">
+        <div className="flex sm:border-l overflow-x-auto scrollbar-slim">
           {["country"].map((key) => {
             const chart = key as keyof typeof barChartConfig;
             return (
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-gray-200/40 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center border-t px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-5 transition-colors"
+                className="data-[active=true]:bg-teal-50 dark:data-[active=true]:bg-slate-800 flex flex-1 sm:flex-none flex-col justify-center border-t sm:border-t-0 px-4 sm:px-8 py-3 sm:py-5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 onClick={() => setActiveChart(chart)}
               >
                 {barChartConfig[chart].label}
@@ -233,20 +233,20 @@ export function InteractiveBarChartLabel(props: {
       </CardHeader>
 
       {/* Content */}
-      <CardContent className="h-[300px] my-4 flex flex-col gap-1 overflow-y-auto">
+      <CardContent className="h-[260px] sm:h-[300px] my-3 sm:my-4 flex flex-col gap-2 sm:gap-1.5 overflow-y-auto px-3 sm:px-6 scrollbar-slim">
         {hasData ? (
           countryData.map((data, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-5 py-3 dark:border-slate-700 dark:bg-slate-900"
+              className="flex items-center justify-between gap-3 rounded-lg sm:rounded-md border border-slate-200 bg-slate-50 px-3 sm:px-5 py-2.5 sm:py-3 dark:border-slate-700 dark:bg-slate-900 min-w-0"
             >
-              <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              <div className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 truncate min-w-0 flex-1">
                 {data.country}
               </div>
 
-              <div className="text-sm font-semibold text-teal-600 dark:text-teal-400">
+              <div className="text-xs sm:text-sm font-semibold text-teal-600 dark:text-teal-400 whitespace-nowrap shrink-0">
                 {data.visitors.toLocaleString()}{" "}
-                <span className="font-normal text-slate-500 dark:text-slate-400">
+                <span className="font-normal text-slate-500 dark:text-slate-400 hidden xs:inline">
                   visits
                 </span>
               </div>
@@ -291,26 +291,26 @@ export function InteractiveBarChartMixed(props: {
   return (
     <Card
       className={cn(
-        "flex flex-col dark:bg-gray-800 shadow-sm",
+        "flex flex-col dark:bg-gray-800 shadow-sm overflow-hidden w-full",
         props.className
       )}
     >
       {/* Header */}
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-          <CardDescription className="flex gap-2 items-center text-base font-semibold text-gray-700 dark:text-gray-200">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-4 sm:px-6 py-3 sm:py-4">
+          <CardDescription className="flex gap-2 items-center text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200">
             Click Count
-            <MousePointerClick className="w-5 h-5" />
+            <MousePointerClick className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
           </CardDescription>
         </div>
-        <div className="flex">
+        <div className="flex overflow-x-auto scrollbar-slim snap-x sm:border-l">
           {["browser", "device", "os"].map((key) => {
             const chart = key as keyof typeof mixedBarChartConfig;
             return (
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-gray-200/40 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center border-t px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-5 transition-colors"
+                className="data-[active=true]:bg-teal-50 dark:data-[active=true]:bg-slate-800 flex flex-1 sm:flex-none flex-col justify-center border-t sm:border-t-0 border-r last:border-r-0 sm:border-r-0 sm:even:border-l px-4 sm:px-6 py-3 sm:py-5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap snap-start shrink-0 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 onClick={() => setActiveChart(chart)}
               >
                 {mixedBarChartConfig[chart].label}
@@ -321,21 +321,24 @@ export function InteractiveBarChartMixed(props: {
       </CardHeader>
 
       {/* Chart */}
-      <CardContent className="mt-6">
+      <CardContent className="mt-4 sm:mt-6 px-2 sm:px-6">
         {hasData ? (
-          <ChartContainer config={mixedBarChartConfig}>
+          <ChartContainer config={mixedBarChartConfig} className="aspect-auto h-[260px] sm:h-[300px] w-full">
             <BarChart
               accessibilityLayer
               data={datasets[activeChart]}
               layout="vertical"
-              margin={{ left: 12 }}
+              margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
             >
               <YAxis
                 dataKey="name"
                 type="category"
                 tickLine={false}
-                tickMargin={10}
+                tickMargin={8}
                 axisLine={false}
+                width={80}
+                tick={{ fontSize: 11 }}
+                tickFormatter={(value: string) => value.length > 12 ? value.slice(0, 12) + "…" : value}
               />
               <XAxis dataKey="visitors" type="number" hide />
               <ChartTooltip
@@ -347,6 +350,7 @@ export function InteractiveBarChartMixed(props: {
                 dataKey="visitors"
                 layout="vertical"
                 radius={6}
+                barSize={22}
               />
             </BarChart>
           </ChartContainer>

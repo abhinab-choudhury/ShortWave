@@ -34,6 +34,7 @@ package-lock.json
 
 # Build output
 build/
+dist/
 
 # Editor-specific settings
 *.sublime-workspace

@@ -156,57 +156,62 @@ export function ChartLineInteractive({
   );
 
   return (
-    <Card className="py-4 sm:py-0 dark:bg-gray-800">
-      <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
-          <CardTitle>Click Count</CardTitle>
-          <CardDescription>
-            Showing total visitors for the last 3 month
-          </CardDescription>
-        </div>
-        <div className="flex">
-          {["desktop", "tablet", "mobile", "others"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="data-[active=true]:bg-gray-300/30 dark:data-[active=true]:bg-gray-900/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
-                onClick={() => setActiveChart(chart)}
-              >
-                <span className="text-muted-foreground text-xs">
-                  {chartConfig[chart].label}
-                </span>
-                <span className="text-lg leading-none font-bold sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
+    <Card className="py-0 dark:bg-gray-800 overflow-hidden w-full">
+      <CardHeader className="flex flex-col items-stretch border-b !p-0">
+        <div className="flex flex-col sm:flex-row sm:items-stretch w-full">
+          <div className="flex flex-1 flex-col justify-center gap-1 px-4 sm:px-6 py-4 sm:py-5">
+            <CardTitle className="text-base sm:text-lg">Click Count</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              Showing total visitors for the last 3 month
+            </CardDescription>
+          </div>
+          <div className="flex w-full sm:w-auto overflow-x-auto scrollbar-slim snap-x snap-mandatory border-t sm:border-t-0 sm:border-l">
+            {["desktop", "tablet", "mobile", "others"].map((key) => {
+              const chart = key as keyof typeof chartConfig;
+              return (
+                <button
+                  key={chart}
+                  data-active={activeChart === chart}
+                  className="data-[active=true]:bg-teal-50 dark:data-[active=true]:bg-slate-800 flex flex-1 sm:flex-none sm:min-w-[110px] lg:min-w-[130px] flex-col justify-center gap-1 px-4 sm:px-6 py-3 sm:py-5 text-left border-r last:border-r-0 sm:border-r-0 sm:even:border-l snap-start shrink-0 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  onClick={() => setActiveChart(chart)}
+                >
+                  <span className="text-muted-foreground text-[11px] sm:text-xs whitespace-nowrap">
+                    {chartConfig[chart].label}
+                  </span>
+                  <span className="text-base sm:text-xl lg:text-2xl leading-none font-bold tabular-nums">
+                    {total[key as keyof typeof total].toLocaleString()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="px-2 sm:p-6">
+      <CardContent className="px-2 sm:px-4 lg:px-6 pt-4 sm:pt-6">
         {chartData.length === 0 ?
           (<BlurFallback message="No data available" />) :
           (<ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-[220px] sm:h-[280px] lg:h-[300px] w-full"
           >
             <LineChart
               accessibilityLayer
               data={chartData}
               margin={{
-                left: 12,
+                left: 8,
                 right: 12,
+                top: 8,
               }}
             >
-              <CartesianGrid vertical={false} />
+              <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
               <XAxis
                 dataKey="date"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                minTickGap={32}
+                minTickGap={16}
+                interval="preserveStartEnd"
+                tick={{ fontSize: 11 }}
                 tickFormatter={(value) => {
                   const date = new Date(value);
                   return date.toLocaleDateString("en-US", {
@@ -236,6 +241,7 @@ export function ChartLineInteractive({
                 stroke={`var(--color-${activeChart})`}
                 strokeWidth={2}
                 dot={false}
+                activeDot={{ r: 4, strokeWidth: 2 }}
               />
             </LineChart>
           </ChartContainer>)
