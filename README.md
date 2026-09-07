@@ -57,15 +57,15 @@ Run the frontend, backend, and supporting services easily.
 
 ```bash
 # Start both frontend (apps/client) and backend (apps/server)
-yarn run dev
+pnpm run dev
 ````
 
 Available scripts:
 
 ```bash
-yarn run start:frontend   # Start only the frontend (apps/client)
-yarn run start:backend    # Start only the backend (apps/server)
-yarn run dev              # Start both frontend & backend concurrently
+pnpm run dev:client   # Start only the frontend (apps/client)
+pnpm run dev:server    # Start only the backend (apps/server)
+pnpm run dev              # Start both frontend & backend concurrently
 ```
 
 ### 🐳 Running Databases with Docker Compose
