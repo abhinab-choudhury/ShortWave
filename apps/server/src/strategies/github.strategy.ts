@@ -1,6 +1,5 @@
 import passport from "passport";
 import { Strategy as GithubStrategy, Profile } from "passport-github2";
-import oauth2 from "passport-oauth2";
 import { env } from "../utils/secret";
 import {
   createUser,
@@ -23,7 +22,7 @@ passport.use(
       _accessToken: string,
       _refeshToken: string,
       profile: Profile,
-      cb: oauth2.VerifyCallback,
+      cb: (err: unknown, user?: unknown, info?: unknown) => void,
     ) {
       try {
         const user = await getUserByAuthProviderId(profile.id);

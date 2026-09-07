@@ -125,6 +125,11 @@ export async function verifyToken(
     await blockJWT(token);
 
     const authToken = generateAuthToken(user._id);
+    const isNative = req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+    if (isNative) {
+      // For Capacitor native, redirect to deep link so App can capture token via appUrlOpen
+      return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+    }
     res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
   } catch (error: any) {
     return next(new ApiError(400, "Invalid Token or Expired", [error.message]));
@@ -142,6 +147,17 @@ export async function logoutUser(
   next: NextFunction,
 ) {
   try {
+    // Also block JWT if provided (native apps use JWT, not cookies)
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      try {
+        await blockJWT(token);
+      } catch (_) {
+        // ignore block errors
+      }
+    }
+
     if (req.session) {
       req.session.destroy((error) => {
         if (error) {
@@ -149,12 +165,13 @@ export async function logoutUser(
             new ApiError(500, "Failed to destroy session", [error.message]),
           );
         }
-        res.clearCookie("connect.sid");
+        res.clearCookie("connect.sid", { path: "/" });
         return res
           .status(200)
           .json(new ApiResponse(200, "User logged out successfully"));
       });
     } else {
+      res.clearCookie("connect.sid", { path: "/" });
       return res
         .status(200)
         .json(new ApiResponse(200, "User logged out successfully"));
@@ -177,6 +194,10 @@ export async function googleOAuthCallback(
     return res.redirect(`${env.CLIENT_URL}/signin`);
   }
   const authToken = generateAuthToken(req.user._id);
+  const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+  if (isNative) {
+    return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+  }
   return res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
 }
 
@@ -189,6 +210,10 @@ export async function githubOAuthCallback(
     return res.redirect(`${env.CLIENT_URL}/signin`);
   }
   const authToken = generateAuthToken(req.user._id);
+  const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+  if (isNative) {
+    return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+  }
   return res.redirect(`${env.CLIENT_URL}/dashboard?token=${authToken}`);
 }
 

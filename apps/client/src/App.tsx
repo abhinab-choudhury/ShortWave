@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/toaster";
 import LoadingScreen from "./components/LoadingScreen";
+import { Capacitor } from "@capacitor/core";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/HomePage"));
@@ -30,8 +31,13 @@ function App() {
             <BrowserRouter>
               <Suspense fallback={<LoadingScreen />}>
                 <Routes>
-                  {/* Redirect root to /home */}
-                  <Route path="/" element={<Navigate to="/home" />} />
+                  {/* Native apps start at signin (no session cookies), web at /home */}
+                  <Route
+                    path="/"
+                    element={
+                      <Navigate to={Capacitor.isNativePlatform() ? "/signin" : "/home"} replace />
+                    }
+                  />
 
                   {/* Public Pages */}
                   <Route path="/home" element={<Home />} />

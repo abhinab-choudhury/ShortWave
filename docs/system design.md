@@ -1,66 +1,74 @@
-# URL Shortener - System Design
+# URL Shortener — System Design
 
-### Features:
-1. **Authentication (Auth):**
-- OAuth (Google, GitHub) or email only.
-- session-based Authentication.
-2. **URL Shortening:**
-- Convert long URLs into short, unique slugs (e.g., abc123).
-- Fast redirection via key lookup.
-3. **Analytics:**
-- Track clicks, geolocation, device type, timestamp, etc.
-- View stats per shortened URL.
+### Features
+1. **Authentication (Auth):** OAuth (Google, GitHub) + magic-link email. **Hybrid: session (web) + JWT Bearer (native/Capacitor).**
+2. **URL Shortening:** Convert long URLs into short 6-char slugs (e.g., `abc123`), fast 302 redirect.
+3. **Analytics:** Per-link clicks, geolocation, device/browser/OS, daily counts; responsive Recharts dashboards (mobile/tablet/desktop).
+4. **Cross-Platform:** Web/desktop (Vite) + Android (Capacitor 8) from same `dist`.
 
-Things which we need to consider is first and formost minimizing the redirecting latency and high avilibility. Lets assume total active user which we can support i.e 100 Millio Daily active users. So if we thing we will have arounf 1B reads per day which will case around 10 Thousand Requests per Seconds, so we need to do some advance stuff with our database. And the last part to consider is how may user are we goinging to accepts let is be around 5 Billion Users.
+## Scale Assumptions
+100M DAU → ~1B reads/day → ~10k RPS. Target 5B total URLs. ~1 KB/record → 1–5 TB. Optimize for **redirect latency** + **availability**.
 
-Backend Routes:
-[POST, GET, PUT, DELETE] /api/auth : this will handle the auth state and logi for our user lets it be a session-based auth strategy with google and github OAuth why because this app if for browsers only and the backend and the frontend are closely tied together but as we are useing session based auth and we are assepeint about 10K Active user we will have to take special care of auth as the auth is session based and is the only single point of trust for the Authenticated user.
+## Auth — Hybrid Session + JWT
 
-[POST] /api/url/create-shorturl: accepts a long URL which gets shortened.
+**Web (browser):** `express-session` + `connect-mongo` (MongoStore, 14d TTL), cookie `connect.sid` (7d, `httpOnly`, `sameSite:none`, `secure` in prod, `trust proxy 1`). CORS `origin: CLIENT_URL`, `credentials:true`. Passport serialize `user._id`, deserialize via `getUserById`.
 
-[GET] /api/url/{shorturl}: we need to add analytics without comprimising on the speed and realibality of our service. which we will be a redirect [301, 302, 307, and 308] we will be using 302. to the orginal URL as is it a redirect this will cause cacheing which will cause the request to not to hit the backend, which will cause proples with the analytics side.
+**Native (Capacitor Android `capacitor://localhost`):** Cookies don't persist in WebView → **JWT Bearer** (`jsonwebtoken`, 7d, `JWT_SECRET`). Client stores in `localStorage["authToken"]` + `@capacitor/preferences` (survives WebView reset), sends `Authorization: Bearer <token>` + `X-Native-Platform: capacitor` on every `axios` request (`withCredentials:false` on native).
 
-Why we will user 302 instead becase if we user 301 which is is feault redirect if we send 301 the browser will cache the request due to which the browser woll not calll the backend hence the analytics will not work.
+**Middleware `isAuthenticated`:** tries `req.isAuthenticated()` (session); falls back to `Authorization: Bearer` → `jwt.verify` → `getUserById` → `req.user`.
 
+**Flows:**
+- Magic link: `POST /api/v1/auth/signin` → email `jwt (1h, blockJWT)` → `GET /verify?token=` → `req.logIn` + `blockJWT` + `generateAuthToken (7d)` → redirect `CLIENT_URL/dashboard?token=` or `capacitor://localhost/dashboard?token=` (if `platform=native` / `origin: capacitor://`).
+- OAuth: `GET /google`, `GET /github` → `passport.authenticate` → callback `GET /google/callback`, `GET /github/callback` → same redirect logic. Native opens via `@capacitor/browser`, captures deep-link via `App.addListener('appUrlOpen')`.
+- Me: `GET /me` (protected) returns `{user, token}` and refreshes JWT.
+- Logout: `POST /logout` → `req.session.destroy` + `clearCookie` **and** `blockJWT(Bearer)` for native.
 
-We will be using a NoSQL DB why becauser it is fast why is a indetpth reason why??
+## Backend Routes
+- `[POST,GET,PUT,DELETE] /api/v1/auth` — `POST /signin` (email), `GET /verify?token=`, `GET /me` (auth), `POST /logout`, `GET /google`, `GET /google/callback`, `GET /github`, `GET /github/callback`.
+- `[POST] /api/v1/url` / `[GET|DELETE] /api/v1/campaign`, `/api/v1/user`, cron `GET /cron/flush`.
+- `[GET] /:shorturl` / `/:campaign/:shorturl` — 302 redirect: `res.redirect(originalUrl)`. Use 302 (not 301) so browser doesn't cache and every hit reaches backend for analytics.
 
+## URL Shortening
+Base62 (`[0-9A-Za-z]` = 62 chars), 6 chars → 62⁶ ≈ 52B URLs, human-readable. Generation: random/hash (nanoid / MD5/sha256 slice) + collision retry. Index `short_url` for 10k RPS; scale via vertical + Redis cache, consider read replicas/sharding only if needed.
 
+## Data & Caching
+NoSQL (MongoDB) for speed. Latency: index `short_url`, front with Redis (higher throughput than read replicas). Don't write analytics synchronously per redirect (hurts read path) → buffer counters in Redis, cron `flushRedishStatsToMongo` every minute bulk-writes to Mongo.
 
-Lets discuss about the shorturl logic we can user a base62, so what is base62?? we have a character set of [0-9][A-Z][a-z] which makesup to 62 chracters.
+Analytics per date: avoid unbounded `click_logs` subdocuments (poor date filtering). Current: separate `click` docs per `{date, country, device, browser, os, click_cnt}` aggregated by Redis; flush aggregates.
 
-WE will make creaing an shortlink auto 6 characters to the total possible shortlinks we can support i.e 52 Billion => 62 x 62 x 62 x 62 x 62 x 62 = (62)^6
-
-why we user base62 beacuse it is simple and human readable.
-
-The database we design will have around 1kb for each record about 1 Trillion to 5 Trillion to date which is fine with database beacuse it is good enouught to handel i.e
-
-
-How do we generate shorturl???
-Counter approach -
-Randomly/hashing i.e MD5, sha256 conflict not that scary chop lat 6-7 character is we have collision we retry to generate a new one.
-
-
-Latency??
-we index the short_url in our db becauser 10k RPS with be too much for a DB but we can scale them vertically, we can user read_replicaa we about multiread/write db but what if we use cacheing with redish which is better than read_only replica so we will have a a bigger thoughtput why not sharding what is overcommplicated in this sineario.
-
-Analytics??
-So every time when the user hits the shorturl we make a counter update or data updated realted to the anlaytics to the DB this is bad why?? we add a cache into the DB in the first place to reduce the read for in the databases. so if we user the write operation we will have a worst time then read so what we can do is user something like redish or a in-memeory cache solution which have a bigger thoughtput and thus  we will add a chrone job which will do the write in after every min into the DB.
-
-
-to add click analytics date wise we can extend the click-model with a sub-document but they don't scale well beacuse MongoDB subdocuments can't be filtered efficiently by date.
 ```json
-click_logs: [
-  {
-    date: {
-      type: Date,
-      required: true,
-    },
-    count: {
-      type: Number,
-      required: true,
-      default: 1,
-    },
-  },
-],
+click_logs: [{ "date": "2026-09-07", "count": 42 }]
 ```
+
+## Build & Run — All Devices (pnpm 11)
+
+### Prerequisites
+Node 20+, pnpm 11.5.1, Docker, Android Studio (SDK 34, JDK 17, ANDROID_HOME), env files.
+
+```bash
+pnpm install
+cp apps/server/.env.example apps/server/.env
+cp apps/client/.env.example apps/client/.env
+# edit JWT_SECRET, SESSION_SECRET, GOOGLE_*/GITHUB_*, EMAIL, CLIENT_URL, SERVER_URL, MONGODB_*, REDIS_URL, VITE_SERVER_URL
+docker-compose up -d  # Mongo + Redis
+```
+
+### Web / Desktop
+```bash
+pnpm run dev              # client http://localhost:5173 + server http://localhost:8080
+pnpm --filter client run build && pnpm --filter server run build
+```
+
+### Android (Capacitor)
+```bash
+pnpm --filter client run build        # Vite dist
+pnpm --filter client exec cap sync android  # -> android/app/src/main/assets/public
+pnpm --filter client run cap:android  # opens Android Studio → Run ▶
+# release
+cd apps/client/android && ./gradlew assembleDebug  # APK
+./gradlew bundleRelease                             # AAB
+```
+- Config `apps/client/capacitor.config.ts`: `appId com.shortwave.app`, `webDir dist`, `server.androidScheme https`, `allowMixedContent true`, `CapacitorHttp enabled`.
+- App icon/splash from `public/shortwave_logo.png` (640×640) → `mipmap-*/ic_launcher*.png` (48/72/96/144/192) + `drawable*/splash.png` (land/port per density).
+- Native entry `/` → `Capacitor.isNativePlatform()` → `/signin` (JWT flow), web → `/home`. OAuth native uses `@capacitor/browser` + `App.appUrlOpen` deep-link `capacitor://localhost/dashboard?token=`.
+- CORS server allows `capacitor://localhost`, `http://localhost`, `CLIENT_URL`.

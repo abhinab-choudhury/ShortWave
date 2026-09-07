@@ -22,6 +22,9 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
+import { App as CapApp } from "@capacitor/app";
 
 const formSchema = z.object({
   email: z
@@ -78,10 +81,28 @@ const SigninPage: React.FC = () => {
   const handleOAuthLogin = async (provider: "google" | "github") => {
     try {
       setOauthLoading((prev) => ({ ...prev, [provider]: true }));
-      window.open(
-        `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/${provider}`,
-        "_self"
-      );
+      const url = `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/${provider}?platform=${Capacitor.isNativePlatform() ? "native" : "web"}`;
+      if (Capacitor.isNativePlatform()) {
+        // Native: open system browser; server will redirect to capacitor://localhost/dashboard?token=...
+        // App listener in AuthProvider will capture token via appUrlOpen
+        await Browser.open({ url });
+
+        // Fallback: also listen for appUrlOpen here to close browser and navigate
+        const listener = await CapApp.addListener("appUrlOpen", async (event) => {
+          try {
+            const u = new URL(event.url);
+            if (u.searchParams.get("token")) {
+              await Browser.close();
+              listener.remove();
+              window.location.href = "/dashboard" + u.search;
+            }
+          } catch {}
+        });
+        // Auto-remove after 2 mins to avoid leak
+        setTimeout(() => listener.remove(), 120000);
+      } else {
+        window.open(url, "_self");
+      }
     } finally {
       setOauthLoading((prev) => ({ ...prev, [provider]: false }));
     }
@@ -89,7 +110,7 @@ const SigninPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate, user]);
 

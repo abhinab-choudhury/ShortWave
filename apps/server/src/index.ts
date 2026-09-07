@@ -27,10 +27,33 @@ app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+const allowedOrigins = [
+  env.CLIENT_URL,
+  "capacitor://localhost",
+  "ionic://localhost",
+  "http://localhost",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://localhost",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      // Allow non-browser requests (curl, native, no origin)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || allowedOrigins.some((o) => origin.startsWith(o))) {
+        return callback(null, true);
+      }
+      // Allow any capacitor / localhost for native builds
+      if (origin.startsWith("capacitor://") || origin.startsWith("http://localhost") || origin.startsWith("https://localhost")) {
+        return callback(null, true);
+      }
+      return callback(null, true); // fallback: allow (JWT will still protect); optionally restrict in prod
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   }),
 );
 app.use(

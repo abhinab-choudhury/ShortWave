@@ -25,11 +25,12 @@ Designed for simplicity and speed, it allows you to **shorten, manage, and analy
 
 - 🔗 **Instant URL Shortening** – Generate short links instantly.  
 - 📊 **Advanced Tracking** – Monitor clicks, referrers, devices, and geolocation.  
-- 📈 **Interactive Analytics Dashboard** – Visualize link performance dynamically.  
+- 📈 **Interactive Analytics Dashboard** – Responsive charts (mobile/tablet/desktop).  
 - 🎨 **Minimal & Intuitive Design** – Clean, distraction-free UI.  
 - 📱 **QR Code Integration** – Generate scannable QR codes automatically.  
 - ⚡ **High Performance & Scalability** – Optimized backend with caching for speed.  
-- 🔒 **Secure by Design** – Safe for personal and production use.  
+- 🔒 **Hybrid Auth (Session + JWT)** – Cookies for web, Bearer JWT for native/Capacitor.  
+- 🤖 **Cross-Platform** – Web, desktop (PWA) & Android (Capacitor).  
 
 ---
 
@@ -41,40 +42,163 @@ Try it here:
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React.js + TypeScript + ShadCN UI  
-- **Backend**: Node.js + Express.js  
-- **Database**: MongoDB  
-- **Cache**: Redis  
-- **Analytics**: Charting libraries for interactive dashboards  
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind + ShadCN UI, Recharts  
+- **Backend**: Node.js + Express 4 + Passport (Google/GitHub) + JWT + express-session + MongoStore  
+- **Database**: MongoDB + Mongoose  
+- **Cache**: Redis (click analytics buffer + cron flush)  
+- **Mobile**: Capacitor 8 (Android, Preferences/Browser/App plugins)  
+- **Package Manager**: pnpm 11 (workspaces `apps/*`)
 
-Got it 👍 here’s the improved snippet with **Docker Compose info** included:
+---
 
-Here’s the updated snippet with a **linter command** added:
+## ✅ Prerequisites
 
-## 🔧 Development
+- **Node.js** 20+ · **pnpm** 11.5.1 (`npm i -g pnpm`)
+- **Docker & Docker Compose** (for MongoDB + Redis)
+- For Android builds: **Android Studio** + SDK 34 + JDK 17 + `ANDROID_HOME` set
+- Env files: `apps/server/.env` and `apps/client/.env` (see `.env.example`)
 
-Run the frontend, backend, and supporting services easily.
+---
+
+## 🔧 Development — All Devices
+
+### 1. Install & Env
 
 ```bash
-# Start both frontend (apps/client) and backend (apps/server)
-pnpm run dev
-````
+pnpm install
 
-Available scripts:
-
-```bash
-pnpm run dev:client   # Start only the frontend (apps/client)
-pnpm run dev:server    # Start only the backend (apps/server)
-pnpm run dev              # Start both frontend & backend concurrently
+# server env
+cp apps/server/.env.example apps/server/.env
+# client env
+cp apps/client/.env.example apps/client/.env
 ```
 
-### 🐳 Running Databases with Docker Compose
+**`apps/server/.env`**
 
-This project includes a `docker-compose.yml` to start the required databases:
-
-```bash
-# Start MongoDB and Redis
-docker-compose up -d
+```
+PORT=8080
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
+SERVER_URL=http://localhost:8080
+MONGODB_BASE_URI=mongodb://localhost:27017
+DATABASE_NAME=mydatabase
+REDIS_URL=redis://localhost:6379
+SESSION_SECRET=your_session_secret_32+chars
+JWT_SECRET=your_jwt_secret_32+chars
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+EMAIL=...
+EMAIL_PASSWORD=...
 ```
 
-This will spin up **MongoDB** and **Redis** containers, which the backend connects to automatically.
+**`apps/client/.env`**
+
+```
+VITE_SERVER_URL=http://localhost:8080
+```
+
+### 2. Databases (Docker)
+
+```bash
+docker-compose up -d        # MongoDB + Redis
+docker-compose logs -f      # verify
+```
+
+### 3. Run Web (Desktop & Mobile Web)
+
+```bash
+pnpm run dev                # both client + server concurrently
+# or separately
+pnpm run dev:client         # Vite http://localhost:5173
+pnpm run dev:server         # Express http://localhost:8080
+```
+
+Open `http://localhost:5173` → web lands on `/home`, auth via **session cookies** (sameSite none/secure in prod) + **JWT** (`Authorization: Bearer`).
+
+### 4. Run Android (Capacitor)
+
+Capacitor bundles the Vite `dist` into a native WebView. Auth is **JWT-only** (no cookies) — token stored in `Preferences` + `localStorage`, sent as `Bearer`.
+
+```bash
+# 1. Build web assets
+pnpm --filter client run build
+
+# 2. Sync to Android (copies dist + plugins)
+pnpm --filter client run cap:sync
+# or pnpm --filter client run mobile:build  # build + sync
+
+# 3. Open in Android Studio
+pnpm --filter client run cap:android
+# In Android Studio: Run ▶ on emulator / device
+```
+
+**Native routing:** `capacitor://localhost/` → `Capacitor.isNativePlatform()` → redirects `/` → `/signin` (not `/home`), so the app always starts at **login/signup**. After magic-link or OAuth (`?token=`), `AuthProvider` captures the token via `App.addListener('appUrlOpen', ...)` and `capacitor://localhost/dashboard?token=...`, persists via `@capacitor/preferences`.
+
+**Live reload on device (optional)** in `apps/client/capacitor.config.ts`:
+
+```ts
+server: { url: 'http://192.168.1.5:5173', cleartext: true }
+```
+
+then `pnpm --filter client run cap:sync` + `npx cap run android`.
+
+### 5. Production Builds
+
+```bash
+# Web + API
+pnpm run build              # builds client (dist) + server (dist)
+
+# Android release
+pnpm --filter client run build
+pnpm --filter client exec cap sync android
+cd apps/client/android && ./gradlew assembleDebug   # APK: app/build/outputs/apk/debug/app-debug.apk
+# Release signed AAB
+./gradlew bundleRelease
+```
+
+Capacitor app icon & splash now use `public/shortwave_logo.png` (640×640) — auto-generated into `android/app/src/main/res/mipmap-*` and `drawable*/splash.png` via `cap sync`.
+
+---
+
+## 🔐 Auth — Web vs Native
+
+| Platform | Mechanism | Storage | Notes |
+|----------|-----------|---------|-------|
+| Web | `express-session` + `connect-mongo` (cookie `connect.sid`, 7d) **and** JWT | Cookie (httpOnly) + `localStorage["authToken"]` | CORS `origin: CLIENT_URL`, `credentials:true` |
+| Android | **JWT only** (`Bearer 7d`) | `Preferences` + `localStorage` | `withCredentials:false`, header `X-Native-Platform: capacitor`, CORS allows `capacitor://localhost` |
+
+`GET /api/v1/auth/me` accepts either session or `Authorization: Bearer`. Magic-link `GET /verify?token=` and OAuth callbacks `GET /google/callback`, `GET /github/callback` detect `platform=native` / `X-Native-Platform` and redirect to `capacitor://localhost/dashboard?token=...` for deep-link capture; otherwise to `${CLIENT_URL}/dashboard?token=...`.
+
+Logout `POST /auth/logout` destroys session **and** blocks JWT (`blockJWT`).
+
+---
+
+## 📱 Supported Devices
+
+- **Web / Desktop:** Chrome/Firefox/Safari/Edge (responsive `320px → 1920px`, PWA-ready). `pnpm run dev:client` or `pnpm run build` + static host.
+- **Android:** Capacitor 8, `androidScheme: https`, minSdk 22, targetSdk 34. Build via Android Studio or `./gradlew`. Icon/splash from web logo.
+
+---
+
+## 🧹 Lint & Format
+
+```bash
+pnpm --filter client run lint        # eslint
+pnpm --filter server run lint
+pnpm --filter client run format      # prettier
+```
+
+---
+
+## 🗂️ Project Structure
+
+```
+apps/client  # Vite + React + Capacitor (dist → android/app/src/main/assets/public)
+apps/server  # Express + Mongo + Redis
+docker-compose.yml # MongoDB + Redis
+pnpm-workspace.yaml
+```
+
+See `docs/system design.md` for deep-dive on shortening, analytics (Redis → cron flush), and hybrid auth flow.

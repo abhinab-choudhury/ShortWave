@@ -6,15 +6,30 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const isNativePlatform = () => {
+  try {
+    // lazy import to avoid SSR issues
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const cap = (window as unknown as { Capacitor?: { isNativePlatform: () => boolean } }).Capacitor;
+    if (cap?.isNativePlatform) return cap.isNativePlatform();
+  } catch {}
+  return false;
+};
+
 export const axiosInstance = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_URL}/api/v1`,
-  withCredentials: true,
+  // Native apps have no cookies — JWT only. Web keeps session cookies.
+  withCredentials: !isNativePlatform(),
 });
 
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Tag native requests so server can choose capacitor:// deep-link redirects
+  if (isNativePlatform()) {
+    config.headers["X-Native-Platform"] = "capacitor";
   }
   return config;
 });

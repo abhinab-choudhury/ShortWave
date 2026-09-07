@@ -1,6 +1,5 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
-import oauth2 from "passport-oauth2";
 import { env } from "../utils/secret";
 import {
   createUser,
@@ -23,7 +22,7 @@ passport.use(
       _accessToken: string,
       _refreshToken: string,
       profile: Profile,
-      cb: oauth2.VerifyCallback,
+      cb: (err: unknown, user?: unknown, info?: unknown) => void,
     ) {
       try {
         let user = await getUserByAuthProviderId(profile.id);

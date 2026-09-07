@@ -11,6 +11,7 @@ import ShortwaveLogo from "/shortwave_logo.png"
 import { ThemeToggle } from "../ui/theme-toggle"
 import { User } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
+import { Capacitor } from "@capacitor/core"
 
 export function DashboardLayout() {
   const location = useLocation()
@@ -35,7 +36,7 @@ export function DashboardLayout() {
   const animate = false
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const { user, refreshUser } = useAuth() 
+  const { user, refreshUser, isLoading: authLoading } = useAuth() 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   
   const handleLogout = async () => {
@@ -48,7 +49,7 @@ export function DashboardLayout() {
           description: "You're all set. Come back soon!",
         })
         await refreshUser()
-        navigate("/home")
+        navigate(Capacitor.isNativePlatform() ? "/signin" : "/home")
       }
     } catch (error) {
       console.log("Error : ", error)
@@ -64,10 +65,10 @@ export function DashboardLayout() {
   const isActive = (href: string) => location.pathname.includes(href)
 
   useEffect(() => {
-    if (!user) {
-      navigate("/signin")
+    if (!authLoading && !user) {
+      navigate("/signin", { replace: true })
     }
-  }, [navigate, user])
+  }, [navigate, user, authLoading])
   return (
     <div
       className={cn(
