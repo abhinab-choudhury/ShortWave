@@ -18,13 +18,14 @@
 **Middleware `isAuthenticated`:** tries `req.isAuthenticated()` (session); falls back to `Authorization: Bearer` → `jwt.verify` → `getUserById` → `req.user`.
 
 **Flows:**
-- Magic link: `POST /api/v1/auth/signin` → email `jwt (1h, blockJWT)` → `GET /verify?token=` → `req.logIn` + `blockJWT` + `generateAuthToken (7d)` → redirect `CLIENT_URL/dashboard?token=` or `capacitor://localhost/dashboard?token=` (if `platform=native` / `origin: capacitor://`).
-- OAuth: `GET /google`, `GET /github` → `passport.authenticate` → callback `GET /google/callback`, `GET /github/callback` → same redirect logic. Native opens via `@capacitor/browser`, captures deep-link via `App.addListener('appUrlOpen')`.
+- **OTP (mobile/native):** `POST /api/v1/auth/otp/request` (email + `platform=native`) → upserts user, stores 6-digit code **hashed** (`sha256(otp:salt)`, `Otp` collection: TTL `expiresAt` 10 min via `expireAfterSeconds:0`, `attempts` cap 5) → `sendOtpEmail` → client enters code → `POST /api/v1/auth/otp/verify` validates, deletes record, returns `{ token (7d JWT), user }` directly → app persists to `Preferences` + `localStorage` and authenticates via `Bearer`. No browser hop, no deep-link registration required on Android.
+- Magic link (web): `POST /api/v1/auth/signin` → email `jwt (1h, blockJWT)` → `GET /verify?token=` → `req.logIn` + `blockJWT` + `generateAuthToken (7d)` → redirect `CLIENT_URL/dashboard?token=` or `capacitor://localhost/dashboard?token=` (if `platform=native` / `origin: capacitor://`).
+- OAuth: `GET /google`, `GET /github` → `passport.authenticate` → callback `GET /google/callback`, `GET /github/callback` → same redirect logic. Web only (native hides these buttons; OTP is preferred) — native can still open via `@capacitor/browser`, capturing deep-link via `App.addListener('appUrlOpen')`.
 - Me: `GET /me` (protected) returns `{user, token}` and refreshes JWT.
 - Logout: `POST /logout` → `req.session.destroy` + `clearCookie` **and** `blockJWT(Bearer)` for native.
 
 ## Backend Routes
-- `[POST,GET,PUT,DELETE] /api/v1/auth` — `POST /signin` (email), `GET /verify?token=`, `GET /me` (auth), `POST /logout`, `GET /google`, `GET /google/callback`, `GET /github`, `GET /github/callback`.
+- `[POST,GET,PUT,DELETE] /api/v1/auth` — `POST /signin` (magic link), `POST /otp/request`, `POST /otp/verify`, `GET /verify?token=`, `GET /me` (auth), `POST /logout`, `GET /google`, `GET /google/callback`, `GET /github`, `GET /github/callback` (all inside `signinRateLimiter`/`oauthCallbackLimiter` windows).
 - `[POST] /api/v1/url` / `[GET|DELETE] /api/v1/campaign`, `/api/v1/user`, cron `GET /cron/flush`.
 - `[GET] /:shorturl` / `/:campaign/:shorturl` — 302 redirect: `res.redirect(originalUrl)`. Use 302 (not 301) so browser doesn't cache and every hit reaches backend for analytics.
 

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Link, LinkProps, useLocation } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { IconMenu2, IconX } from '@tabler/icons-react';
 import { useSidebar } from '@/hooks/useSidebar';
@@ -71,6 +71,13 @@ export const MobileSidebar = ({
   ...props
 }: React.ComponentProps<'div'>) => {
   const { open, setOpen } = useSidebar();
+  const location = useLocation();
+
+  // Always close the drawer when the active tab changes
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname, setOpen]);
+
   return (
     <>
       <div
@@ -82,11 +89,20 @@ export const MobileSidebar = ({
         <div className="flex justify-end z-20 w-full">
           <IconMenu2
             className="text-neutral-800 dark:text-neutral-200"
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpen(true)}
           />
         </div>
-        <AnimatePresence>
-          {open && (
+      </div>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-90 backdrop-blur-sm md:hidden"
+              onClick={() => setOpen(false)}
+            />
             <motion.div
               initial={{ x: '-100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -96,21 +112,21 @@ export const MobileSidebar = ({
                 ease: 'easeInOut',
               }}
               className={cn(
-                'fixed h-full w-full inset-0 bg-white dark:bg-slate-900 p-10 z-100 flex flex-col justify-between',
+                'fixed h-full w-[80%] max-w-[300px] inset-y-0 left-0 bg-white dark:bg-slate-900 p-10 z-100 flex flex-col justify-between shadow-2xl',
                 className
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-slate-200"
-                onClick={() => setOpen(!open)}
+                className="absolute right-6 top-6 z-50 text-neutral-800 dark:text-slate-200"
+                onClick={() => setOpen(false)}
               >
                 <IconX />
               </div>
               {children}
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
@@ -125,15 +141,15 @@ export const SidebarLink = ({
   props?: LinkProps;
 }) => {
   const location = useLocation();
-  const { open, setOpen, animate } = useSidebar();
+  const { setOpen } = useSidebar();
 
-  const isActive = location.pathname
-    .split('/')
-    .includes(link.href.split('/')[0]);
+  const isActive =
+    location.pathname === link.href ||
+    location.pathname.startsWith(link.href + '/');
   return (
     <Link
       to={link.href}
-      onClick={() => setOpen(!open)}
+      onClick={() => setOpen(false)}
       className={cn(
         'flex items-center justify-start gap-2 group/sidebar py-2 px-3 rounded-md transition-colors',
         isActive
@@ -154,15 +170,9 @@ export const SidebarLink = ({
         {link.icon}
       </div>
 
-      <motion.span
-        animate={{
-          display: animate ? (open ? 'inline-block' : 'none') : 'inline-block',
-          opacity: animate ? (open ? 1 : 0) : 1,
-        }}
-        className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block p-0! m-0!"
-      >
+      <span className="text-neutral-700 dark:text-slate-200 text-sm group-hover/sidebar:translate-x-1 transition-all duration-150 whitespace-pre inline-block p-0! m-0!">
         {link.label}
-      </motion.span>
+      </span>
     </Link>
   );
 };

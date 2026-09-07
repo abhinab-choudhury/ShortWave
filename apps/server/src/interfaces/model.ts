@@ -29,6 +29,15 @@ export interface IBlockJWT extends Document {
   jwt: string;
 }
 
+export interface IOtp extends Document {
+  email: string;
+  otpHash: string;
+  salt: string;
+  expiresAt: Date;
+  attempts: number;
+  createdAt?: Date;
+}
+
 export interface IUser extends Document {
   email: string;
   authProviders: Array<IAuthProvider>;

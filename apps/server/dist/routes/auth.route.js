@@ -25,6 +25,18 @@ router.get("/me", auth_middleware_1.isAuthenticated, auth_controller_1.me);
  */
 router.post("/signin", ratelimter_middleware_1.signinRateLimiter, auth_controller_1.signinUser);
 /**
+ * @route   POST /api/v1/auth/otp/request
+ * @desc    Request a 6-digit OTP (used by native/mobile apps)
+ * @access  Public
+ */
+router.post("/otp/request", ratelimter_middleware_1.signinRateLimiter, auth_controller_1.requestOtp);
+/**
+ * @route   POST /api/v1/auth/otp/verify
+ * @desc    Verify OTP and return a JWT (used by native/mobile apps)
+ * @access  Public
+ */
+router.post("/otp/verify", ratelimter_middleware_1.signinRateLimiter, auth_controller_1.verifyOtp);
+/**
  * @route   GET /api/v1/auth/verify?token
  * @desc    Sign Verification (e.g., OTP/magic link based)
  * @access  Public

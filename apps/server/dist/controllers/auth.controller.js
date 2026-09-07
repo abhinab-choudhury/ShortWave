@@ -12,6 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.requestOtp = requestOtp;
+exports.verifyOtp = verifyOtp;
 exports.me = me;
 exports.signinUser = signinUser;
 exports.verifyToken = verifyToken;
@@ -25,13 +27,105 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const api_error_handling_1 = __importDefault(require("../utils/api-error-handling"));
 const user_services_1 = require("../services/user.services");
 const zod_1 = require("zod");
-const email_1 = require("../utils/email");
 const secret_1 = require("../utils/secret");
 const blockjwt_service_1 = require("../services/blockjwt.service");
+const otp_model_1 = __importDefault(require("../database/models/otp.model"));
+const otp_services_1 = require("../services/otp.services");
+const email_1 = require("../utils/email");
 const api_response_handling_1 = __importDefault(require("../utils/api-response-handling"));
 const signinReqSchema = zod_1.z.object({
     email: zod_1.z.string().email().trim(),
 });
+const verifyOtpReqSchema = zod_1.z.object({
+    email: zod_1.z.string().email().trim(),
+    otp: zod_1.z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
+});
+function isNativeRequest(req) {
+    return (req.query.platform === "native" ||
+        req.query.state === "native" ||
+        req.headers["x-native-platform"] === "capacitor" ||
+        (typeof req.headers.origin === "string" &&
+            req.headers.origin.includes("capacitor://")));
+}
+function requestOtp(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
+        try {
+            const parsed = verifyOtpReqSchema
+                .pick({ email: true })
+                .parse((_a = req.body.data) !== null && _a !== void 0 ? _a : req.body);
+            let user = yield (0, user_services_1.getUserByEmail)(parsed.email);
+            if (!user) {
+                const newUser = {
+                    email: parsed.email,
+                    name: (_b = parsed.email.split("@")) === null || _b === void 0 ? void 0 : _b[0],
+                    admin: false,
+                };
+                yield (0, email_1.sendWelcomeEmail)(newUser.name, newUser.email);
+                user = yield (0, user_services_1.createUser)(newUser);
+            }
+            const otp = yield (0, otp_services_1.storeOtp)(parsed.email);
+            yield (0, email_1.sendOtpEmail)(user.email, user.name, otp);
+            res.status(200).json(new api_response_handling_1.default(200, "A 6-digit verification code has been sent to your email.", true, { expiresInSeconds: otp_services_1.OTP_TTL_MS / 1000 }));
+        }
+        catch (error) {
+            if (error instanceof zod_1.z.ZodError) {
+                const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+                return next(new api_error_handling_1.default(400, "Validation failed", messages));
+            }
+            console.log("Error requesting OTP: ", error);
+            return next(new api_error_handling_1.default(500, "Unexprected error occurred", error));
+        }
+    });
+}
+function verifyOtp(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            const parsed = verifyOtpReqSchema.parse((_a = req.body.data) !== null && _a !== void 0 ? _a : req.body);
+            const record = yield (0, otp_services_1.findOtpByEmail)(parsed.email);
+            if (!record) {
+                return next(new api_error_handling_1.default(400, "No verification code found for this email. Please request a new one."));
+            }
+            if ((0, otp_services_1.isOtpExpired)(record)) {
+                yield otp_model_1.default.findOneAndDelete({ email: parsed.email.toLowerCase() });
+                return next(new api_error_handling_1.default(400, "This code has expired. Please request a new one."));
+            }
+            if (!(0, otp_services_1.isOtpValid)(parsed.otp, record)) {
+                record.attempts += 1;
+                yield record.save();
+                if ((0, otp_services_1.hasExceededMaxAttempts)(record)) {
+                    yield otp_model_1.default.findOneAndDelete({ email: parsed.email.toLowerCase() });
+                    return next(new api_error_handling_1.default(400, "Too many incorrect attempts. Please request a new code."));
+                }
+                const remaining = otp_services_1.OTP_MAX_ATTEMPTS - record.attempts;
+                return next(new api_error_handling_1.default(400, `Incorrect code. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`));
+            }
+            const user = yield (0, user_services_1.getUserByEmail)(parsed.email);
+            if (!user)
+                return next(new api_error_handling_1.default(400, "User not found"));
+            yield otp_model_1.default.findOneAndDelete({ email: parsed.email.toLowerCase() });
+            const authToken = generateAuthToken(user._id);
+            res.status(200).json(new api_response_handling_1.default(200, "Sign-in successful", true, {
+                token: authToken,
+                user: {
+                    userId: user._id,
+                    email: user.email,
+                    name: user.name,
+                    profilePic: user.profilePic,
+                },
+            }));
+        }
+        catch (error) {
+            if (error instanceof zod_1.z.ZodError) {
+                const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+                return next(new api_error_handling_1.default(400, "Validation failed", messages));
+            }
+            console.log("Error verifying OTP: ", error);
+            return next(new api_error_handling_1.default(500, "Unexprected error occurred", error));
+        }
+    });
+}
 function me(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
@@ -115,8 +209,7 @@ function verifyToken(req, res, next) {
             });
             yield (0, blockjwt_service_1.blockJWT)(token);
             const authToken = generateAuthToken(user._id);
-            const isNative = req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
-            if (isNative) {
+            if (isNativeRequest(req)) {
                 // For Capacitor native, redirect to deep link so App can capture token via appUrlOpen
                 return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
             }
@@ -177,8 +270,7 @@ function googleOAuthCallback(req, res, _next) {
             return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
         }
         const authToken = generateAuthToken(req.user._id);
-        const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
-        if (isNative) {
+        if (isNativeRequest(req)) {
             return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
         }
         return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
@@ -190,8 +282,7 @@ function githubOAuthCallback(req, res, _next) {
             return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
         }
         const authToken = generateAuthToken(req.user._id);
-        const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
-        if (isNative) {
+        if (isNativeRequest(req)) {
             return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
         }
         return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);

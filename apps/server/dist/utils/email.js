@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendSignInEmail = exports.sendWelcomeEmail = void 0;
+exports.sendSignInEmail = exports.sendOtpEmail = exports.sendWelcomeEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const secret_1 = require("./secret");
 const ua_parser_js_1 = require("ua-parser-js");
@@ -45,6 +45,49 @@ const sendWelcomeEmail = function (username, email) {
     });
 };
 exports.sendWelcomeEmail = sendWelcomeEmail;
+const sendOtpEmail = (email, username, otp) => __awaiter(void 0, void 0, void 0, function* () {
+    const emailTemplate = `
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Your Shortwave Code</title>
+        <style>
+          body {
+            margin: 0; padding: 0; font-family: Arial, sans-serif;
+            background-color: #f9fafb; color: #111827;
+          }
+          .container {
+            max-width: 480px; margin: 40px auto; background-color: #ffffff;
+            border-radius: 12px; padding: 30px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          }
+          .header { font-size: 22px; font-weight: bold; margin-bottom: 12px; }
+          .content { font-size: 16px; margin-bottom: 24px; color: #4b5563; }
+          .code {
+            display: inline-block; font-size: 36px; font-weight: 800;
+            letter-spacing: 10px; padding: 16px 24px; border-radius: 10px;
+            background-color: #f0fdfa; color: #0f766e; border: 1px dashed #14b8a6;
+          }
+          .hint { font-size: 13px; color: #6b7280; margin-top: 20px; }
+          .footer { font-size: 13px; color: #9ca3af; margin-top: 24px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Hi ${username}, your sign-in code</div>
+          <div class="content">Enter this code in the Shortwave app to securely log in. It expires in 10 minutes.</div>
+          <div class="code">${otp}</div>
+          <div class="hint">If you didn't request this, you can safely ignore this email.</div>
+          <div class="footer">&copy; ${new Date().getFullYear()} Shortwave. All rights reserved.</div>
+        </div>
+      </body>
+    </html>
+  `;
+    yield sendEmail(email, "Your Shortwave Verification Code", emailTemplate);
+});
+exports.sendOtpEmail = sendOtpEmail;
 const sendSignInEmail = (email, username, userAgent, token) => __awaiter(void 0, void 0, void 0, function* () {
     const parser = new ua_parser_js_1.UAParser(userAgent);
     const uaResult = parser.getResult();

@@ -8,6 +8,8 @@ import {
   githubOAuth,
   googleOAuthCallback,
   githubOAuthCallback,
+  requestOtp,
+  verifyOtp,
 } from "../controllers/auth.controller";
 import passport from "passport";
 import { env } from "../utils/secret";
@@ -34,6 +36,20 @@ router.get("/me", isAuthenticated, me);
  * @access  Public
  */
 router.post("/signin", signinRateLimiter, signinUser);
+
+/**
+ * @route   POST /api/v1/auth/otp/request
+ * @desc    Request a 6-digit OTP (used by native/mobile apps)
+ * @access  Public
+ */
+router.post("/otp/request", signinRateLimiter, requestOtp);
+
+/**
+ * @route   POST /api/v1/auth/otp/verify
+ * @desc    Verify OTP and return a JWT (used by native/mobile apps)
+ * @access  Public
+ */
+router.post("/otp/verify", signinRateLimiter, verifyOtp);
 
 /**
  * @route   GET /api/v1/auth/verify?token

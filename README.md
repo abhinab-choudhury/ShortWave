@@ -134,7 +134,7 @@ pnpm --filter client run cap:android
 # In Android Studio: Run ▶ on emulator / device
 ```
 
-**Native routing:** `capacitor://localhost/` → `Capacitor.isNativePlatform()` → redirects `/` → `/signin` (not `/home`), so the app always starts at **login/signup**. After magic-link or OAuth (`?token=`), `AuthProvider` captures the token via `App.addListener('appUrlOpen', ...)` and `capacitor://localhost/dashboard?token=...`, persists via `@capacitor/preferences`.
+**Native routing:** `capacitor://localhost/` → `Capacitor.isNativePlatform()` → redirects `/` → `/signin` (not `/home`), so the app always starts at **login/signup**. On native, sign-in uses **email OTP** (`POST /api/v1/auth/otp/request` → 6-digit code → `POST /api/v1/auth/otp/verify` → JWT) so the user never leaves the app. Web keeps magic-link + OAuth. OAuth/magic-link deep links (`capacitor://localhost/...?token=`) are still captured via `App.addListener('appUrlOpen', ...)` and persisted via `@capacitor/preferences`.
 
 **Live reload on device (optional)** in `apps/client/capacitor.config.ts`:
 
@@ -169,7 +169,7 @@ Capacitor app icon & splash now use `public/shortwave_logo.png` (640×640) — a
 | Web | `express-session` + `connect-mongo` (cookie `connect.sid`, 7d) **and** JWT | Cookie (httpOnly) + `localStorage["authToken"]` | CORS `origin: CLIENT_URL`, `credentials:true` |
 | Android | **JWT only** (`Bearer 7d`) | `Preferences` + `localStorage` | `withCredentials:false`, header `X-Native-Platform: capacitor`, CORS allows `capacitor://localhost` |
 
-`GET /api/v1/auth/me` accepts either session or `Authorization: Bearer`. Magic-link `GET /verify?token=` and OAuth callbacks `GET /google/callback`, `GET /github/callback` detect `platform=native` / `X-Native-Platform` and redirect to `capacitor://localhost/dashboard?token=...` for deep-link capture; otherwise to `${CLIENT_URL}/dashboard?token=...`.
+`GET /api/v1/auth/me` accepts either session or `Authorization: Bearer`. **Android sign-in uses email OTP** — `POST /api/v1/auth/otp/request` (emails a 6-digit code, hashed at rest, 10 min expiry, 5 attempts) then `POST /api/v1/auth/otp/verify` returns `{ token, user }` which the app stores and sends as `Bearer`. This replaces OAuth on native (no browser hop, no `capacitor://` redirect registration). Web still uses magic-link `GET /verify?token=` and OAuth callbacks `GET /google/callback`, `GET /github/callback`, which detect `platform=native` / `X-Native-Platform` and redirect to `capacitor://localhost/dashboard?token=...` for deep-link capture; otherwise to `${CLIENT_URL}/dashboard?token=...`.
 
 Logout `POST /auth/logout` destroys session **and** blocks JWT (`blockJWT`).
 

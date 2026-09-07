@@ -19,17 +19,17 @@ export function DashboardLayout() {
   const links = [
     {
       label: "Dashboard",
-      href: "dashboard",
+      href: "/dashboard",
       icon: <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
     {
       label: "Analytics",
-      href: "analytics",
+      href: "/analytics",
       icon: <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
     {
       label: "Settings",
-      href: "settings",
+      href: "/settings",
       icon: <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
     },
   ]
@@ -62,7 +62,8 @@ export function DashboardLayout() {
     }
   }
 
-  const isActive = (href: string) => location.pathname.includes(href)
+  const isActive = (href: string) =>
+    location.pathname === href || location.pathname.startsWith(href + "/")
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -121,7 +122,7 @@ export function DashboardLayout() {
           <div className="mt-auto w-full border-t border-slate-100 dark:border-slate-800 pt-3">
             <Link
               to="#"
-              onClick={() => setOpen(!open)}
+              onClick={() => setOpen(true)}
               className="flex items-center justify-start gap-3 group/sidebar py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               <div className="shrink-0">

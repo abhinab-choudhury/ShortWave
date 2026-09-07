@@ -33,6 +33,53 @@ export const sendWelcomeEmail = async function (
   await sendEmail(email!, "Welcome to Shotwave!", emailTemplate);
 };
 
+export const sendOtpEmail = async (
+  email: string,
+  username: string,
+  otp: string,
+) => {
+  const emailTemplate = `
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Your Shortwave Code</title>
+        <style>
+          body {
+            margin: 0; padding: 0; font-family: Arial, sans-serif;
+            background-color: #f9fafb; color: #111827;
+          }
+          .container {
+            max-width: 480px; margin: 40px auto; background-color: #ffffff;
+            border-radius: 12px; padding: 30px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          }
+          .header { font-size: 22px; font-weight: bold; margin-bottom: 12px; }
+          .content { font-size: 16px; margin-bottom: 24px; color: #4b5563; }
+          .code {
+            display: inline-block; font-size: 36px; font-weight: 800;
+            letter-spacing: 10px; padding: 16px 24px; border-radius: 10px;
+            background-color: #f0fdfa; color: #0f766e; border: 1px dashed #14b8a6;
+          }
+          .hint { font-size: 13px; color: #6b7280; margin-top: 20px; }
+          .footer { font-size: 13px; color: #9ca3af; margin-top: 24px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Hi ${username}, your sign-in code</div>
+          <div class="content">Enter this code in the Shortwave app to securely log in. It expires in 10 minutes.</div>
+          <div class="code">${otp}</div>
+          <div class="hint">If you didn't request this, you can safely ignore this email.</div>
+          <div class="footer">&copy; ${new Date().getFullYear()} Shortwave. All rights reserved.</div>
+        </div>
+      </body>
+    </html>
+  `;
+  await sendEmail(email, "Your Shortwave Verification Code", emailTemplate);
+};
+
 export const sendSignInEmail = async (
   email: string,
   username: string,
