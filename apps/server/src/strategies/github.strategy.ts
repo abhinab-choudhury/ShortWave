@@ -1,6 +1,10 @@
-// @ts-nocheck
 import passport from "passport";
-import { Strategy as GithubStrategy, Profile } from "passport-github2";
+import {
+  Strategy as GithubStrategy,
+  type Profile,
+  type StrategyOptions,
+} from "passport-github2";
+import type { VerifyCallback } from "passport-oauth2";
 import { env } from "../utils/secret";
 import {
   createUser,
@@ -10,20 +14,22 @@ import {
 import { IUser } from "../interfaces/model";
 import { sendWelcomeEmail } from "../utils/email";
 
+const githubStrategyOptions: StrategyOptions = {
+  clientID: env.GITHUB_CLIENT_ID,
+  clientSecret: env.GITHUB_CLIENT_SECRET,
+  callbackURL: `${env.SERVER_URL}/api/v1/auth/github/callback`,
+  scope: ["read:user", "user:email"],
+};
+
 passport.use(
   "github-strategy",
   new GithubStrategy(
-    {
-      clientID: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
-      callbackURL: `${env.SERVER_URL}/api/v1/auth/github/callback`,
-      scope: ["read:user", "user:email"],
-    },
+    githubStrategyOptions,
     async function (
       _accessToken: string,
       _refeshToken: string,
       profile: Profile,
-      cb: (err: unknown, user?: unknown, info?: unknown) => void,
+      cb: VerifyCallback,
     ) {
       try {
         const user = await getUserByAuthProviderId(profile.id);

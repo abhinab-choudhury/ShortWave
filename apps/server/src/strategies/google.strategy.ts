@@ -1,6 +1,10 @@
-// @ts-nocheck
 import passport from "passport";
-import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
+import {
+  Strategy as GoogleStrategy,
+  type Profile,
+  type StrategyOptions,
+} from "passport-google-oauth20";
+import type { VerifyCallback } from "passport-oauth2";
 import { env } from "../utils/secret";
 import {
   createUser,
@@ -10,20 +14,22 @@ import {
 import { IUser } from "../interfaces/model";
 import { sendWelcomeEmail } from "../utils/email";
 
+const googleStrategyOptions: StrategyOptions = {
+  clientID: env.GOOGLE_CLIENT_ID,
+  clientSecret: env.GOOGLE_CLIENT_SECRET,
+  callbackURL: `${env.SERVER_URL}/api/v1/auth/google/callback`,
+  scope: ["profile", "email"],
+};
+
 passport.use(
   "google-strategy",
   new GoogleStrategy(
-    {
-      clientID: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${env.SERVER_URL}/api/v1/auth/google/callback`,
-      scope: ["profile", "email"],
-    },
+    googleStrategyOptions,
     async function (
       _accessToken: string,
       _refreshToken: string,
       profile: Profile,
-      cb: (err: unknown, user?: unknown, info?: unknown) => void,
+      cb: VerifyCallback,
     ) {
       try {
         let user = await getUserByAuthProviderId(profile.id);

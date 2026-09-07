@@ -115,6 +115,11 @@ function verifyToken(req, res, next) {
             });
             yield (0, blockjwt_service_1.blockJWT)(token);
             const authToken = generateAuthToken(user._id);
+            const isNative = req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+            if (isNative) {
+                // For Capacitor native, redirect to deep link so App can capture token via appUrlOpen
+                return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+            }
             res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
         }
         catch (error) {
@@ -130,18 +135,30 @@ function verifyToken(req, res, next) {
 function logoutUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            // Also block JWT if provided (native apps use JWT, not cookies)
+            const authHeader = req.headers.authorization;
+            if (authHeader === null || authHeader === void 0 ? void 0 : authHeader.startsWith("Bearer ")) {
+                const token = authHeader.split(" ")[1];
+                try {
+                    yield (0, blockjwt_service_1.blockJWT)(token);
+                }
+                catch (_) {
+                    // ignore block errors
+                }
+            }
             if (req.session) {
                 req.session.destroy((error) => {
                     if (error) {
                         return next(new api_error_handling_1.default(500, "Failed to destroy session", [error.message]));
                     }
-                    res.clearCookie("connect.sid");
+                    res.clearCookie("connect.sid", { path: "/" });
                     return res
                         .status(200)
                         .json(new api_response_handling_1.default(200, "User logged out successfully"));
                 });
             }
             else {
+                res.clearCookie("connect.sid", { path: "/" });
                 return res
                     .status(200)
                     .json(new api_response_handling_1.default(200, "User logged out successfully"));
@@ -160,6 +177,10 @@ function googleOAuthCallback(req, res, _next) {
             return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
         }
         const authToken = generateAuthToken(req.user._id);
+        const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+        if (isNative) {
+            return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+        }
         return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
     });
 }
@@ -169,6 +190,10 @@ function githubOAuthCallback(req, res, _next) {
             return res.redirect(`${secret_1.env.CLIENT_URL}/signin`);
         }
         const authToken = generateAuthToken(req.user._id);
+        const isNative = req.query.state === "native" || req.query.platform === "native" || req.headers["x-native-platform"] === "capacitor" || (req.headers.origin && req.headers.origin.includes("capacitor://"));
+        if (isNative) {
+            return res.redirect(`capacitor://localhost/dashboard?token=${authToken}`);
+        }
         return res.redirect(`${secret_1.env.CLIENT_URL}/dashboard?token=${authToken}`);
     });
 }

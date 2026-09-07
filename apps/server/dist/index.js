@@ -67,9 +67,32 @@ const app = (0, express_1.default)();
 app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", node_path_1.default.join(__dirname, "views"));
+const allowedOrigins = [
+    secret_1.env.CLIENT_URL,
+    "capacitor://localhost",
+    "ionic://localhost",
+    "http://localhost",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://localhost",
+].filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: secret_1.env.CLIENT_URL,
+    origin: (origin, callback) => {
+        // Allow non-browser requests (curl, native, no origin)
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.includes(origin) || allowedOrigins.some((o) => origin.startsWith(o))) {
+            return callback(null, true);
+        }
+        // Allow any capacitor / localhost for native builds
+        if (origin.startsWith("capacitor://") || origin.startsWith("http://localhost") || origin.startsWith("https://localhost")) {
+            return callback(null, true);
+        }
+        return callback(null, true); // fallback: allow (JWT will still protect); optionally restrict in prod
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
 app.use((0, express_session_1.default)({
     secret: secret_1.env.SESSION_SECRET,

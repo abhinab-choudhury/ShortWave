@@ -17,12 +17,13 @@ const passport_google_oauth20_1 = require("passport-google-oauth20");
 const secret_1 = require("../utils/secret");
 const user_services_1 = require("../services/user.services");
 const email_1 = require("../utils/email");
-passport_1.default.use("google-strategy", new passport_google_oauth20_1.Strategy({
+const googleStrategyOptions = {
     clientID: secret_1.env.GOOGLE_CLIENT_ID,
     clientSecret: secret_1.env.GOOGLE_CLIENT_SECRET,
     callbackURL: `${secret_1.env.SERVER_URL}/api/v1/auth/google/callback`,
     scope: ["profile", "email"],
-}, function (_accessToken, _refreshToken, profile, cb) {
+};
+passport_1.default.use("google-strategy", new passport_google_oauth20_1.Strategy(googleStrategyOptions, function (_accessToken, _refreshToken, profile, cb) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e, _f, _g, _h;
         try {

@@ -17,12 +17,13 @@ const passport_github2_1 = require("passport-github2");
 const secret_1 = require("../utils/secret");
 const user_services_1 = require("../services/user.services");
 const email_1 = require("../utils/email");
-passport_1.default.use("github-strategy", new passport_github2_1.Strategy({
+const githubStrategyOptions = {
     clientID: secret_1.env.GITHUB_CLIENT_ID,
     clientSecret: secret_1.env.GITHUB_CLIENT_SECRET,
     callbackURL: `${secret_1.env.SERVER_URL}/api/v1/auth/github/callback`,
     scope: ["read:user", "user:email"],
-}, function (_accessToken, _refeshToken, profile, cb) {
+};
+passport_1.default.use("github-strategy", new passport_github2_1.Strategy(githubStrategyOptions, function (_accessToken, _refeshToken, profile, cb) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         try {
