@@ -65,8 +65,8 @@ export function DashboardLayout() {
           title: "Logged Out Successfull",
           description: "You're all set. Come back soon!",
         });
-        await refreshUser();
         navigate(Capacitor.isNativePlatform() ? "/signin" : "/home");
+        await refreshUser();
       }
     } catch (error) {
       console.log("Error : ", error);
@@ -82,11 +82,15 @@ export function DashboardLayout() {
   const isActive = (href: string) =>
     location.pathname === href || location.pathname.startsWith(href + "/");
 
+  const isProtectedRoute = ["/dashboard", "/analytics", "/settings"].some(
+    (path) => isActive(path),
+  );
+
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && isProtectedRoute) {
       navigate("/signin", { replace: true });
     }
-  }, [navigate, user, authLoading]);
+  }, [navigate, user, authLoading, isProtectedRoute]);
 
   return (
     <div

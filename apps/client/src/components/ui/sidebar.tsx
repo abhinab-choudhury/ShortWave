@@ -79,7 +79,7 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "flex h-12 w-full shrink-0 items-center justify-between gap-3 bg-neutral-100 px-4 dark:bg-slate-800 md:hidden",
+          "flex h-12 w-full shrink-0 items-center gap-3 bg-neutral-100 px-4 dark:bg-slate-800 md:hidden",
           className,
         )}
         {...props}
@@ -92,10 +92,6 @@ export const MobileSidebar = ({
         >
           <IconMenu2 className="h-5 w-5" />
         </button>
-
-        <span className="text-sm font-semibold tracking-tight text-teal-600 dark:text-teal-400">
-          ShortWave
-        </span>
       </div>
       <div
         aria-hidden={!open}

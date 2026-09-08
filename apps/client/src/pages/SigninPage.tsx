@@ -95,13 +95,14 @@ const SigninPage: React.FC = () => {
         startResendCountdown();
         emailForm.clearErrors();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log("Error: ", error);
       toast({
         variant: "destructive",
         title:
           "❌ " +
-          (error?.response?.data?.message || "Could not send the code."),
+          ((error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "Could not send the code."),
       });
     } finally {
       setIsSending(false);
@@ -127,19 +128,20 @@ const SigninPage: React.FC = () => {
         if (native) {
           try {
             await Preferences.set({ key: AUTH_TOKEN_KEY, value: data.token });
-          } catch {}
+          } catch { /* empty */ }
         }
         toast({ variant: "default", title: "✅ Signed in!" });
         await refreshUser();
         navigate("/dashboard", { replace: true });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log("Error: ", error);
       toast({
         variant: "destructive",
         title:
           "❌ " +
-          (error?.response?.data?.message || "Invalid code. Try again."),
+          ((error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "Invalid code. Try again."),
       });
     } finally {
       setIsSending(false);
@@ -171,7 +173,7 @@ const SigninPage: React.FC = () => {
                 listener.remove();
                 window.location.href = "/dashboard" + u.search;
               }
-            } catch {}
+            } catch { /* empty */ }
           },
         );
         setTimeout(() => listener.remove(), 120000);
@@ -191,7 +193,7 @@ const SigninPage: React.FC = () => {
 
   return (
     <AuthLayout>
-      <div className="max-w-[420px] w-full flex flex-col gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 rounded-2xl p-8 border border-slate-200/60 dark:border-slate-700/50">
+      <div className="max-w-105 w-full flex flex-col gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 rounded-2xl p-8 border border-slate-200/60 dark:border-slate-700/50">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Welcome to Shortwave
