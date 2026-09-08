@@ -16,7 +16,9 @@ const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const SigninPage = lazy(() => import("./pages/SigninPage"));
 const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const CampaignAnalyticsPage = lazy(() => import("./pages/CampaignAnalyticsPage"));
+const CampaignAnalyticsPage = lazy(
+  () => import("./pages/CampaignAnalyticsPage"),
+);
 const LinkAnalyticsPage = lazy(() => import("./pages/LinkAnalyticsPage"));
 
 const queryClient = new QueryClient();
@@ -35,7 +37,10 @@ function App() {
                   <Route
                     path="/"
                     element={
-                      <Navigate to={Capacitor.isNativePlatform() ? "/signin" : "/home"} replace />
+                      <Navigate
+                        to={Capacitor.isNativePlatform() ? "/signin" : "/home"}
+                        replace
+                      />
                     }
                   />
 
@@ -72,4 +77,3 @@ function App() {
 }
 
 export default App;
-

@@ -3,14 +3,14 @@ import { env } from "./secret";
 import { UAParser } from "ua-parser-js";
 import ApiError from "./api-error-handling";
 
+const mailUser = env.MAIL_USER || env.EMAIL;
+const mailPass = env.MAIL_PASS || env.EMAIL_PASSWORD;
+
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: env.EMAIL,
-    pass: env.EMAIL_PASSWORD,
-  },
+  host: env.MAIL_HOST,
+  port: Number(env.MAIL_PORT) || 587,
+  secure: env.MAIL_SECURE === "true",
+  ...(mailUser && mailPass ? { auth: { user: mailUser, pass: mailPass } } : {}),
 });
 
 export const sendWelcomeEmail = async function (
@@ -223,7 +223,7 @@ export const sendSignInEmail = async (
 async function sendEmail(email: string, title: string, emailTemplate: string) {
   try {
     await transporter.sendMail({
-      from: '"Shortwave" <noreply@shortwave.com>',
+      from: env.MAIL_FROM,
       to: email,
       subject: title,
       html: emailTemplate,

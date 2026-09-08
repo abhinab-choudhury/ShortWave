@@ -1,6 +1,6 @@
-import { ArrowUp } from 'lucide-react';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { ArrowUp } from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
 
 interface linkType {
   to: string;
@@ -9,16 +9,16 @@ interface linkType {
 const Footer: React.FC = () => {
   const FooterLink: linkType[] = [
     {
-      to: '/dashboard',
-      text: 'Dashboard',
+      to: "/dashboard",
+      text: "Dashboard",
     },
     {
-      to: '#',
-      text: 'Services',
+      to: "#",
+      text: "Services",
     },
     {
-      to: '#',
-      text: 'About',
+      to: "#",
+      text: "About",
     },
   ];
 

@@ -151,7 +151,9 @@ function ChartCard({
       <CardHeader className="dark:bg-gray-900 border-gray-950 rounded-t-md p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
           <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <CardTitle className="text-base sm:text-lg leading-tight truncate">{title}</CardTitle>
+            <CardTitle className="text-base sm:text-lg leading-tight truncate">
+              {title}
+            </CardTitle>
             <CardDescription className="font-light text-xs sm:text-sm line-clamp-2">
               {description}
             </CardDescription>
@@ -189,11 +191,17 @@ function ChartCard({
         </div>
       </CardHeader>
       <CardContent className="dark:bg-gray-900 px-3 sm:px-6 pb-4">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[220px] sm:h-[260px] w-full">{renderChart()}</ChartContainer>
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[220px] sm:h-[260px] w-full"
+        >
+          {renderChart()}
+        </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col dark:bg-gray-900 border-gray-950 rounded-b-md items-start gap-1.5 sm:gap-2 text-xs sm:text-sm px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="flex gap-2 font-medium leading-none items-center flex-wrap">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 shrink-0" />
+          Trending up by 5.2% this month{" "}
+          <TrendingUp className="h-4 w-4 shrink-0" />
         </div>
         <div className="leading-snug text-muted-foreground text-xs">
           Showing total visitors for the last 6 months

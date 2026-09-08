@@ -1,6 +1,13 @@
 import { axiosInstance } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, createContext, useMemo, useCallback, useEffect, useRef } from "react";
+import {
+  useState,
+  createContext,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { Capacitor } from "@capacitor/core";
 import { Preferences } from "@capacitor/preferences";
 import { App as CapApp } from "@capacitor/app";

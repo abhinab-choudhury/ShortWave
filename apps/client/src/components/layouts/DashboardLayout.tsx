@@ -1,75 +1,86 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar"
-import { IconArrowLeft, IconLayoutDashboard, IconSettings, IconChartCovariate } from "@tabler/icons-react"
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom"
-import { motion } from "framer-motion"
-import { axiosInstance, cn } from "@/lib/utils"
-import { toast } from "../ui/use-toast"
-import ShortwaveLogo from "/shortwave_logo.png"
-import { ThemeToggle } from "../ui/theme-toggle"
-import { User } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
-import { Capacitor } from "@capacitor/core"
+import { useEffect, useState } from "react";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import {
+  IconArrowLeft,
+  IconLayoutDashboard,
+  IconSettings,
+  IconChartCovariate,
+} from "@tabler/icons-react";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { axiosInstance, cn } from "@/lib/utils";
+import { toast } from "../ui/use-toast";
+import ShortwaveLogo from "/shortwave_logo.png";
+import { ThemeToggle } from "../ui/theme-toggle";
+import { User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Capacitor } from "@capacitor/core";
 
 export function DashboardLayout() {
-  const location = useLocation()
+  const location = useLocation();
 
   const links = [
     {
       label: "Dashboard",
       href: "/dashboard",
-      icon: <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
+      icon: (
+        <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
+      ),
     },
     {
       label: "Analytics",
       href: "/analytics",
-      icon: <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
+      icon: (
+        <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
+      ),
     },
     {
       label: "Settings",
       href: "/settings",
-      icon: <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />,
+      icon: (
+        <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
+      ),
     },
-  ]
-  const animate = false
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const { user, refreshUser, isLoading: authLoading } = useAuth() 
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  
+  ];
+  const animate = false;
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const { user, refreshUser, isLoading: authLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const handleLogout = async () => {
     try {
-      setIsLoading(true)
-      const response = await axiosInstance.post("/auth/logout")
+      setIsLoading(true);
+      const response = await axiosInstance.post("/auth/logout");
       if (response.status == 200) {
         toast({
           title: "Logged Out Successfull",
           description: "You're all set. Come back soon!",
-        })
-        await refreshUser()
-        navigate(Capacitor.isNativePlatform() ? "/signin" : "/home")
+        });
+        await refreshUser();
+        navigate(Capacitor.isNativePlatform() ? "/signin" : "/home");
       }
     } catch (error) {
-      console.log("Error : ", error)
+      console.log("Error : ", error);
       toast({
         title: "Logout Unsuccessful",
         description: "Something went wrong. Please try again.",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const isActive = (href: string) =>
-    location.pathname === href || location.pathname.startsWith(href + "/")
+    location.pathname === href || location.pathname.startsWith(href + "/");
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/signin", { replace: true })
+      navigate("/signin", { replace: true });
     }
-  }, [navigate, user, authLoading])
+  }, [navigate, user, authLoading]);
   return (
     <div
       className={cn(
@@ -96,7 +107,11 @@ export function DashboardLayout() {
                     <motion.div
                       layoutId="activeTab"
                       className="absolute left-0 top-0 bottom-0 w-0.75 rounded-r-full bg-teal-500 dark:bg-teal-400"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.2,
+                        duration: 0.4,
+                      }}
                     />
                   )}
                   <SidebarLink link={link} />
@@ -141,7 +156,11 @@ export function DashboardLayout() {
 
               <motion.span
                 animate={{
-                  display: animate ? (open ? "inline-block" : "none") : "inline-block",
+                  display: animate
+                    ? open
+                      ? "inline-block"
+                      : "none"
+                    : "inline-block",
                   opacity: animate ? (open ? 1 : 0) : 1,
                 }}
                 className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium whitespace-pre inline-block p-0! m-0!"
@@ -155,16 +174,13 @@ export function DashboardLayout() {
 
       <Outlet />
     </div>
-  )
+  );
 }
 
 export const Logo = () => {
   return (
     <div className="flex w-full items-center justify-between gap-3">
-      <Link
-        to="/home"
-        className="relative z-20 flex min-w-0 items-center py-1"
-      >
+      <Link to="/home" className="relative z-20 flex min-w-0 items-center py-1">
         <div className="flex items-center gap-2.5">
           <img
             width={30}
@@ -192,19 +208,27 @@ export const Logo = () => {
         </div>
       </Link>
 
-      <div className="relative z-50 shrink-0">
+      <div className="relative z-50 hidden shrink-0 md:block">
         <ThemeToggle />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export const LogoIcon = () => {
   return (
-    <Link to="/" className="font-normal flex space-x-2 items-center text-sm text-gray-950 py-1 relative z-20">
-      <img width={30} height={30} src={ShortwaveLogo || "/placeholder.svg"} alt="Shortwave Logo" />
+    <Link
+      to="/"
+      className="font-normal flex space-x-2 items-center text-sm text-gray-950 py-1 relative z-20"
+    >
+      <img
+        width={30}
+        height={30}
+        src={ShortwaveLogo || "/placeholder.svg"}
+        alt="Shortwave Logo"
+      />
     </Link>
-  )
-}
+  );
+};
 
-export default DashboardLayout
+export default DashboardLayout;

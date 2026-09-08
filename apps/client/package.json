@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
-    "mobile:build": "pnpm build && pnpm cap:sync"
+    "mobile:build": "tsc -b && vite build --mode android && cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

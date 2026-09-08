@@ -17,15 +17,9 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const secret_1 = require("./secret");
 const ua_parser_js_1 = require("ua-parser-js");
 const api_error_handling_1 = __importDefault(require("./api-error-handling"));
-const transporter = nodemailer_1.default.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: secret_1.env.EMAIL,
-        pass: secret_1.env.EMAIL_PASSWORD,
-    },
-});
+const mailUser = secret_1.env.MAIL_USER || secret_1.env.EMAIL;
+const mailPass = secret_1.env.MAIL_PASS || secret_1.env.EMAIL_PASSWORD;
+const transporter = nodemailer_1.default.createTransport(Object.assign({ host: secret_1.env.MAIL_HOST, port: Number(secret_1.env.MAIL_PORT) || 587, secure: secret_1.env.MAIL_SECURE === "true" }, (mailUser && mailPass ? { auth: { user: mailUser, pass: mailPass } } : {})));
 const sendWelcomeEmail = function (username, email) {
     return __awaiter(this, void 0, void 0, function* () {
         const emailTemplate = `
@@ -225,7 +219,7 @@ function sendEmail(email, title, emailTemplate) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield transporter.sendMail({
-                from: '"Shortwave" <noreply@shortwave.com>',
+                from: secret_1.env.MAIL_FROM,
                 to: email,
                 subject: title,
                 html: emailTemplate,

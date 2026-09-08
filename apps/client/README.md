@@ -18,7 +18,7 @@ export default tseslint.config({
   languageOptions: {
     // other options...
     parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
       tsconfigRootDir: import.meta.dirname,
     },
   },
@@ -31,11 +31,11 @@ export default tseslint.config({
 
 ```js
 // eslint.config.js
-import react from 'eslint-plugin-react';
+import react from "eslint-plugin-react";
 
 export default tseslint.config({
   // Set the react version
-  settings: { react: { version: '18.3' } },
+  settings: { react: { version: "18.3" } },
   plugins: {
     // Add the react plugin
     react,
@@ -44,35 +44,37 @@ export default tseslint.config({
     // other rules...
     // Enable its recommended rules
     ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
+    ...react.configs["jsx-runtime"].rules,
   },
 });
 ```
-
 
 Here’s a **UI overview** along with some **relevant code snippets** for your **URL shortener analytics dashboard** using **Next.js, ShadCN, and Recharts**.
 
 ---
 
 ## **🔹 UI Overview**
-The dashboard has two main pages:  
+
+The dashboard has two main pages:
+
 - **Dashboard Page (Overview)**
   - Key metrics (Total Clicks, URLs, QR Codes Generated)
   - Recent activity table (Short URLs, Clicks, Date)
   - Click trends graph (Last 7 days)
   - Top-performing URLs
-  - Export data button  
+  - Export data button
 
 - **Analytics Page (Detailed View)**
   - Search and filter (by URL, date, QR status)
   - Graphs: Click trends, Device usage, Geolocation breakdown
   - Heatmaps (Peak click times)
   - Full analytics table (UTM, referrer info, detailed stats)
-  - A/B testing comparison  
+  - A/B testing comparison
 
 ---
 
 ## **🔹 UI Structure**
+
 Here's how you should **structure your components**:
 
 ```
@@ -95,9 +97,11 @@ Here's how you should **structure your components**:
 ---
 
 ## **🔹 Implementing Features**
+
 Here are **code snippets** for key UI features.
 
 ### **📊 1. Stat Cards (Dashboard Overview)**
+
 ```tsx
 // components/StatCard.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,6 +128,7 @@ export function StatCard({ title, value, icon }: StatCardProps) {
 ```
 
 **Usage in `dashboard.tsx`:**
+
 ```tsx
 <StatCard title="Total Clicks" value="12,345" icon={<ClickIcon />} />
 <StatCard title="Total URLs" value="230" icon={<LinkIcon />} />
@@ -133,9 +138,17 @@ export function StatCard({ title, value, icon }: StatCardProps) {
 ---
 
 ### **📈 2. Click Trends Chart (Using Recharts)**
+
 ```tsx
 // components/ClickTrendsChart.tsx
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const data = [
   { day: "Mon", clicks: 120 },
@@ -152,7 +165,12 @@ export function ClickTrendsChart() {
         <XAxis dataKey="day" />
         <YAxis />
         <Tooltip />
-        <Line type="monotone" dataKey="clicks" stroke="#8884d8" strokeWidth={3} />
+        <Line
+          type="monotone"
+          dataKey="clicks"
+          stroke="#8884d8"
+          strokeWidth={3}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -160,6 +178,7 @@ export function ClickTrendsChart() {
 ```
 
 **Usage in `dashboard.tsx`:**
+
 ```tsx
 <Card>
   <CardHeader>
@@ -174,13 +193,31 @@ export function ClickTrendsChart() {
 ---
 
 ### **📝 3. Recent Activity Table**
+
 ```tsx
 // components/RecentActivityTable.tsx
-import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHead,
+  TableRow,
+  TableHeader,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 const recentUrls = [
-  { shortUrl: "short.ly/abc", original: "https://example.com", clicks: 45, created: "2024-03-29" },
-  { shortUrl: "short.ly/xyz", original: "https://openai.com", clicks: 78, created: "2024-03-28" },
+  {
+    shortUrl: "short.ly/abc",
+    original: "https://example.com",
+    clicks: 45,
+    created: "2024-03-29",
+  },
+  {
+    shortUrl: "short.ly/xyz",
+    original: "https://openai.com",
+    clicks: 78,
+    created: "2024-03-28",
+  },
 ];
 
 export function RecentActivityTable() {
@@ -210,6 +247,7 @@ export function RecentActivityTable() {
 ```
 
 **Usage in `dashboard.tsx`:**
+
 ```tsx
 <Card>
   <CardHeader>
@@ -224,6 +262,7 @@ export function RecentActivityTable() {
 ---
 
 ### **🌍 4. Geolocation Chart**
+
 ```tsx
 // components/GeoLocationChart.tsx
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
@@ -240,7 +279,13 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 export function GeoLocationChart() {
   return (
     <PieChart width={400} height={300}>
-      <Pie data={geoData} dataKey="value" nameKey="country" outerRadius={100} fill="#8884d8">
+      <Pie
+        data={geoData}
+        dataKey="value"
+        nameKey="country"
+        outerRadius={100}
+        fill="#8884d8"
+      >
         {geoData.map((_, index) => (
           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
         ))}
@@ -254,25 +299,27 @@ export function GeoLocationChart() {
 ---
 
 ## **🔹 How to Structure UI?**
-- **Dashboard Page:**  
-  - ✅ Stat Cards (Total Clicks, URLs, QR Codes)  
-  - ✅ Click Trends Chart  
-  - ✅ Recent Activity Table  
-  - ✅ Top URLs List  
-  - ✅ Export Data Button  
 
-- **Analytics Page:**  
-  - 🔍 Search & Filter  
-  - 📊 Advanced Charts (Geolocation, Device Usage, Heatmap)  
-  - 🏆 A/B Testing  
-  - 📋 Full Detailed Table  
+- **Dashboard Page:**
+  - ✅ Stat Cards (Total Clicks, URLs, QR Codes)
+  - ✅ Click Trends Chart
+  - ✅ Recent Activity Table
+  - ✅ Top URLs List
+  - ✅ Export Data Button
+
+- **Analytics Page:**
+  - 🔍 Search & Filter
+  - 📊 Advanced Charts (Geolocation, Device Usage, Heatmap)
+  - 🏆 A/B Testing
+  - 📋 Full Detailed Table
 
 ---
 
 ## **🔹 Next Steps**
-1. Implement the **API to fetch real analytics data** (using Next.js API routes).  
-2. Add **dynamic filtering** (ShadCN’s dropdowns).  
-3. Integrate **real-time updates** using WebSockets (optional for live click tracking).  
+
+1. Implement the **API to fetch real analytics data** (using Next.js API routes).
+2. Add **dynamic filtering** (ShadCN’s dropdowns).
+3. Integrate **real-time updates** using WebSockets (optional for live click tracking).
 
 ---
 

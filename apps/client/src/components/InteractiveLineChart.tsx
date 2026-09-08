@@ -121,7 +121,6 @@ function parseCampaignLinksDeviceData(data, shortUrl: string): IDeviceData[] {
   });
 }
 
-
 export function ChartLineInteractive({
   campaignId,
   shortUrl,
@@ -152,7 +151,7 @@ export function ChartLineInteractive({
       tablet: chartData.reduce((acc, curr) => acc + curr.tablet, 0),
       others: chartData.reduce((acc, curr) => acc + curr.others, 0),
     }),
-    [chartData]
+    [chartData],
   );
 
   return (
@@ -188,9 +187,10 @@ export function ChartLineInteractive({
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:px-4 lg:px-6 pt-4 sm:pt-6">
-        {chartData.length === 0 ?
-          (<BlurFallback message="No data available" />) :
-          (<ChartContainer
+        {chartData.length === 0 ? (
+          <BlurFallback message="No data available" />
+        ) : (
+          <ChartContainer
             config={chartConfig}
             className="aspect-auto h-[220px] sm:h-[280px] lg:h-[300px] w-full"
           >
@@ -203,7 +203,11 @@ export function ChartLineInteractive({
                 top: 8,
               }}
             >
-              <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                className="stroke-slate-200 dark:stroke-slate-700"
+              />
               <XAxis
                 dataKey="date"
                 tickLine={false}
@@ -244,9 +248,8 @@ export function ChartLineInteractive({
                 activeDot={{ r: 4, strokeWidth: 2 }}
               />
             </LineChart>
-          </ChartContainer>)
-        }
-
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

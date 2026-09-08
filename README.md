@@ -81,7 +81,7 @@ NODE_ENV=development
 CLIENT_URL=http://localhost:5173
 SERVER_URL=http://localhost:8080
 MONGODB_BASE_URI=mongodb://localhost:27017
-DATABASE_NAME=mydatabase
+DATABASE_NAME=shortwave-db
 REDIS_URL=redis://localhost:6379
 SESSION_SECRET=your_session_secret_32+chars
 JWT_SECRET=your_jwt_secret_32+chars
@@ -89,8 +89,17 @@ GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
-EMAIL=...
+EMAIL=...              # production-only (Gmail SMTP app password)
 EMAIL_PASSWORD=...
+
+# SMTP — local dev: Mailpit (inbox http://localhost:8025). Production: override
+# these with a real provider (e.g. smtp.gmail.com:587 + MAIL_USER/MAIL_PASS).
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USER=
+MAIL_PASS=
+MAIL_SECURE=false
+MAIL_FROM=Shortwave <noreply@shortwave.com>
 ```
 
 **`apps/client/.env`**
@@ -99,12 +108,22 @@ EMAIL_PASSWORD=...
 VITE_SERVER_URL=http://localhost:8080
 ```
 
-### 2. Databases (Docker)
+### 2. Databases & Email (Docker)
+
+One command starts the whole local backend stack (all images are already cached — no pulls):
 
 ```bash
-docker-compose up -d        # MongoDB + Redis
-docker-compose logs -f      # verify
+docker compose up -d        # MongoDB + Redis + Mailpit
+docker compose ps           # verify (all healthy)
 ```
+
+- **MongoDB** (`mongo:7`) → `127.0.0.1:27017` — database `shortwave-db`
+- **Redis** (`redis:7-alpine`) → `127.0.0.1:6379`
+- **Mailpit** (`axllent/mailpit`) → SMTP `127.0.0.1:1025`, inbox UI **http://localhost:8025**
+
+Mailpit captures every email, so OTP / magic-link codes are read in the inbox UI instead of a real mailbox. To stop everything: `docker compose down` (add `-v` to also drop the volumes).
+
+> **Production:** point `MAIL_HOST`/`MAIL_PORT`/`MAIL_USER`/`MAIL_PASS` at a real SMTP provider (Gmail works via `EMAIL`/`EMAIL_PASSWORD`), and `MONGODB_BASE_URI`/`REDIS_URL` at Atlas/Upstash. The compose stack is for local dev only — no code changes needed to switch.
 
 ### 3. Run Web (Desktop & Mobile Web)
 

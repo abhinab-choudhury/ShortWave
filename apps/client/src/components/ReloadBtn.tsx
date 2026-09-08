@@ -11,11 +11,13 @@ export default function ReloadBtn() {
 
   const refersh = useMutation({
     mutationFn: async () => {
-      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/cron/flush`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/cron/flush`,
+      );
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["campaignLink"]});
+      queryClient.invalidateQueries({ queryKey: ["campaignLink"] });
       toast({
         variant: "default",
         title: "Refreshed Successfully!!",
@@ -33,7 +35,7 @@ export default function ReloadBtn() {
   const handleClick = () => {
     setIsPressed(true);
     refersh.mutate(undefined, {
-      onSettled: () => setIsPressed(false), 
+      onSettled: () => setIsPressed(false),
     });
   };
 

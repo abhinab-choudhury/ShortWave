@@ -10,7 +10,9 @@ const isNativePlatform = () => {
   try {
     // lazy import to avoid SSR issues
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const cap = (window as unknown as { Capacitor?: { isNativePlatform: () => boolean } }).Capacitor;
+    const cap = (
+      window as unknown as { Capacitor?: { isNativePlatform: () => boolean } }
+    ).Capacitor;
     if (cap?.isNativePlatform) return cap.isNativePlatform();
   } catch {}
   return false;
@@ -44,16 +46,15 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-
 export class DateUtils {
   /**
    * Format: DD/MM/YYYY
    */
   static formatDate(date: Date | string): string {
     const d = new Date(date);
-    return `${d.getDate().toString().padStart(2, "0")}/${
-      (d.getMonth() + 1).toString().padStart(2, "0")
-    }/${d.getFullYear()}`;
+    return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}/${d.getFullYear()}`;
   }
 
   /**

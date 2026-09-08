@@ -152,7 +152,7 @@ function parseCampaignLinksOSData(data, shortUrl): IOSData[] {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-function parseCampaignLinksCountryData(data,shortUrl): ICountryData[] {
+function parseCampaignLinksCountryData(data, shortUrl): ICountryData[] {
   if (!data?.urls) return [];
 
   const parsedData: Record<string, ICountryData> = {};
@@ -196,7 +196,7 @@ export function InteractiveBarChartLabel(props: {
   });
   const countryData = parseCampaignLinksCountryData(
     campaignLinks.data,
-    props.shortUrl
+    props.shortUrl,
   );
   const hasData = countryData.length > 0;
 
@@ -204,7 +204,7 @@ export function InteractiveBarChartLabel(props: {
     <Card
       className={cn(
         "flex flex-col justify-between dark:bg-gray-800 shadow-sm overflow-hidden w-full",
-        props.className
+        props.className,
       )}
     >
       {/* Header */}
@@ -292,7 +292,7 @@ export function InteractiveBarChartMixed(props: {
     <Card
       className={cn(
         "flex flex-col dark:bg-gray-800 shadow-sm overflow-hidden w-full",
-        props.className
+        props.className,
       )}
     >
       {/* Header */}
@@ -323,7 +323,10 @@ export function InteractiveBarChartMixed(props: {
       {/* Chart */}
       <CardContent className="mt-4 sm:mt-6 px-2 sm:px-6">
         {hasData ? (
-          <ChartContainer config={mixedBarChartConfig} className="aspect-auto h-[260px] sm:h-[300px] w-full">
+          <ChartContainer
+            config={mixedBarChartConfig}
+            className="aspect-auto h-[260px] sm:h-[300px] w-full"
+          >
             <BarChart
               accessibilityLayer
               data={datasets[activeChart]}
@@ -338,7 +341,9 @@ export function InteractiveBarChartMixed(props: {
                 axisLine={false}
                 width={80}
                 tick={{ fontSize: 11 }}
-                tickFormatter={(value: string) => value.length > 12 ? value.slice(0, 12) + "…" : value}
+                tickFormatter={(value: string) =>
+                  value.length > 12 ? value.slice(0, 12) + "…" : value
+                }
               />
               <XAxis dataKey="visitors" type="number" hide />
               <ChartTooltip

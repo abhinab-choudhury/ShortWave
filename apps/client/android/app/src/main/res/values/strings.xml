@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Shortwave</string>
+    <string name="title_activity_main">Shortwave</string>
+    <string name="package_name">com.shortwave.app</string>
+    <string name="custom_url_scheme">com.shortwave.app</string>
+</resources>

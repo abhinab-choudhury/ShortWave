@@ -4,7 +4,6 @@ import { Hero } from "@/components/HeroSection";
 import { Cta } from "@/components/CtaSectio";
 
 const Home = () => {
-
   return (
     <AppLayout>
       <Hero />
@@ -13,6 +12,5 @@ const Home = () => {
     </AppLayout>
   );
 };
-
 
 export default Home;

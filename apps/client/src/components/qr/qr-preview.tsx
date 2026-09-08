@@ -1,15 +1,15 @@
-import QRCode from "react-qrcode-logo"
-import { cn } from "@/lib/utils"
-import type { QRConfig } from "./types"
+import QRCode from "react-qrcode-logo";
+import { cn } from "@/lib/utils";
+import type { QRConfig } from "./types";
 
 export function QRCardPreview({
   shortLink,
   config,
   className,
 }: {
-  shortLink: string
-  config: QRConfig
-  className?: string
+  shortLink: string;
+  config: QRConfig;
+  className?: string;
 }) {
   const {
     size = 192,
@@ -24,26 +24,30 @@ export function QRCardPreview({
     logoWidth = 40,
     logoHeight = 40,
     removeQrCodeBehindLogo = true,
-  } = config || {}
+  } = config || {};
 
   return (
     <div
       id="qr-card"
       className={cn(
-        "relative mx-auto flex w-full max-w-sm flex-col items-center gap-4 overflow-hidden rounded-xl",
-        "border border-border bg-card p-6 text-card-foreground shadow-sm",
+        "relative mx-auto flex w-full min-w-0 max-w-sm flex-col items-center gap-3 overflow-hidden rounded-xl",
+        "border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-6 sm:gap-4",
         className,
       )}
     >
       {/* brand */}
       <div className="flex items-center gap-2">
-        <img src="/shortwave_logo.png" alt="Shortwave logo" className="h-10 w-10 rounded" />
+        <img
+          src="/shortwave_logo.png"
+          alt="Shortwave logo"
+          className="h-10 w-10 rounded"
+        />
         <span className="text-lg font-semibold tracking-tight">Shortwave</span>
       </div>
 
       {/* QR area */}
       <div
-        className="flex items-center justify-center rounded-lg bg-muted p-3 ring-1 ring-border"
+        className="flex min-w-0 max-w-full items-center justify-center overflow-hidden rounded-lg bg-muted p-3 ring-1 ring-border"
         style={{ height: size + 16, width: size + 16 }}
       >
         <QRCode
@@ -71,7 +75,9 @@ export function QRCardPreview({
 
       {/* copy/link info */}
       <div className="w-full text-center">
-        <h5 className="text-base font-semibold text-foreground">Scan this QR Code</h5>
+        <h5 className="text-base font-semibold text-foreground">
+          Scan this QR Code
+        </h5>
         <p className="mt-1 text-sm text-muted-foreground">
           <a
             href={shortLink}
@@ -92,5 +98,5 @@ export function QRCardPreview({
         QR
       </span>
     </div>
-  )
+  );
 }

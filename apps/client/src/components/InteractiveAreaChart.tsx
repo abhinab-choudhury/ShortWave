@@ -144,7 +144,9 @@ export function ChartAreaInteractive({
     <Card className="pt-0 dark:bg-gray-800 overflow-hidden w-full">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 space-y-0 border-b p-4 sm:py-5 sm:px-6">
         <div className="grid flex-1 gap-1 min-w-0">
-          <CardTitle className="text-base sm:text-lg lg:text-xl leading-tight">Area Chart - Interactive</CardTitle>
+          <CardTitle className="text-base sm:text-lg lg:text-xl leading-tight">
+            Area Chart - Interactive
+          </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             Showing total visitors for the selected period
           </CardDescription>

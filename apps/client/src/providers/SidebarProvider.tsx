@@ -1,5 +1,5 @@
-import { SidebarContext } from '@/hooks/useSidebar';
-import { useState } from 'react';
+import { SidebarContext } from "@/hooks/useSidebar";
+import { useState } from "react";
 
 export const SidebarProvider = ({
   children,

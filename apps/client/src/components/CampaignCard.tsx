@@ -52,12 +52,19 @@ export default function CampaignCard({
         <div className="p-1 sm:p-1.5 rounded-md bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex items-center justify-center shrink-0">
           <Link2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500 dark:text-slate-300" />
         </div>
-        <span className="truncate font-mono text-[11px] sm:text-xs tracking-tight">{shortId}</span>
+        <span className="truncate font-mono text-[11px] sm:text-xs tracking-tight">
+          {shortId}
+        </span>
       </div>
 
       {/* Created date */}
       <div className="text-[11px] sm:text-xs text-right text-slate-400 dark:text-slate-500 mt-auto pt-2 border-t border-dashed border-slate-100 dark:border-slate-700/50">
-        Created on {date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+        Created on{" "}
+        {date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })}
       </div>
     </div>
   );

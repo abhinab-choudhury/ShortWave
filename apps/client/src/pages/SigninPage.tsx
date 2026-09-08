@@ -1,4 +1,5 @@
 import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -98,7 +99,8 @@ const SigninPage: React.FC = () => {
       console.log("Error: ", error);
       toast({
         variant: "destructive",
-        title: "❌ " +
+        title:
+          "❌ " +
           (error?.response?.data?.message || "Could not send the code."),
       });
     } finally {
@@ -135,7 +137,8 @@ const SigninPage: React.FC = () => {
       console.log("Error: ", error);
       toast({
         variant: "destructive",
-        title: "❌ " +
+        title:
+          "❌ " +
           (error?.response?.data?.message || "Invalid code. Try again."),
       });
     } finally {
@@ -158,16 +161,19 @@ const SigninPage: React.FC = () => {
       const url = `${import.meta.env.VITE_SERVER_URL}/api/v1/auth/${provider}?platform=${native ? "native" : "web"}`;
       if (native) {
         await Browser.open({ url });
-        const listener = await CapApp.addListener("appUrlOpen", async (event) => {
-          try {
-            const u = new URL(event.url);
-            if (u.searchParams.get("token")) {
-              await Browser.close();
-              listener.remove();
-              window.location.href = "/dashboard" + u.search;
-            }
-          } catch {}
-        });
+        const listener = await CapApp.addListener(
+          "appUrlOpen",
+          async (event) => {
+            try {
+              const u = new URL(event.url);
+              if (u.searchParams.get("token")) {
+                await Browser.close();
+                listener.remove();
+                window.location.href = "/dashboard" + u.search;
+              }
+            } catch {}
+          },
+        );
         setTimeout(() => listener.remove(), 120000);
       } else {
         window.open(url, "_self");
@@ -198,113 +204,122 @@ const SigninPage: React.FC = () => {
         </div>
 
         {native && step === "otp" ? (
-          <form onSubmit={otpForm.handleSubmit(handleVerifyOtp)} className="space-y-5">
-            <FormField
-              control={otpForm.control}
-              name="otp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-slate-700 dark:text-slate-300 text-sm font-medium">
-                    Verification Code
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      placeholder="000000"
-                      className="h-14 w-full text-center text-2xl font-bold tracking-[0.5em] bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-200 rounded-lg"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs text-slate-400 dark:text-slate-500 text-center">
-                    We emailed a 6-digit code to{" "}
-                    <span className="font-medium text-slate-500 dark:text-slate-400">
-                      {emailForm.getValues("email")}
-                    </span>
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              disabled={isSending}
-              type="submit"
-              variant="default"
-              className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] dark:bg-teal-500 dark:hover:bg-teal-400 dark:text-slate-950"
-            >
-              {isSending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                "Verify Code"
-              )}
-            </Button>
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                disabled={resendTimer > 0}
-                onClick={handleResend}
-                className="text-xs font-medium text-teal-600 dark:text-teal-400 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
-              >
-                {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend code"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                className="text-xs font-medium text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-              >
-                Change email
-              </button>
-            </div>
-          </form>
-        ) : (
-          <>
+          <Form {...otpForm}>
             <form
-              onSubmit={emailForm.handleSubmit(
-                native ? handleSendOtp : onSubmitMagicLink,
-              )}
+              onSubmit={otpForm.handleSubmit(handleVerifyOtp)}
               className="space-y-5"
             >
               <FormField
-                control={emailForm.control}
-                name="email"
+                control={otpForm.control}
+                name="otp"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-slate-700 dark:text-slate-300 text-sm font-medium">
-                      Email
+                      Verification Code
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder="name@example.com"
-                        className="h-11 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-200 rounded-lg"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="000000"
+                        className="h-14 w-full text-center text-2xl font-bold tracking-[0.5em] bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-200 rounded-lg"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className="text-xs text-slate-400 dark:text-slate-500">
-                      {native
-                        ? "Enter your email to receive a one-time sign-in code."
-                        : "Enter your email address to receive your secure login link."}
+                    <FormDescription className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                      We emailed a 6-digit code to{" "}
+                      <span className="font-medium text-slate-500 dark:text-slate-400">
+                        {emailForm.getValues("email")}
+                      </span>
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button
-                disabled={isLoading || isSending}
+                disabled={isSending}
                 type="submit"
                 variant="default"
                 className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] dark:bg-teal-500 dark:hover:bg-teal-400 dark:text-slate-950"
               >
-                {isLoading || isSending ? (
+                {isSending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
-                ) : native ? (
-                  "Send Code"
                 ) : (
-                  "Sign In"
+                  "Verify Code"
                 )}
               </Button>
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  disabled={resendTimer > 0}
+                  onClick={handleResend}
+                  className="text-xs font-medium text-teal-600 dark:text-teal-400 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
+                >
+                  {resendTimer > 0
+                    ? `Resend in ${resendTimer}s`
+                    : "Resend code"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep("email")}
+                  className="text-xs font-medium text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  Change email
+                </button>
+              </div>
             </form>
+          </Form>
+        ) : (
+          <>
+            <Form {...emailForm}>
+              <form
+                onSubmit={emailForm.handleSubmit(
+                  native ? handleSendOtp : onSubmitMagicLink,
+                )}
+                className="space-y-5"
+              >
+                <FormField
+                  control={emailForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-700 dark:text-slate-300 text-sm font-medium">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="name@example.com"
+                          className="h-11 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-200 rounded-lg"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs text-slate-400 dark:text-slate-500">
+                        {native
+                          ? "Enter your email to receive a one-time sign-in code."
+                          : "Enter your email address to receive your secure login link."}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  disabled={isLoading || isSending}
+                  type="submit"
+                  variant="default"
+                  className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] dark:bg-teal-500 dark:hover:bg-teal-400 dark:text-slate-950"
+                >
+                  {isLoading || isSending ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : native ? (
+                    "Send Code"
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </form>
+            </Form>
           </>
         )}
 
@@ -328,7 +343,11 @@ const SigninPage: React.FC = () => {
                 {oauthLoading.google ? (
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 ) : (
-                  <img src={GoogleLogo} alt="Google logo" className="h-5 w-5 mr-2.5" />
+                  <img
+                    src={GoogleLogo}
+                    alt="Google logo"
+                    className="h-5 w-5 mr-2.5"
+                  />
                 )}
                 Continue with Google
               </Button>
@@ -342,7 +361,11 @@ const SigninPage: React.FC = () => {
                 {oauthLoading.github ? (
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 ) : (
-                  <img src={GithubLogo} alt="Github logo" className="h-5 w-5 mr-2.5" />
+                  <img
+                    src={GithubLogo}
+                    alt="Github logo"
+                    className="h-5 w-5 mr-2.5"
+                  />
                 )}
                 Continue with GitHub
               </Button>

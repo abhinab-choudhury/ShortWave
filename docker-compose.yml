@@ -1,20 +1,38 @@
 services:
-  mongo_db:
-    image: mongo:latest
+  mongo:
+    image: mongo:7
+    container_name: shortwave-mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
-      - mongo_data:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis/redis-stack
-    container_name: redis-stack
+    image: redis:7-alpine
+    container_name: shortwave-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: shortwave-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    volumes:
+      - mailpit-data:/data
 
 volumes:
-  mongo_data:
-  redis_data:
+  mongo-data:
+  redis-data:
+  mailpit-data:
