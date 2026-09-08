@@ -99,15 +99,15 @@ export function QRCardBtn(props: { shortLink: string }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="overflow-x-hidden overflow-y-auto p-0 sm:max-h-[90vh] sm:max-w-6xl sm:p-6 max-sm:inset-x-0 max-sm:top-0 max-sm:h-dvh max-sm:w-full max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none">
-        <DialogHeader className="px-4 pr-12 pt-4 sm:px-0 sm:pt-0">
+      <DialogContent className="overflow-x-hidden overflow-y-auto p-0 sm:max-h-[90vh] sm:max-w-6xl max-sm:inset-x-0 max-sm:top-0 max-sm:h-dvh max-sm:w-full max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none">
+        <DialogHeader className="px-4 pr-12 pt-4 sm:px-6 sm:pt-6">
           <DialogTitle className="tracking-tight">QR Card</DialogTitle>
           <DialogDescription>
             Customize the QR code and download a high-quality image.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5 px-4 pt-4 pb-0 sm:px-0 sm:pt-3 sm:pb-0 md:grid-cols-2 md:gap-6">
+        <div className="grid gap-5 px-4 pt-3 sm:px-6 sm:pt-4 md:grid-cols-2 md:gap-6">
           <div className="order-1 md:sticky md:top-0 md:order-2 md:self-start">
             <QRCardPreview
               shortLink={`${import.meta.env.VITE_SERVER_URL}/${shortLink}`}
@@ -169,7 +169,7 @@ export function QRCardBtn(props: { shortLink: string }) {
           </div>
         </div>
 
-        <DialogFooter className="sticky bottom-0 z-10 gap-2 border-t border-border bg-white px-4 py-3 dark:bg-gray-950 sm:px-0 sm:py-4 max-sm:flex-row max-sm:justify-end">
+        <DialogFooter className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t border-border bg-white px-4 py-3 dark:bg-gray-950 sm:flex-row sm:justify-end sm:px-6 sm:py-4 max-sm:flex-row max-sm:justify-end">
           <DialogClose asChild>
             <Button type="button" variant="ghost">
               Close

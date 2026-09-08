@@ -1,11 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Link, LinkProps, useLocation } from "react-router-dom";
 import React, { useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { useSidebar } from "@/hooks/useSidebar";
 import { SidebarProvider } from "@/providers/SidebarProvider";
-import { ThemeToggle } from "./theme-toggle";
 
 interface Links {
   label: string;
@@ -31,11 +29,17 @@ export const Sidebar = ({
   );
 };
 
-export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+export const SidebarBody = ({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) => {
   return (
     <>
-      <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
+      <DesktopSidebar className={className} {...props}>
+        {children}
+      </DesktopSidebar>
+      <MobileSidebar>{children}</MobileSidebar>
     </>
   );
 };
@@ -44,25 +48,17 @@ export const DesktopSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof motion.div>) => {
-  const { open, setOpen, animate } = useSidebar();
+}: React.ComponentProps<"div">) => {
   return (
-    <>
-      <motion.div
-        className={cn(
-          "h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-slate-800 w-75 shrink-0",
-          className,
-        )}
-        animate={{
-          width: animate ? (open ? "300px" : "70px") : "300px",
-        }}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    </>
+    <aside
+      className={cn(
+        "hidden h-full w-[300px] shrink-0 flex-col bg-neutral-100 px-4 py-4 dark:bg-slate-800 md:flex",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </aside>
   );
 };
 
@@ -83,7 +79,8 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "flex h-12 w-full shrink-0 items-center justify-between gap-3 px-4 md:hidden bg-neutral-100 dark:bg-slate-800",
+          "flex h-12 w-full shrink-0 items-center justify-between gap-3 bg-neutral-100 px-4 dark:bg-slate-800 md:hidden",
+          className,
         )}
         {...props}
       >
@@ -91,7 +88,7 @@ export const MobileSidebar = ({
           type="button"
           aria-label="Open menu"
           onClick={() => setOpen(true)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-neutral-800 dark:text-neutral-200 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-neutral-800 transition-colors hover:bg-black/5 dark:text-neutral-200 dark:hover:bg-white/10"
         >
           <IconMenu2 className="h-5 w-5" />
         </button>
@@ -99,45 +96,33 @@ export const MobileSidebar = ({
         <span className="text-sm font-semibold tracking-tight text-teal-600 dark:text-teal-400">
           ShortWave
         </span>
-
-        <ThemeToggle />
       </div>
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-90 backdrop-blur-sm md:hidden"
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-              }}
-              className={cn(
-                "fixed h-full w-[80%] max-w-[300px] inset-y-0 left-0 bg-white dark:bg-slate-900 p-5 sm:p-6 z-100 flex flex-col justify-between overflow-y-auto shadow-2xl",
-                className,
-              )}
-            >
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-                className="absolute right-3 top-3 z-50 flex h-9 w-9 items-center justify-center rounded-lg text-neutral-800 dark:text-slate-200 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-              >
-                <IconX className="h-5 w-5" />
-              </button>
-              {children}
-            </motion.div>
-          </>
+      <div
+        aria-hidden={!open}
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
-      </AnimatePresence>
+        onClick={() => setOpen(false)}
+      />
+
+      <div
+        aria-hidden={!open}
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-full w-[80%] max-w-[300px] flex-col justify-between overflow-y-auto bg-white p-5 transition-transform duration-300 ease-in-out dark:bg-slate-900 sm:p-6 md:hidden",
+          open ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setOpen(false)}
+          className="absolute right-3 top-3 z-50 flex h-9 w-9 items-center justify-center rounded-lg text-neutral-800 transition-colors hover:bg-black/5 dark:text-slate-200 dark:hover:bg-white/10"
+        >
+          <IconX className="h-5 w-5" />
+        </button>
+        {children}
+      </div>
     </>
   );
 };

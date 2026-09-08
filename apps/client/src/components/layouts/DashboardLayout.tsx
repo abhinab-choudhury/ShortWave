@@ -13,8 +13,14 @@ import { motion } from "framer-motion";
 import { axiosInstance, cn } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
 import ShortwaveLogo from "/shortwave_logo.png";
-import { ThemeToggle } from "../ui/theme-toggle";
-import { User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Moon, Sun, User } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Capacitor } from "@capacitor/core";
 
@@ -44,9 +50,9 @@ export function DashboardLayout() {
       ),
     },
   ];
-  const animate = false;
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { setTheme } = useTheme();
   const { user, refreshUser, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -81,23 +87,15 @@ export function DashboardLayout() {
       navigate("/signin", { replace: true });
     }
   }, [navigate, user, authLoading]);
+
   return (
     <div
       className={cn(
         "relative flex flex-col md:flex-row w-full h-screen flex-1 mx-auto border border-slate-200 dark:border-slate-800 overflow-hidden",
       )}
     >
-      <Sidebar open={open} setOpen={setOpen} animate={animate}>
-        <SidebarBody
-          className="
-            justify-between
-            gap-10
-            bg-white dark:bg-slate-900
-            pt-4 md:pt-8
-            overflow-visible
-            border-r border-slate-200/60 dark:border-slate-800
-          "
-        >
+      <Sidebar open={open} setOpen={setOpen}>
+        <SidebarBody className="justify-between gap-10 bg-white dark:bg-slate-900 pt-4 md:pt-8 overflow-visible border-r border-slate-200/60 dark:border-slate-800">
           <div className="flex flex-col flex-1">
             <Logo />
             <div className="mt-8 flex flex-col gap-1 h-fit">
@@ -118,6 +116,7 @@ export function DashboardLayout() {
                 </div>
               ))}
               <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <ThemeButton setTheme={setTheme} />
                 <button
                   disabled={isLoading ? true : false}
                   onClick={handleLogout}
@@ -126,7 +125,7 @@ export function DashboardLayout() {
                   <div className="rounded-lg p-1.5 bg-slate-100 dark:bg-slate-800 transition-colors group-hover/sidebar:bg-red-100 dark:group-hover/sidebar:bg-red-950/50">
                     <IconArrowLeft className="h-4 w-4 shrink-0" />
                   </div>
-                  <div className="text-sm font-medium group-hover/sidebar:translate-x-0.5 transition duration-150 whitespace-pre inline-block p-0! m-0!">
+                  <div className="text-sm font-medium whitespace-pre inline-block p-0! m-0!">
                     Logout
                   </div>
                 </button>
@@ -137,7 +136,6 @@ export function DashboardLayout() {
           <div className="mt-auto w-full border-t border-slate-100 dark:border-slate-800 pt-3">
             <Link
               to="#"
-              onClick={() => setOpen(true)}
               className="flex items-center justify-start gap-3 group/sidebar py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               <div className="shrink-0">
@@ -154,19 +152,9 @@ export function DashboardLayout() {
                 )}
               </div>
 
-              <motion.span
-                animate={{
-                  display: animate
-                    ? open
-                      ? "inline-block"
-                      : "none"
-                    : "inline-block",
-                  opacity: animate ? (open ? 1 : 0) : 1,
-                }}
-                className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium whitespace-pre inline-block p-0! m-0!"
-              >
+              <span className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium">
                 <span>{user?.email || "User"}</span>
-              </motion.span>
+              </span>
             </Link>
           </div>
         </SidebarBody>
@@ -177,41 +165,73 @@ export function DashboardLayout() {
   );
 }
 
+function ThemeButton({
+  setTheme,
+}: {
+  setTheme: (t: "dark" | "light" | "system") => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          aria-label="Toggle theme"
+          className="flex w-full items-center justify-start gap-2 group/sidebar py-2 px-3 cursor-pointer rounded-lg transition-all duration-200 hover:bg-teal-50 dark:hover:bg-teal-500/10 text-teal-700 dark:text-teal-300"
+        >
+          <div className="rounded-lg p-1.5 bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-300 transition-colors group-hover/sidebar:bg-teal-100 dark:group-hover/sidebar:bg-teal-500/25">
+            <Sun className="h-4 w-4 dark:hidden" />
+            <Moon className="hidden h-4 w-4 dark:block" />
+          </div>
+          <div className="text-sm font-medium whitespace-pre inline-block p-0! m-0!">
+            Theme
+          </div>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        sideOffset={4}
+        className="z-[60] dark:bg-gray-800"
+      >
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export const Logo = () => {
   return (
-    <div className="flex w-full items-center justify-between gap-3">
-      <Link to="/home" className="relative z-20 flex min-w-0 items-center py-1">
-        <div className="flex items-center gap-2.5">
-          <img
-            width={30}
-            height={30}
-            src={ShortwaveLogo || "/placeholder.svg"}
-            alt="Shortwave Logo"
-            className="h-7.5 w-7.5 shrink-0"
-          />
+    <Link to="/home" className="relative z-20 flex min-w-0 items-center gap-2.5 py-1">
+      <img
+        width={30}
+        height={30}
+        src={ShortwaveLogo || "/placeholder.svg"}
+        alt="Shortwave Logo"
+        className="h-7.5 w-7.5 shrink-0"
+      />
 
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="
-              whitespace-nowrap
-              font-sans
-              text-xl
-              font-bold
-              tracking-tight
-              text-teal-600
-              dark:text-teal-400
-            "
-          >
-            ShortWave
-          </motion.span>
-        </div>
-      </Link>
-
-      <div className="relative z-50 hidden shrink-0 md:block">
-        <ThemeToggle />
-      </div>
-    </div>
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="
+          whitespace-nowrap
+          font-sans
+          text-xl
+          font-bold
+          tracking-tight
+          text-teal-600
+          dark:text-teal-400
+        "
+      >
+        ShortWave
+      </motion.span>
+    </Link>
   );
 };
 
