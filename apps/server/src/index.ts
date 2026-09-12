@@ -5,7 +5,7 @@ import morgan from "morgan";
 import session from "express-session";
 import passport from "passport";
 import MongoStore from "connect-mongo";
-import "ejs";
+import * as ejs from "ejs";
 
 import { env } from "./utils/secret";
 import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
@@ -27,6 +27,10 @@ const app = express();
 app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.engine(
+  "ejs",
+  ejs.renderFile as (path: string, options: object, callback: (e: unknown, rendered?: string) => void) => void,
+);
 
 const allowedOrigins = [
   env.CLIENT_URL,

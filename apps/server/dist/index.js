@@ -51,7 +51,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("passport"));
 const connect_mongo_1 = __importDefault(require("connect-mongo"));
-require("ejs");
+const ejs = __importStar(require("ejs"));
 const secret_1 = require("./utils/secret");
 const db_connect_1 = __importStar(require("./database/db-connect"));
 const redis_connect_1 = require("./database/redis-connect");
@@ -68,6 +68,7 @@ const app = (0, express_1.default)();
 app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 app.set("views", node_path_1.default.join(__dirname, "views"));
+app.engine("ejs", ejs.renderFile);
 const allowedOrigins = [
     secret_1.env.CLIENT_URL,
     "capacitor://localhost",
