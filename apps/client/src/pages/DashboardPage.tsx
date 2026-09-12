@@ -69,7 +69,7 @@ const DashboardPage = () => {
           data={stats.total_links}
           footer="+10 this week"
           icon_styles="bg-teal-100 dark:bg-teal-500/15"
-          icon={<Link2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />}
+          icon={<Link2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
         />
         <DashboardQuickInfoCard
           title="Click Rate Growth"
@@ -78,7 +78,7 @@ const DashboardPage = () => {
           footer="Since yesterday"
           icon_styles="bg-emerald-100 dark:bg-emerald-500/15"
           icon={
-            <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           }
         />
         <DashboardQuickInfoCard
@@ -88,7 +88,7 @@ const DashboardPage = () => {
           footer="Running this week"
           icon_styles="bg-indigo-100 dark:bg-indigo-500/15"
           icon={
-            <Megaphone className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <Megaphone className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           }
         />
       </>
@@ -128,41 +128,41 @@ const DashboardPage = () => {
 
   return (
     <div className="flex flex-1 min-w-0">
-      <div className="font-sans p-4 sm:p-6 md:p-8 lg:p-10 bg-slate-50/50 dark:bg-slate-950 flex flex-col gap-2 flex-1 w-full max-h-screen overflow-y-auto overflow-x-hidden scrollbar-slim">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+      <div className="font-sans p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950 flex flex-col gap-3 flex-1 w-full max-h-screen overflow-y-auto overflow-x-hidden scrollbar-slim">
+        <div className="mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Dashboard
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 sm:mt-1.5">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Overview of your link management activity
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <StatCards />
         </div>
 
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mt-6 sm:mt-8 mb-4 sm:mb-6 gap-3 sm:gap-4">
-          <div className="flex gap-2 sm:gap-2.5 w-full lg:w-auto overflow-x-auto scrollbar-slim pb-1 lg:pb-0">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mt-4 sm:mt-5 mb-3 gap-3">
+          <div className="flex gap-2 w-full lg:w-auto overflow-x-auto scrollbar-slim pb-1 lg:pb-0">
             <Button
               variant="outline"
-              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-9 sm:h-10 text-xs sm:text-sm"
+              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-8 sm:h-9 text-xs"
             >
               Filter{" "}
-              <ListFilter className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 text-slate-400" />
+              <ListFilter className="w-3.5 h-3.5 ml-1.5 text-slate-400" />
             </Button>
             <Button
               variant="outline"
-              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-9 sm:h-10 text-xs sm:text-sm"
+              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-8 sm:h-9 text-xs"
             >
               Display{" "}
-              <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 text-slate-400" />
+              <SlidersHorizontal className="w-3.5 h-3.5 ml-1.5 text-slate-400" />
             </Button>
           </div>
 
-          <div className="flex gap-2 sm:gap-2.5 items-center w-full lg:w-auto">
+          <div className="flex gap-2 items-center w-full lg:w-auto">
             <input
-              className="h-9 sm:h-10 px-3 sm:px-3.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm leading-6 flex-1 lg:w-64 min-w-0 bg-white dark:bg-slate-800 dark:text-white placeholder:text-xs sm:placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-all duration-200"
+              className="h-8 sm:h-9 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm leading-6 flex-1 lg:w-56 min-w-0 bg-white dark:bg-slate-800 dark:text-white placeholder:text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-all duration-200"
               type="text"
               placeholder="Search campaigns..."
             />
@@ -172,15 +172,15 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 sm:gap-5 p-4 sm:p-6 flex-1 border border-slate-200/60 dark:border-slate-800 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900/50 h-auto shadow-sm min-w-0">
-          <h2 className="text-base sm:text-lg lg:text-xl font-semibold tracking-tight flex gap-2 sm:gap-2.5 items-center text-slate-800 dark:text-white">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/10 shrink-0">
-              <TentIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-400" />
+        <div className="flex flex-col gap-3 p-4 sm:p-5 flex-1 border border-slate-200/60 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50 h-auto shadow-sm min-w-0">
+          <h2 className="text-sm sm:text-base font-semibold tracking-tight flex gap-2 items-center text-slate-800 dark:text-white">
+            <div className="p-1 rounded-lg bg-teal-50 dark:bg-teal-500/10 shrink-0">
+              <TentIcon className="w-4 h-4 text-teal-600 dark:text-teal-400" />
             </div>
             Recent Campaigns
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-3 sm:gap-4 h-full w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 w-full">
             <CampaignCards />
           </div>
         </div>
