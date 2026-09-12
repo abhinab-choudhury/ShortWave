@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { axiosInstance, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
 import ShortwaveLogo from "/shortwave_logo.png";
 import {
@@ -53,21 +53,18 @@ export function DashboardLayout() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { setTheme } = useTheme();
-  const { user, refreshUser, isLoading: authLoading } = useAuth();
+  const { user, logout, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.post("/auth/logout");
-      if (response.status == 200) {
-        toast({
-          title: "Logged Out Successfull",
-          description: "You're all set. Come back soon!",
-        });
-        navigate(Capacitor.isNativePlatform() ? "/signin" : "/home");
-        await refreshUser();
-      }
+      await logout();
+      toast({
+        title: "Logged Out Successfully",
+        description: "You're all set. Come back soon!",
+      });
+      navigate(Capacitor.isNativePlatform() ? "/signin" : "/home");
     } catch (error) {
       console.log("Error : ", error);
       toast({
