@@ -51,6 +51,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("passport"));
 const connect_mongo_1 = __importDefault(require("connect-mongo"));
+require("ejs");
 const secret_1 = require("./utils/secret");
 const db_connect_1 = __importStar(require("./database/db-connect"));
 const redis_connect_1 = require("./database/redis-connect");

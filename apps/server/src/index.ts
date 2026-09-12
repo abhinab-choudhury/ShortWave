@@ -5,6 +5,7 @@ import morgan from "morgan";
 import session from "express-session";
 import passport from "passport";
 import MongoStore from "connect-mongo";
+import "ejs";
 
 import { env } from "./utils/secret";
 import DB_CONNECT, { MONGODB_URI } from "./database/db-connect";
