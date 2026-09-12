@@ -55,7 +55,7 @@ Try it here:
 
 - **Node.js** 20+ · **pnpm** 11.5.1 (`npm i -g pnpm`)
 - **Docker & Docker Compose** (for MongoDB + Redis)
-- For Android builds: **Android Studio** + SDK 34 + JDK 17 + `ANDROID_HOME` set
+- For Android builds: **Android Studio** + SDK 36 + JDK 17 + `ANDROID_HOME` set
 - Env files: `apps/server/.env` and `apps/client/.env` (see `.env.example`)
 
 ---
@@ -140,18 +140,22 @@ Open `http://localhost:5173` → web lands on `/home`, auth via **session cookie
 
 Capacitor bundles the Vite `dist` into a native WebView. Auth is **JWT-only** (no cookies) — token stored in `Preferences` + `localStorage`, sent as `Bearer`.
 
+The Android project lives in `apps/client/android/` (Gradle, `appId com.shortwave.app`, app name **Shortwave**). SDK floor is **minSdk 24 / compileSdk & targetSdk 36** — set these in `apps/client/android/variables.gradle`.
+
 ```bash
-# 1. Build web assets
-pnpm --filter client run build
+# 1. Build web assets + sync (uses .env.android → VITE_SERVER_URL=http://10.0.2.2:8080 for the emulator)
+pnpm --filter client run mobile:build   # = tsc -b && vite build --mode android && cap sync
+# or step by step:
+pnpm --filter client run build          # build web assets to dist/
+pnpm --filter client run cap:sync       # copy dist + plugins into android/
 
-# 2. Sync to Android (copies dist + plugins)
-pnpm --filter client run cap:sync
-# or pnpm --filter client run mobile:build  # build + sync
-
-# 3. Open in Android Studio
+# 2. Open in Android Studio and Run ▶ on an emulator / device
 pnpm --filter client run cap:android
-# In Android Studio: Run ▶ on emulator / device
 ```
+
+**`apps/client/.env.android`** points the app at the API server:
+- **Emulator:** `VITE_SERVER_URL="http://10.0.2.2:8080"` (`10.0.2.2` = host loopback from the emulator)
+- **Physical device:** replace `10.0.2.2` with your machine's LAN IP (e.g. `http://192.168.1.20:8080`), find it with `ip a` / `ifconfig`, and open inbound TCP 8080 in your firewall
 
 **Native routing:** `capacitor://localhost/` → `Capacitor.isNativePlatform()` → redirects `/` → `/signin` (not `/home`), so the app always starts at **login/signup**. On native, sign-in uses **email OTP** (`POST /api/v1/auth/otp/request` → 6-digit code → `POST /api/v1/auth/otp/verify` → JWT) so the user never leaves the app. Web keeps magic-link + OAuth. OAuth/magic-link deep links (`capacitor://localhost/...?token=`) are still captured via `App.addListener('appUrlOpen', ...)` and persisted via `@capacitor/preferences`.
 
@@ -170,11 +174,10 @@ then `pnpm --filter client run cap:sync` + `npx cap run android`.
 pnpm run build              # builds client (dist) + server (dist)
 
 # Android release
-pnpm --filter client run build
-pnpm --filter client exec cap sync android
+pnpm --filter client run mobile:build        # build + cap sync
 cd apps/client/android && ./gradlew assembleDebug   # APK: app/build/outputs/apk/debug/app-debug.apk
-# Release signed AAB
-./gradlew bundleRelease
+# Signed release AAB
+./gradlew bundleRelease                      # AAB: app/build/outputs/bundle/release/app-release.aab
 ```
 
 Capacitor app icon & splash now use `public/shortwave_logo.png` (640×640) — auto-generated into `android/app/src/main/res/mipmap-*` and `drawable*/splash.png` via `cap sync`.
@@ -197,7 +200,7 @@ Logout `POST /auth/logout` destroys session **and** blocks JWT (`blockJWT`).
 ## 📱 Supported Devices
 
 - **Web / Desktop:** Chrome/Firefox/Safari/Edge (responsive `320px → 1920px`, PWA-ready). `pnpm run dev:client` or `pnpm run build` + static host.
-- **Android:** Capacitor 8, `androidScheme: https`, minSdk 22, targetSdk 34. Build via Android Studio or `./gradlew`. Icon/splash from web logo.
+- **Android:** Capacitor 8, `androidScheme: https`, minSdk 24, targetSdk 36. Build via Android Studio or `./gradlew`. Icon/splash from web logo.
 
 ---
 
