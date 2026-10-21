@@ -13,10 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleRedirect = handleRedirect;
+const functions_1 = require("@vercel/functions");
 const url_services_1 = require("../services/url.services");
 const api_error_handling_1 = __importDefault(require("../utils/api-error-handling"));
-const parse_ua_1 = require("../utils/parse-ua");
-const redis_connect_1 = require("../database/redis-connect");
 const redis_helpers_1 = require("../utils/redis-helpers");
 /**
  * @desc   Redirect handler with analytics
@@ -36,40 +35,16 @@ function handleRedirect(req, res, next) {
             if (!longUrl) {
                 return next(new api_error_handling_1.default(404, "Short URL Not Found"));
             }
-            const ttl = 3600; // 1 hour TTL
-            const timeStamp = Date.now().toString();
-            const userAgent = req.get("user-agent") || "";
-            const country = req.get("x-vercel-ip-country") || "unknown";
-            const { device, os, browser } = (0, parse_ua_1.parseUserAgent)(userAgent);
-            const deviceType = (device === null || device === void 0 ? void 0 : device.type) || "desktop";
-            const osType = (os === null || os === void 0 ? void 0 : os.name) || "unknown";
-            const browserType = (browser === null || browser === void 0 ? void 0 : browser.name) || "unknown";
-            const fingerprint = (0, redis_helpers_1.getDeviceFingerprint)(req);
-            const hitKey = `device_hit:${shortCode}:${fingerprint}`;
-            const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
-            try {
-                // Set device fingerprint to prevent duplicate stats
-                const isUniqueDevice = yield redis_connect_1.redisClient.set(hitKey, "1", {
-                    expiration: { type: "EX", value: ttl },
-                    condition: "NX",
-                });
-                // Only update stats for unique devices
-                if (isUniqueDevice) {
-                    yield redis_connect_1.redisClient.hIncrBy(statsKey, "hits", 1);
-                    yield redis_connect_1.redisClient.hIncrBy(statsKey, `country:${country}`, 1);
-                    yield redis_connect_1.redisClient.hIncrBy(statsKey, `os:${osType}`, 1);
-                    yield redis_connect_1.redisClient.hIncrBy(statsKey, `device:${deviceType}`, 1);
-                    yield redis_connect_1.redisClient.hIncrBy(statsKey, `browser:${browserType}`, 1);
-                    yield redis_connect_1.redisClient.hSet(statsKey, "last_access", timeStamp);
-                    // update the expire as per the latest entry.
-                    yield redis_connect_1.redisClient.expire(statsKey, ttl);
-                }
-            }
-            catch (redisErr) {
-                console.error("[Redis Error]", redisErr);
-            }
             console.log(`[Redirect] ${shortCode} → ${longUrl}`);
-            return res.redirect(302, longUrl);
+            // 302 (not 301): the browser has to come back for every visit, otherwise
+            // the clicks would be cached and the analytics would stay empty.
+            res.redirect(302, longUrl);
+            // Count the click only after the response is on the wire: the analytics
+            // write must never add latency to the redirect. waitUntil keeps the
+            // function alive until the write is done.
+            const clickWrite = (0, redis_helpers_1.recordClickInBuffer)(req, shortCode).catch((error) => console.error("[Click] failed to record:", error));
+            (0, functions_1.waitUntil)(clickWrite);
+            yield clickWrite;
         }
         catch (error) {
             console.error("[Redirect Error]", error);

@@ -13,10 +13,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDeviceFingerprint = getDeviceFingerprint;
+exports.recordClickInBuffer = recordClickInBuffer;
 exports.flushRedishStatsToMongo = flushRedishStatsToMongo;
 const redis_connect_1 = require("../database/redis-connect");
 const crypto_1 = __importDefault(require("crypto"));
 const click_service_1 = require("../services/click.service");
+const parse_ua_1 = require("./parse-ua");
+/** A stuck Redis must not keep the function open: the click is dropped instead. */
+function withTimeout(promise, ms) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms)),
+    ]);
+}
 function recordToArray(record, keyName, valueName) {
     return Object.entries(record).map(([k, v]) => {
         return {
@@ -31,6 +40,49 @@ function getDeviceFingerprint(req) {
     const lang = req.headers["accept-language"] || "";
     const raw = `${ip}|${ua}|${lang}`;
     return crypto_1.default.createHash("sha256").update(raw).digest("hex");
+}
+/**
+ * Buffers one click in Redis. The daily cron moves the buffer over to Mongo,
+ * so the redirect itself never has to wait for a database write.
+ */
+function recordClickInBuffer(req, shortCode) {
+    return withTimeout(bufferClick(req, shortCode), 3000);
+}
+function bufferClick(req, shortCode) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ttl = 3600; // 1 hour TTL
+        const timeStamp = Date.now().toString();
+        const userAgent = req.get("user-agent") || "";
+        const country = req.get("x-vercel-ip-country") || "unknown";
+        const { device, os, browser } = (0, parse_ua_1.parseUserAgent)(userAgent);
+        const deviceType = (device === null || device === void 0 ? void 0 : device.type) || "desktop";
+        const osType = (os === null || os === void 0 ? void 0 : os.name) || "unknown";
+        const browserType = (browser === null || browser === void 0 ? void 0 : browser.name) || "unknown";
+        const fingerprint = getDeviceFingerprint(req);
+        const hitKey = `device_hit:${shortCode}:${fingerprint}`;
+        const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
+        try {
+            // Set device fingerprint to prevent duplicate stats
+            const isUniqueDevice = yield redis_connect_1.redisClient.set(hitKey, "1", {
+                expiration: { type: "EX", value: ttl },
+                condition: "NX",
+            });
+            // Only update stats for unique devices
+            if (!isUniqueDevice)
+                return;
+            yield redis_connect_1.redisClient.hIncrBy(statsKey, "hits", 1);
+            yield redis_connect_1.redisClient.hIncrBy(statsKey, `country:${country}`, 1);
+            yield redis_connect_1.redisClient.hIncrBy(statsKey, `os:${osType}`, 1);
+            yield redis_connect_1.redisClient.hIncrBy(statsKey, `device:${deviceType}`, 1);
+            yield redis_connect_1.redisClient.hIncrBy(statsKey, `browser:${browserType}`, 1);
+            yield redis_connect_1.redisClient.hSet(statsKey, "last_access", timeStamp);
+            // update the expire as per the latest entry.
+            yield redis_connect_1.redisClient.expire(statsKey, ttl);
+        }
+        catch (redisErr) {
+            console.error("[Redis Error]", redisErr);
+        }
+    });
 }
 function flushRedishStatsToMongo(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

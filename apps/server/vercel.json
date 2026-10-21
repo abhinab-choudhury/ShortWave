@@ -14,7 +14,7 @@
   ],
   "crons": [
     {
-      "path": "/api/cron/flush",
+      "path": "/cron/flush",
       "schedule": "0 1 * * *"
     }
   ]

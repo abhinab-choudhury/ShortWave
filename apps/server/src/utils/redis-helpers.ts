@@ -3,6 +3,17 @@ import { redisClient } from "../database/redis-connect";
 import crypto from "crypto";
 import { createClick } from "../services/click.service";
 import { IClick } from "../interfaces/model";
+import { parseUserAgent } from "./parse-ua";
+
+/** A stuck Redis must not keep the function open: the click is dropped instead. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms),
+    ),
+  ]);
+}
 
 function recordToArray<T extends { [key: string]: number }, R>(
   record: T,
@@ -24,6 +35,54 @@ export function getDeviceFingerprint(req: Request): string {
 
   const raw = `${ip}|${ua}|${lang}`;
   return crypto.createHash("sha256").update(raw).digest("hex");
+}
+
+/**
+ * Buffers one click in Redis. The daily cron moves the buffer over to Mongo,
+ * so the redirect itself never has to wait for a database write.
+ */
+export function recordClickInBuffer(req: Request, shortCode: string) {
+  return withTimeout(bufferClick(req, shortCode), 3000);
+}
+
+async function bufferClick(req: Request, shortCode: string) {
+  const ttl = 3600; // 1 hour TTL
+  const timeStamp = Date.now().toString();
+
+  const userAgent = req.get("user-agent") || "";
+  const country = req.get("x-vercel-ip-country") || "unknown";
+  const { device, os, browser } = parseUserAgent(userAgent);
+
+  const deviceType = device?.type || "desktop";
+  const osType = os?.name || "unknown";
+  const browserType = browser?.name || "unknown";
+
+  const fingerprint = getDeviceFingerprint(req);
+  const hitKey = `device_hit:${shortCode}:${fingerprint}`;
+  const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
+
+  try {
+    // Set device fingerprint to prevent duplicate stats
+    const isUniqueDevice = await redisClient.set(hitKey, "1", {
+      expiration: { type: "EX", value: ttl },
+      condition: "NX",
+    });
+
+    // Only update stats for unique devices
+    if (!isUniqueDevice) return;
+
+    await redisClient.hIncrBy(statsKey, "hits", 1);
+    await redisClient.hIncrBy(statsKey, `country:${country}`, 1);
+    await redisClient.hIncrBy(statsKey, `os:${osType}`, 1);
+    await redisClient.hIncrBy(statsKey, `device:${deviceType}`, 1);
+    await redisClient.hIncrBy(statsKey, `browser:${browserType}`, 1);
+    await redisClient.hSet(statsKey, "last_access", timeStamp);
+
+    // update the expire as per the latest entry.
+    await redisClient.expire(statsKey, ttl);
+  } catch (redisErr) {
+    console.error("[Redis Error]", redisErr);
+  }
 }
 
 export async function flushRedishStatsToMongo(req: Request, res: Response) {
