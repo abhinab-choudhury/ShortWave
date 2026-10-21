@@ -145,14 +145,14 @@ app.use("/api/v1/user", user_route_1.default);
 app.use("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
 app.use("/", redirect_route_1.default);
 app.use(error_middleware_1.default);
-(0, db_connect_1.default)()
-    .then(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, redis_connect_1.REDIS_CONNECT)();
-    app.listen(secret_1.env.PORT, () => {
-        console.log(`Server running at http://localhost:${secret_1.env.PORT}`);
-    });
-}))
-    .catch((error) => {
+// Listen first, connect after: a failed dependency must not kill the instance and
+// the requests it is already serving.
+app.listen(secret_1.env.PORT, () => {
+    console.log(`Server running at http://localhost:${secret_1.env.PORT}`);
+});
+(0, db_connect_1.default)().catch((error) => {
     console.error("Failed to connect to MongoDB:", error);
-    process.exit(1);
+});
+(0, redis_connect_1.REDIS_CONNECT)().catch((error) => {
+    console.error("Failed to connect to Redis:", error);
 });

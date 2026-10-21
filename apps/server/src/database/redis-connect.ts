@@ -15,8 +15,9 @@ const REDIS_CONNECT = async () => {
   try {
     await redisClient.connect();
   } catch (error) {
+    // Redis is only a cache/analytics buffer, so an outage must not take the API
+    // down: the redirect handler falls back to a plain DB lookup.
     console.error("Redis Connection Error: ", error);
-    process.exit(1);
   }
 };
 

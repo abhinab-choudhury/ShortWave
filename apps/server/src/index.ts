@@ -116,14 +116,16 @@ app.use("/cron/flush", flushRedishStatsToMongo);
 app.use("/", redirectRoute);
 app.use(globalErrorHandler);
 
-DB_CONNECT()
-  .then(async () => {
-    await REDIS_CONNECT();
-    app.listen(env.PORT, () => {
-      console.log(`Server running at http://localhost:${env.PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Failed to connect to MongoDB:", error);
-    process.exit(1);
-  });
+// Listen first, connect after: a failed dependency must not kill the instance and
+// the requests it is already serving.
+app.listen(env.PORT, () => {
+  console.log(`Server running at http://localhost:${env.PORT}`);
+});
+
+DB_CONNECT().catch((error) => {
+  console.error("Failed to connect to MongoDB:", error);
+});
+
+REDIS_CONNECT().catch((error) => {
+  console.error("Failed to connect to Redis:", error);
+});
