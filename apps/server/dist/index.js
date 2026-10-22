@@ -97,6 +97,11 @@ app.use((0, cors_1.default)({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
+// Redirect must be public + fast. Do NOT run session/passport/Mongo sessions here
+app.use("/", redirect_route_1.default);
+app.use(express_1.default.json({ limit: "16kb" }));
+app.use(express_1.default.urlencoded({ extended: true, limit: "16kb" }));
+app.use((0, morgan_1.default)(secret_1.env.NODE_ENV === "development" ? "dev" : "combined"));
 app.use((0, express_session_1.default)({
     secret: secret_1.env.SESSION_SECRET,
     resave: false,
@@ -104,10 +109,9 @@ app.use((0, express_session_1.default)({
     rolling: true,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: "none", // not-recommended for real world usercase ❌❌❌
-        secure: secret_1.env.NODE_ENV === "production", // only over HTTPS
+        sameSite: "none",
+        secure: secret_1.env.NODE_ENV === "production",
         httpOnly: true,
-        // domain: env.NODE_ENV === "production" ? ".vercel.app" : undefined,
     },
     store: connect_mongo_1.default.create({
         mongoUrl: db_connect_1.MONGODB_URI,
@@ -116,16 +120,8 @@ app.use((0, express_session_1.default)({
         autoRemove: "native",
     }),
 }));
-app.use(express_1.default.json({ limit: "16kb" }));
-app.use(express_1.default.urlencoded({ extended: true, limit: "16kb" }));
-app.use((0, morgan_1.default)(secret_1.env.NODE_ENV === "development" ? "dev" : "combined"));
 app.use(passport_1.default.initialize());
-app.use((req, res, next) => {
-    if (req.path.match(/^\/[A-Za-z0-9_-]+$/) && req.method === "GET") {
-        return next();
-    }
-    return passport_1.default.session()(req, res, next);
-});
+app.use(passport_1.default.session());
 passport_1.default.serializeUser((user, done) => {
     done(null, user._id);
 });
@@ -154,7 +150,6 @@ app.use("/api/v1/campaign", campaign_route_1.default);
 app.use("/api/v1/url", url_route_1.default);
 app.use("/api/v1/user", user_route_1.default);
 app.use("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
-app.use("/", redirect_route_1.default);
 app.use(error_middleware_1.default);
 // Listen first, connect after: a failed dependency must not kill the instance and
 // the requests it is already serving.

@@ -61,6 +61,14 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   }),
 );
+
+// Redirect must be public + fast. Do NOT run session/passport/Mongo sessions here
+app.use("/", redirectRoute);
+
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
+
 app.use(
   session({
     secret: env.SESSION_SECRET,
@@ -69,10 +77,9 @@ app.use(
     rolling: true,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,          // 7 days
-      sameSite: "none",                         // not-recommended for real world usercase ❌❌❌
-      secure: env.NODE_ENV === "production",    // only over HTTPS
+      sameSite: "none",
+      secure: env.NODE_ENV === "production",
       httpOnly: true,
-      // domain: env.NODE_ENV === "production" ? ".vercel.app" : undefined,
     },
     store: MongoStore.create({
       mongoUrl: MONGODB_URI,
@@ -83,18 +90,8 @@ app.use(
   })
 );
 
-
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
-
 app.use(passport.initialize());
-app.use((req, res, next) => {
-  if (req.path.match(/^\/[A-Za-z0-9_-]+$/) && req.method === "GET") {
-    return next();
-  }
-  return passport.session()(req, res, next);
-});
+app.use(passport.session());
 passport.serializeUser((user: Express.User, done) => {
   done(null, user._id);
 });
@@ -122,9 +119,7 @@ app.use("/api/v1/campaign", campaignRoute);
 app.use("/api/v1/url", urlRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/cron/flush", flushRedishStatsToMongo);
-app.use("/", redirectRoute);
 app.use(globalErrorHandler);
-
 // Listen first, connect after: a failed dependency must not kill the instance and
 // the requests it is already serving.
 app.listen(env.PORT, () => {

@@ -7,10 +7,26 @@ import { z } from "zod";
 
 const globalErrorHandler: ErrorRequestHandler = (
   error: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
+  // Don't leak auth/session/mongoose errors on redirect routes (/:shortCode)
+  const path = req.path || "";
+  const shortCodeMatch = path.match(/^\/([A-Za-z0-9_-]+)$/);
+  if (shortCodeMatch && req.method === "GET") {
+    const shortCode = shortCodeMatch[1];
+    // Avoid intercepting known API/cron/routes
+    if (
+      shortCode !== "api" &&
+      shortCode !== "cron" &&
+      shortCode !== "health" &&
+      shortCode !== "favicon.ico"
+    ) {
+      return res.status(404).end();
+    }
+  }
+
   if (error instanceof ApiError) {
     res.status(error.statusCode).json(
       new ApiResponse(error.statusCode, error.message, false, {
@@ -30,6 +46,7 @@ const globalErrorHandler: ErrorRequestHandler = (
         error.issues.map((issue) => issue.message),
       ),
     );
+    return;
   }
 
   res.status(500).json(
