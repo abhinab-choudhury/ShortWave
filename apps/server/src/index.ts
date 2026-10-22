@@ -89,16 +89,25 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
 
 app.use(passport.initialize());
-app.use(passport.session());
+app.use((req, res, next) => {
+  if (req.path.match(/^\/[A-Za-z0-9_-]+$/) && req.method === "GET") {
+    return next();
+  }
+  return passport.session()(req, res, next);
+});
 passport.serializeUser((user: Express.User, done) => {
   done(null, user._id);
 });
 passport.deserializeUser(async (id: IUser["_id"], done) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return done(null, false);
+    }
     const user = await getUserById(id);
+    if (!user) return done(null, false);
     done(null, user);
   } catch (error) {
-    done(error, null);
+    done(null, false);
   }
 });
 

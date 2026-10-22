@@ -16,6 +16,8 @@ exports.MONGODB_URI = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const secret_1 = require("../utils/secret");
 exports.MONGODB_URI = `${secret_1.env.MONGODB_BASE_URI}/${secret_1.env.DATABASE_NAME}?retryWrites=true`;
+// Don't buffer commands if not connected (prevents hanging requests on cold start)
+mongoose_1.default.set("bufferCommands", false);
 // One pool per warm instance, reused by every request. A client per request would
 // pay a fresh TCP + TLS handshake on every redirect.
 let connectionPromise = null;

@@ -47,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const morgan_1 = __importDefault(require("morgan"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("passport"));
@@ -119,17 +120,27 @@ app.use(express_1.default.json({ limit: "16kb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "16kb" }));
 app.use((0, morgan_1.default)(secret_1.env.NODE_ENV === "development" ? "dev" : "combined"));
 app.use(passport_1.default.initialize());
-app.use(passport_1.default.session());
+app.use((req, res, next) => {
+    if (req.path.match(/^\/[A-Za-z0-9_-]+$/) && req.method === "GET") {
+        return next();
+    }
+    return passport_1.default.session()(req, res, next);
+});
 passport_1.default.serializeUser((user, done) => {
     done(null, user._id);
 });
 passport_1.default.deserializeUser((id, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (mongoose_1.default.connection.readyState !== 1) {
+            return done(null, false);
+        }
         const user = yield (0, user_services_1.getUserById)(id);
+        if (!user)
+            return done(null, false);
         done(null, user);
     }
     catch (error) {
-        done(error, null);
+        done(null, false);
     }
 }));
 app.get("/", (_req, res) => {
