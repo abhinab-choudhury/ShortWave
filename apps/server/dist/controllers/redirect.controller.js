@@ -44,7 +44,6 @@ function handleRedirect(req, res, next) {
             // function alive until the write is done.
             const clickWrite = (0, redis_helpers_1.recordClickInBuffer)(req, shortCode).catch((error) => console.error("[Click] failed to record:", error));
             (0, functions_1.waitUntil)(clickWrite);
-            yield clickWrite;
         }
         catch (error) {
             console.error("[Redirect Error]", error);

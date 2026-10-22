@@ -41,7 +41,6 @@ export async function handleRedirect(
       console.error("[Click] failed to record:", error),
     );
     waitUntil(clickWrite);
-    await clickWrite;
   } catch (error: any) {
     console.error("[Redirect Error]", error);
     return next(new ApiError(500, "Internal Server Error", error));
