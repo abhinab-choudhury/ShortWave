@@ -20,12 +20,22 @@ const urlSchema = z.object({
   from_date: z.coerce.date().optional(),
 });
 
-const updateUrlSchema = z.object({
-  original_url: z.string().url().optional(),
-  from_date: z.coerce.date().nullable().optional(),
-  to_date: z.coerce.date().nullable().optional(),
-  is_active: z.boolean().optional(),
-});
+const updateUrlSchema = z
+  .object({
+    original_url: z.string().url().optional(),
+    from_date: z.coerce.date().nullable().optional(),
+    to_date: z.coerce.date().nullable().optional(),
+    is_active: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.from_date && data.to_date) {
+        return data.from_date <= data.to_date;
+      }
+      return true;
+    },
+    { message: "from_date must be before or equal to to_date", path: ["to_date"] },
+  );
 
 /**
  * @desc    Get details of a specific short URL
