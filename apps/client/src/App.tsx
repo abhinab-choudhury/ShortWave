@@ -9,7 +9,6 @@ import { Toaster } from "./components/ui/toaster";
 import LoadingScreen from "./components/LoadingScreen";
 import { Capacitor } from "@capacitor/core";
 
-// Lazy-loaded pages
 const Home = lazy(() => import("./pages/HomePage"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -21,58 +20,60 @@ const CampaignAnalyticsPage = lazy(
 );
 const LinkAnalyticsPage = lazy(() => import("./pages/LinkAnalyticsPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools />
-        <ThemeProvider storageKey="vite-ui-theme" defaultTheme="light">
-          <AuthProvider>
-            <BrowserRouter>
-              <Suspense fallback={<LoadingScreen />}>
-                <Routes>
-                  {/* Native apps start at signin (no session cookies), web at /home */}
+    <QueryClientProvider client={queryClient}>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      <ThemeProvider storageKey="shortwave-theme" defaultTheme="system">
+        <AuthProvider>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Navigate
+                      to={Capacitor.isNativePlatform() ? "/signin" : "/home"}
+                      replace
+                    />
+                  }
+                />
+
+                <Route path="/home" element={<Home />} />
+                <Route path="/signin" element={<SigninPage />} />
+
+                <Route element={<DashboardLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route
-                    path="/"
-                    element={
-                      <Navigate
-                        to={Capacitor.isNativePlatform() ? "/signin" : "/home"}
-                        replace
-                      />
-                    }
+                    path="/analytics/:campaignId"
+                    element={<CampaignAnalyticsPage />}
                   />
+                  <Route
+                    path="/analytics/:campaignId/:shortUrl"
+                    element={<LinkAnalyticsPage />}
+                  />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Route>
 
-                  {/* Public Pages */}
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/signin" element={<SigninPage />} />
-
-                  {/* App Pages with Dashboard Layout */}
-                  <Route element={<DashboardLayout />}>
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
-                    <Route
-                      path="/analytics/:campaignId"
-                      element={<CampaignAnalyticsPage />}
-                    />
-                    <Route
-                      path="/analytics/:campaignId/:shortUrl"
-                      element={<LinkAnalyticsPage />}
-                    />
-                    <Route path="/settings" element={<SettingsPage />} />
-                  </Route>
-
-                  {/* Catch-All Route */}
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </Suspense>
-              <Toaster />
-            </BrowserRouter>
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </>
+                <Route path="*" element={<PageNotFound />} />
+              </Routes>
+            </Suspense>
+            <Toaster />
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
