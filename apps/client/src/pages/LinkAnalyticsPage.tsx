@@ -33,8 +33,10 @@ const LinkAnalyticsPage = () => {
         }
       />
 
-      <div className="mt-8 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
-        <span className="font-mono">{shortUrl}</span>
+      <div className="mt-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
+          <span className="font-mono">{shortUrl}</span>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-6">
