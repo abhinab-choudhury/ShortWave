@@ -175,9 +175,38 @@ export async function getActiveLinkCnt(userId: IUser["_id"]): Promise<Number> {
   allLinks.forEach((link) => {
     const fromDate = link.from_date;
     const toDate = link.to_date;
-    if ((!fromDate || now >= fromDate) && (!toDate || now <= toDate))
+    if (
+      link.is_active !== false &&
+      (!fromDate || now >= fromDate) &&
+      (!toDate || now <= toDate)
+    )
       activeLinkCnt++;
   });
 
   return activeLinkCnt;
+}
+
+/* Resolve a short URL for redirection, honoring active status and schedule. */
+export async function getRedirectTarget(
+  short_url: IUrl["short_url"],
+): Promise<
+  | { ok: true; url: string }
+  | { ok: false; reason: "not_found" | "inactive" | "not_started" | "expired" }
+> {
+  const doc = await Url.findOne({ short_url })
+    .select("original_url is_active from_date to_date")
+    .lean();
+
+  if (!doc) return { ok: false, reason: "not_found" };
+  if (doc.is_active === false) return { ok: false, reason: "inactive" };
+
+  const now = new Date();
+  if (doc.from_date && now < new Date(doc.from_date)) {
+    return { ok: false, reason: "not_started" };
+  }
+  if (doc.to_date && now > new Date(doc.to_date)) {
+    return { ok: false, reason: "expired" };
+  }
+
+  return { ok: true, url: doc.original_url };
 }
