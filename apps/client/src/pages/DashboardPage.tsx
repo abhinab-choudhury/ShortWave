@@ -78,7 +78,7 @@ const DashboardPage = () => {
             />
             <StatCard
               label="Click growth"
-              value={`${stats?.crg ?? 0}%`}
+              value={typeof stats?.crg === "string" && stats.crg.includes("%") ? stats.crg : `${stats?.crg ?? 0}%`}
               hint="Day-over-day click growth"
               icon={<Sparkles className="size-4" aria-hidden="true" />}
               tone="sand"
