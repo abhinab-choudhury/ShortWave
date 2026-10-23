@@ -28,7 +28,7 @@ export default function CampaignCard({
       <Link
         to={`/analytics/${_id}`}
         aria-label={`View ${name} analytics`}
-        className="flex items-center justify-between gap-2 min-w-0 -mx-1 -my-0.5 rounded-xl px-1 py-0.5 transition-colors hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex items-center justify-between gap-2 min-w-0 -ml-1 -mr-1 -my-0.5 rounded-xl pl-1 pr-0.5 py-0.5 transition-colors hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {/* Title */}
         <div className="min-w-0 flex-1 text-sm font-semibold leading-tight tracking-tight text-foreground truncate">
