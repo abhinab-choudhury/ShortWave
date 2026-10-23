@@ -32,8 +32,9 @@ export default function LinkCard({
           <div className="min-w-0 flex-1">
             <Link
               to={`/analytics/${campaign_id}/${short_link}`}
-              className="block text-sm font-medium leading-6 tracking-[-0.01em] text-foreground line-clamp-2 break-all hover:underline underline-offset-4"
+              className="block text-sm font-medium leading-6 tracking-[-0.01em] text-foreground line-clamp-2 break-all underline-offset-4 group-hover:underline focus-visible:underline"
               title={original_link}
+              aria-label="View link analytics"
             >
               {original_link}
             </Link>
