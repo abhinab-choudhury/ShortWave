@@ -50,7 +50,7 @@ const CampaignAnalyticsPage = () => {
       <PageHeader
         eyebrow="Campaign"
         title={campaignLinks.data?.name || "Campaign analytics"}
-        description="Daily clicks and every short link created for this campaign."
+        description={campaignLinks.data?.description || "Daily clicks and every short link created for this campaign."}
         back={{ to: "/analytics", label: "Back to campaigns" }}
         actions={
           <div className="flex flex-wrap items-center gap-1.5">
