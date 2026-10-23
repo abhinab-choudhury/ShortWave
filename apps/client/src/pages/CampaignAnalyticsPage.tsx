@@ -48,7 +48,7 @@ const CampaignAnalyticsPage = () => {
         description="Daily clicks and every short link created for this campaign."
         back={{ to: "/analytics", label: "Back to campaigns" }}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <ReloadBtn />
             <CreateLinkBtn campaignId={campaignId!} />
             <AlertDeleteCampaignBtn campaignId={campaignId!} />
