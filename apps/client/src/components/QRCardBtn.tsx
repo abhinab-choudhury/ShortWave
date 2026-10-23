@@ -33,9 +33,9 @@ export function QRCardBtn(props: { shortLink: string }) {
   const [ecLevel, setEcLevel] = useState<"L" | "M" | "Q" | "H">("M");
 
   const [showLogo, setShowLogo] = useState(true);
-  const [logoUrl, setLogoUrl] = useState("/shortwave_logo.png");
+  const [logoUrl, setLogoUrl] = useState(`${window.location.origin}/shortwave_logo.png`);
   const [logoSize, setLogoSize] = useState(48);
-  const [exportBgWhite, setExportBgWhite] = useState(true);
+  const [exportBgWhite, setExportBgWhite] = useState(false);
 
   const config = useMemo(
     () => ({
