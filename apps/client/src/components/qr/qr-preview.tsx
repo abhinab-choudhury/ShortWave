@@ -30,25 +30,28 @@ export function QRCardPreview({
     <div
       id="qr-card"
       className={cn(
-        "relative mx-auto flex w-full min-w-0 max-w-sm flex-col items-center gap-3 overflow-hidden rounded-xl",
-        "border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-6 sm:gap-4",
+        "relative mx-auto flex w-full min-w-0 max-w-sm flex-col items-center gap-4 overflow-hidden rounded-[1.75rem]",
+        "border border-border bg-[radial-gradient(circle_at_top,rgba(31,127,92,0.08),transparent_55%),var(--card)] p-5 text-card-foreground shadow-sm sm:p-7 sm:gap-5",
         className,
       )}
     >
       {/* brand */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <img
           src="/shortwave_logo.png"
           alt="Shortwave logo"
-          className="h-10 w-10 rounded"
+          className="size-11 rounded-xl shadow-xs"
         />
-        <span className="text-lg font-semibold tracking-tight">Shortwave</span>
+        <div className="text-left">
+          <p className="text-base font-semibold tracking-[-0.01em]">Shortwave</p>
+          <p className="text-xs text-muted-foreground">Scan to open</p>
+        </div>
       </div>
 
       {/* QR area */}
       <div
-        className="flex min-w-0 max-w-full items-center justify-center overflow-hidden rounded-lg bg-muted p-3 ring-1 ring-border"
-        style={{ height: size + 16, width: size + 16 }}
+        className="flex min-w-0 max-w-full items-center justify-center overflow-hidden rounded-2xl border border-border/80 bg-background p-4 shadow-inner"
+        style={{ height: size + 32, width: size + 32 }}
       >
         <QRCode
           value={shortLink}
@@ -75,18 +78,9 @@ export function QRCardPreview({
 
       {/* copy/link info */}
       <div className="w-full text-center">
-        <h5 className="text-base font-semibold text-foreground">
-          Scan this QR Code
-        </h5>
-        <p className="mt-1 text-sm text-muted-foreground">
-          <a
-            href={shortLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="break-all font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            {shortLink}
-          </a>
+        <p className="text-sm font-medium text-foreground">Scan to open this link</p>
+        <p className="mt-1 max-w-[18rem] break-all text-xs text-muted-foreground">
+          {shortLink}
         </p>
       </div>
 

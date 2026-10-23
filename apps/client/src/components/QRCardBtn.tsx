@@ -25,16 +25,16 @@ export function QRCardBtn(props: { shortLink: string }) {
   const fullLink = getShortLinkUrl(shortLink);
 
   const [qrStyle, setQrStyle] = useState<"dots" | "squares" | "fluid">("dots");
-  const [fgColor, setFgColor] = useState("#1f7f5c");
+  const [fgColor, setFgColor] = useState("#145a3a");
   const [bgColor, setBgColor] = useState("#ffffff");
-  const [size, setSize] = useState(224);
+  const [size, setSize] = useState(248);
   const [quietZone, setQuietZone] = useState(10);
   const [eyeRadius, setEyeRadius] = useState(10);
   const [ecLevel, setEcLevel] = useState<"L" | "M" | "Q" | "H">("M");
 
   const [showLogo, setShowLogo] = useState(true);
   const [logoUrl, setLogoUrl] = useState("/shortwave_logo.png");
-  const [logoSize, setLogoSize] = useState(44);
+  const [logoSize, setLogoSize] = useState(48);
   const [exportBgWhite, setExportBgWhite] = useState(true);
 
   const config = useMemo(
