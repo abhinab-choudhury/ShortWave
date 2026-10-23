@@ -71,6 +71,18 @@ async function getAllUrl(userId: IUser["_id"]): Promise<IUrl[]> {
   return await Url.find({ user_id: userId });
 }
 
+export async function updateUrl(
+  userId: IUser["_id"],
+  shortUrl: IUrl["short_url"],
+  data: Partial<Pick<IUrl, "original_url" | "from_date" | "to_date" | "is_active">>,
+): Promise<IUrl | null> {
+  return await Url.findOneAndUpdate(
+    { short_url: shortUrl, user_id: userId },
+    data,
+    { new: true },
+  );
+}
+
 /* delete a specific url from a campaign by the help of short_url */
 export async function deleteUrl(
   userId: IUser["_id"],
