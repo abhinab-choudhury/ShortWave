@@ -2,6 +2,7 @@ import { Link2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CopyShortUrlBtn } from "./CopyShortUrlBtn";
 import { QRCardBtn } from "./QRCardBtn";
+import { EditLinkBtn } from "./EditLinkBtn";
 import { DateUtils } from "@/lib/utils";
 
 export interface LinkCardI {
@@ -9,6 +10,9 @@ export interface LinkCardI {
   original_link: string;
   short_link: string;
   created_at: string;
+  from_date?: string | null;
+  to_date?: string | null;
+  is_active?: boolean;
 }
 
 export default function LinkCard({
@@ -16,6 +20,9 @@ export default function LinkCard({
   original_link,
   short_link,
   created_at,
+  from_date,
+  to_date,
+  is_active,
 }: LinkCardI) {
   return (
     <div className="group w-full min-w-0 rounded-2xl border border-border bg-card p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:border-primary/40">
@@ -34,6 +41,16 @@ export default function LinkCard({
 
           {/* Action Buttons */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <EditLinkBtn
+              campaignId={campaign_id}
+              link={{
+                original_url: original_link,
+                short_url: short_link,
+                from_date,
+                to_date,
+                is_active,
+              }}
+            />
             <CopyShortUrlBtn shortLink={short_link} />
             <QRCardBtn shortLink={short_link} />
           </div>
@@ -48,6 +65,11 @@ export default function LinkCard({
             <span className="truncate font-mono text-xs text-muted-foreground min-w-0" title={short_link}>
               {short_link}
             </span>
+            {is_active === false ? (
+              <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                Inactive
+              </span>
+            ) : null}
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
             {DateUtils.timeAgo(created_at)}

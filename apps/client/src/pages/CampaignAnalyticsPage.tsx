@@ -18,6 +18,9 @@ interface LinkRecord {
   original_url: string;
   short_url: string;
   createdAt: string;
+  from_date?: string | null;
+  to_date?: string | null;
+  is_active?: boolean;
 }
 
 interface CampaignRecord {
@@ -105,6 +108,9 @@ const CampaignAnalyticsPage = () => {
                 original_link={link.original_url}
                 short_link={link.short_url}
                 created_at={link.createdAt}
+                from_date={link.from_date}
+                to_date={link.to_date}
+                is_active={link.is_active}
               />
             ))
           )}
