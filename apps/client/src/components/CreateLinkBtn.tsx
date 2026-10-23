@@ -58,33 +58,29 @@ function CreateLinkBtn(props: { campaignId: string }) {
           Create Link
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          <DialogHeader>
-            <DialogTitle>Create link</DialogTitle>
+      <DialogContent className="sm:max-w-[460px]">
+        <form onSubmit={handleSubmit} className="grid gap-6">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-xl tracking-[-0.01em]">Create short link</DialogTitle>
             <DialogDescription>
-              Anyone who has this link will be able to view this.
+              Paste a long URL to generate a trackable short link.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="link" className="sr-only">
-                Link
-              </Label>
-              <Input
-                id="link"
-                type="url"
-                required
-                value={link}
-                onChange={(e) => setLink(e.currentTarget.value)}
-                className="col-span-3 dark:bg-gray-800"
-                disabled={createCampaignLink.isPending}
-              />
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="link">Destination URL</Label>
+            <Input
+              id="link"
+              type="url"
+              required
+              placeholder="https://example.com/your-long-url"
+              value={link}
+              onChange={(e) => setLink(e.currentTarget.value)}
+              disabled={createCampaignLink.isPending}
+            />
           </div>
-          <DialogFooter className="sm:justify-start">
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button type="submit" disabled={createCampaignLink.isPending}>
-              {createCampaignLink.isPending ? "Saving..." : "Save"}
+              {createCampaignLink.isPending ? "Creating..." : "Create link"}
             </Button>
           </DialogFooter>
         </form>
