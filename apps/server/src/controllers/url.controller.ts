@@ -44,18 +44,19 @@ export async function deleteUserUrl(
   res: Response,
   next: NextFunction,
 ) {
-  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const urlId = req.params.urlId as string;
-    await deleteUrl(req.user._id, urlId);
+    const shortLink = (req.params.shortLink || req.params.urlId) as string;
+    if (!shortLink) return next(new ApiError(400, "Short link is required"));
+    if (!req.user) return next(new ApiError(401, "Unauthorized"));
+    await deleteUrl(req.user._id, shortLink);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));
   } catch (error) {
     return next(
-      normalizeError(error, "Unexprected error occured while deleting the url"),
+      normalizeError(error, "Unexpected error occured while deleting the url"),
     );
-  } 
+  }
 }
 
 /**
