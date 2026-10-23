@@ -93,7 +93,7 @@ export function EditLinkBtn({
           size="icon"
           aria-label="Edit link"
           title="Edit link"
-          className="size-9 rounded-full"
+          className="size-9 rounded-full transition-colors hover:bg-accent"
         >
           <Pencil className="size-4" aria-hidden="true" />
         </Button>
