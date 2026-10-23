@@ -21,7 +21,7 @@ export default function CampaignCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 w-full h-[8.5rem] min-w-0 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:border-primary/40",
+        "group relative flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 w-full min-h-[8.5rem] min-w-0 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm hover:border-primary/40",
         "overflow-hidden",
       )}
     >
