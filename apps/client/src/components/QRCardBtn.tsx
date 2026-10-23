@@ -14,7 +14,6 @@ import { useMemo, useState } from "react";
 import { QRCardPreview } from "./qr/qr-preview";
 import { QRConfigurator } from "./qr/qr-configurator";
 import { downloadNodeAsPng } from "./qr/qr-download";
-import type { QRConfig } from "./qr/types";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getShortLinkUrl, hapticTap, shareOrDownloadDataUrl } from "@/lib/platform";
