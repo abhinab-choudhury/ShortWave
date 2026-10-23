@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { axiosInstance } from "@/lib/utils";
 import CreateLinkBtn from "@/components/CreateLinkBtn";
 import { AlertDeleteCampaignBtn } from "@/components/AlertDeleteBtn";
+import { EditCampaignBtn } from "@/components/EditCampaignBtn";
 import LinkCard from "@/components/LinkCard";
 import { CardSkeleton } from "@/components/CardSkeleton";
 import { PageContainer } from "@/components/PageContainer";
@@ -26,6 +27,7 @@ interface LinkRecord {
 interface CampaignRecord {
   _id: string;
   name: string;
+  description?: string;
   urls?: LinkRecord[];
 }
 
@@ -54,6 +56,11 @@ const CampaignAnalyticsPage = () => {
           <div className="flex flex-wrap items-center gap-1.5">
             <ReloadBtn />
             <CreateLinkBtn campaignId={campaignId!} />
+            <EditCampaignBtn
+              campaignId={campaignId!}
+              name={campaignLinks.data?.name || ""}
+              description={campaignLinks.data?.description}
+            />
             <AlertDeleteCampaignBtn campaignId={campaignId!} />
           </div>
         }

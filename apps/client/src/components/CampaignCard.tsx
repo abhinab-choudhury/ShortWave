@@ -1,6 +1,5 @@
 import { Link2, LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 
 export interface CampaignCardI {
@@ -28,7 +27,7 @@ export default function CampaignCard({
       <Link
         to={`/analytics/${_id}`}
         aria-label={`View ${name} analytics`}
-        className="flex items-center justify-between gap-2 min-w-0 -ml-1 -mr-1 -my-0.5 rounded-xl pl-1 pr-0.5 py-0.5 transition-colors hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex items-center justify-between gap-2 min-w-0 rounded-xl px-4 py-0.5 transition-colors hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {/* Title */}
         <div className="min-w-0 flex-1 text-sm font-semibold leading-tight tracking-tight text-foreground truncate">
@@ -40,7 +39,7 @@ export default function CampaignCard({
       </Link>
 
       {/* Description with clamp */}
-      <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2 min-h-[2rem] break-words">
+      <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2 min-h-8 wrap-break-word">
         {description || "No description provided."}
       </p>
 
