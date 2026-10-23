@@ -76,11 +76,19 @@ export async function updateUrl(
   shortUrl: IUrl["short_url"],
   data: Partial<Pick<IUrl, "original_url" | "from_date" | "to_date" | "is_active">>,
 ): Promise<IUrl | null> {
-  return await Url.findOneAndUpdate(
+  const updated = await Url.findOneAndUpdate(
     { short_url: shortUrl, user_id: userId },
     data,
     { new: true },
   );
+  if (updated && redisClient.isReady) {
+    try {
+      await redisClient.del(shortUrl);
+    } catch (error) {
+      console.error("Failed to invalidate Redis cache:", error);
+    }
+  }
+  return updated;
 }
 
 /* delete a specific url from a campaign by the help of short_url */

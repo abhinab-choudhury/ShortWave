@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CalendarRange, Link2, Pencil } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { axiosInstance } from "@/lib/utils";
 import { toast } from "./ui/use-toast";
-import { cn } from "@/lib/utils";
+import { LinkDateRangePicker } from "./LinkDateRangePicker";
 
 export interface EditableLink {
   original_url: string;
@@ -26,11 +27,11 @@ export interface EditableLink {
   is_active?: boolean;
 }
 
-function toDateInput(value?: string | null) {
-  if (!value) return "";
+function toDate(value?: string | null): Date | undefined {
+  if (!value) return undefined;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 export function EditLinkBtn({
@@ -42,22 +43,25 @@ export function EditLinkBtn({
 }) {
   const [open, setOpen] = useState(false);
   const [originalUrl, setOriginalUrl] = useState(link.original_url);
-  const [fromDate, setFromDate] = useState(toDateInput(link.from_date));
-  const [toDate, setToDate] = useState(toDateInput(link.to_date));
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(
+    link.from_date || link.to_date
+      ? { from: toDate(link.from_date), to: toDate(link.to_date) }
+      : undefined,
+  );
   const [isActive, setIsActive] = useState(link.is_active !== false);
 
   const queryClient = useQueryClient();
   const updateLink = useMutation({
     mutationFn: (data: {
       original_url: string;
-      from_date: string | null;
-      to_date: string | null;
+      from_date: Date | null;
+      to_date: Date | null;
       is_active: boolean;
     }) =>
       axiosInstance.patch(`/url/${link.short_url}`, {
         original_url: data.original_url,
-        from_date: data.from_date ? new Date(`${data.from_date}T00:00:00`).toISOString() : null,
-        to_date: data.to_date ? new Date(`${data.to_date}T23:59:59`).toISOString() : null,
+        from_date: data.from_date ? new Date(data.from_date.setHours(0, 0, 0, 0)).toISOString() : null,
+        to_date: data.to_date ? new Date(data.to_date.setHours(23, 59, 59, 999)).toISOString() : null,
         is_active: data.is_active,
       }),
     onSuccess: () => {
@@ -79,7 +83,7 @@ export function EditLinkBtn({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (fromDate && toDate && fromDate > toDate) {
+    if (dateRange?.from && dateRange?.to && dateRange.from > dateRange.to) {
       toast({
         variant: "destructive",
         title: "Invalid date range",
@@ -89,8 +93,8 @@ export function EditLinkBtn({
     }
     await updateLink.mutateAsync({
       original_url: originalUrl,
-      from_date: fromDate || null,
-      to_date: toDate || null,
+      from_date: dateRange?.from ? new Date(dateRange.from) : null,
+      to_date: dateRange?.to ? new Date(dateRange.to) : null,
       is_active: isActive,
     });
   };
@@ -151,30 +155,11 @@ export function EditLinkBtn({
                   </p>
                 </div>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor={`from-${link.short_url}`}>Start date</Label>
-                  <Input
-                    id={`from-${link.short_url}`}
-                    type="date"
-                    value={fromDate}
-                    onChange={(event) => setFromDate(event.currentTarget.value)}
-                    disabled={updateLink.isPending}
-                    className="h-10"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={`to-${link.short_url}`}>End date</Label>
-                  <Input
-                    id={`to-${link.short_url}`}
-                    type="date"
-                    value={toDate}
-                    onChange={(event) => setToDate(event.currentTarget.value)}
-                    disabled={updateLink.isPending}
-                    className={cn("h-10", fromDate && toDate && fromDate > toDate && "border-destructive")}
-                  />
-                </div>
-              </div>
+              <LinkDateRangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                disabled={updateLink.isPending}
+              />
             </div>
 
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-border px-4 py-3.5">
