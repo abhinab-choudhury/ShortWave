@@ -37,15 +37,15 @@ export async function getCampaignById(
 
 /**
  * Update a campaign by ID
- * updates name of the campaign
+ * updates name/description of the campaign
  */
 export async function updateCampaign(
-  campaignId: ICampaign["_id"],
+  campaignId: ICampaign["_id"] | string,
   userId: IUser["_id"],
-  data: Partial<ICampaign>,
+  data: Partial<Pick<ICampaign, "name" | "description">>,
 ): Promise<ICampaign | null> {
   return await Campaign.findOneAndUpdate(
-    { _id: campaignId, user: userId },
+    { _id: campaignId, user_id: userId },
     data,
     { new: true },
   );
