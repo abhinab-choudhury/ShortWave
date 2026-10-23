@@ -25,22 +25,19 @@ export default function CampaignCard({
         "overflow-hidden",
       )}
     >
-      <div className="flex items-start justify-between gap-2 min-w-0">
+      <Link
+        to={`/analytics/${_id}`}
+        aria-label={`View ${name} analytics`}
+        className="flex items-start justify-between gap-2 min-w-0 -m-1 rounded-xl p-1 transition-colors hover:bg-accent/60 focus-visible:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
         {/* Title */}
         <div className="min-w-0 flex-1 text-sm font-semibold leading-tight tracking-tight text-foreground truncate">
           {name}
         </div>
-        <Button
-          asChild
-          variant="ghost"
-          size="icon"
-          className="size-8 shrink-0 rounded-full"
-        >
-          <Link to={`/analytics/${_id}`} aria-label={`View ${name} analytics`}>
-            <LinkIcon className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
-      </div>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground">
+          <LinkIcon className="size-3.5" aria-hidden="true" />
+        </span>
+      </Link>
 
       {/* Description with clamp */}
       <p className="text-xs leading-relaxed text-muted-foreground line-clamp-2 min-h-[2rem] break-words">
