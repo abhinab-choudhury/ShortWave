@@ -48,9 +48,10 @@ function AlertDeleteCampaignBtn(props: { campaignId: string }) {
         <Button
           disabled={deleteCampaign.isPaused}
           variant="destructive"
-          className="text-white"
+          size="sm"
+          className="gap-2"
         >
-          <DeleteIcon className="mr-2 w-4.5 h-4.5" />
+          <DeleteIcon className="size-4" />
           {deleteCampaign.isPaused ? "Deleting..." : "Delete"}
         </Button>
       </AlertDialogTrigger>
@@ -98,8 +99,8 @@ function AlertDeleteUrlBtn(props: { campaignId: string; shortUrl: string }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="text-white">
-          <DeleteIcon className="mr-2 w-4.5 h-4.5" />
+        <Button variant="destructive" size="sm" className="gap-2">
+          <DeleteIcon className="size-4" />
           Delete
         </Button>
       </AlertDialogTrigger>

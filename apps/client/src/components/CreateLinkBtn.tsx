@@ -53,7 +53,7 @@ function CreateLinkBtn(props: { campaignId: string }) {
         <Button
           variant="default"
           size="sm"
-          className="cursor-pointer active:scale-95 transition"
+          className="gap-2"
         >
           Create Link
         </Button>
