@@ -1,6 +1,14 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Capacitor, SystemBars, SystemBarsStyle } from "@capacitor/core";
 
-type Theme = "dark" | "light" | "system";
+export type Theme = "dark" | "light" | "system";
+export type ResolvedTheme = "dark" | "light";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -10,52 +18,100 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
+  resolvedTheme: ResolvedTheme;
   setTheme: (theme: Theme) => void;
 };
 
 const initialState: ThemeProviderState = {
   theme: "system",
+  resolvedTheme: "light",
   setTheme: () => null,
 };
 
 export const ThemeProviderContext =
   createContext<ThemeProviderState>(initialState);
 
+const THEME_COLORS: Record<ResolvedTheme, string> = {
+  light: "#f5f0e5",
+  dark: "#121a17",
+};
+
+function getSystemTheme(): ResolvedTheme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function readStoredTheme(storageKey: string, fallback: Theme): Theme {
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (stored === "light" || stored === "dark" || stored === "system") {
+      return stored;
+    }
+  } catch {
+    return fallback;
+  }
+  return fallback;
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "vite-ui-theme",
+  storageKey = "shortwave-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
+  const [theme, setThemeState] = useState<Theme>(() =>
+    readStoredTheme(storageKey, defaultTheme),
+  );
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() =>
+    getSystemTheme(),
   );
 
+  const resolvedTheme: ResolvedTheme =
+    theme === "system" ? systemTheme : theme;
+
   useEffect(() => {
-    const root = window.document.documentElement;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => setSystemTheme(media.matches ? "dark" : "light");
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
     root.classList.remove("light", "dark");
+    root.classList.add(resolvedTheme);
+    root.dataset.theme = resolvedTheme;
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+    const meta = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    meta?.setAttribute("content", THEME_COLORS[resolvedTheme]);
 
-      root.classList.add(systemTheme);
-      return;
+    if (Capacitor.isNativePlatform()) {
+      SystemBars.setStyle({
+        style:
+          resolvedTheme === "dark" ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+      }).catch(() => undefined);
     }
+  }, [resolvedTheme]);
 
-    root.classList.add(theme);
-  }, [theme]);
-
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+  const setTheme = useCallback(
+    (nextTheme: Theme) => {
+      try {
+        localStorage.setItem(storageKey, nextTheme);
+      } catch {
+        // Theme still applies for the current session.
+      }
+      setThemeState(nextTheme);
     },
-  };
+    [storageKey],
+  );
+
+  const value = useMemo<ThemeProviderState>(
+    () => ({ theme, resolvedTheme, setTheme }),
+    [theme, resolvedTheme, setTheme],
+  );
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

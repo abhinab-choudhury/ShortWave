@@ -1,5 +1,5 @@
 import AppLayout from "@/components/layouts/AppLayout";
-import { Features } from "@/components/FeatureSection";
+import { Features, Workflow } from "@/components/FeatureSection";
 import { Hero } from "@/components/HeroSection";
 import { Cta } from "@/components/CtaSectio";
 
@@ -8,6 +8,7 @@ const Home = () => {
     <AppLayout>
       <Hero />
       <Features />
+      <Workflow />
       <Cta />
     </AppLayout>
   );

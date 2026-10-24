@@ -16,6 +16,7 @@ coverage/
 # Environment variables
 .env
 .env.local
+.env.android
 
 # Typescript cache
 *.tsbuildinfo
@@ -23,6 +24,7 @@ coverage/
 # Debugger configurations
 .vscode/
 .idea/
+.vercel
 
 # OS generated files
 .DS_Store

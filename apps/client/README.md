@@ -34,8 +34,9 @@ See `.env.example` for the full explanations.
 
 ```bash
 pnpm install
-cp .env.example .env          # or set VITE_SERVER_URL manually
-pnpm run dev                  # http://localhost:5173
+cp .env.example .env                          # or set VITE_SERVER_URL manually
+cp .env.android.example .env.android          # or set VITE_SERVER_URL manually
+pnpm run dev                                  # http://localhost:5173
 ```
 
 ## Android Setup & Build (Capacitor)

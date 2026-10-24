@@ -1,73 +1,52 @@
-import { ArrowUp } from "lucide-react";
-import React from "react";
 import { Link } from "react-router-dom";
+import { BrandMark } from "@/components/BrandMark";
 
-interface linkType {
-  to: string;
-  text: string;
-}
-const Footer: React.FC = () => {
-  const FooterLink: linkType[] = [
-    {
-      to: "/dashboard",
-      text: "Dashboard",
-    },
-    {
-      to: "#",
-      text: "Services",
-    },
-    {
-      to: "#",
-      text: "About",
-    },
-  ];
+const FOOTER_LINKS = [
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/analytics", label: "Analytics" },
+  { to: "/settings", label: "Settings" },
+];
 
+const Footer = () => {
   return (
-    <section>
-      <footer className="dark:bg-slate-800">
-        <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8 lg:pt-24">
-          <div className="absolute end-4 top-4 sm:end-6 sm:top-6 lg:end-8 lg:top-8">
+    <footer className="bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-10 border-b border-border/70 pb-10 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-sm">
+            <BrandMark to="/home" />
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              Short links, organised campaigns, and analytics that stay close
+              to the work.
+            </p>
+          </div>
+
+          <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3">
+            {FOOTER_LINKS.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {label}
+              </Link>
+            ))}
             <a
-              className="inline-block rounded-full bg-teal-600 p-2 text-white shadow transition hover:bg-teal-500 sm:p-3 lg:p-4 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-600"
-              href="#MainContent"
+              href="https://github.com/abhinab-choudhury/ShortWave"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <span className="sr-only">Back to top</span>
-              <ArrowUp />
+              GitHub
             </a>
-          </div>
-
-          <div className="lg:flex lg:items-end lg:justify-between">
-            <div>
-              <div className="flex justify-center text-teal-600 lg:justify-start dark:text-teal-300">
-                <h1 className="text-5xl font-extrabold min-w-fit">ShortWave</h1>
-              </div>
-
-              <p className="mx-auto mt-6 max-w-md text-center leading-relaxed text-gray-500 lg:text-left dark:text-gray-400">
-                Effortlessly shorten URLs and gain insights with advanced
-                analytics. Simple, fast, and powerful URL management.
-              </p>
-            </div>
-
-            <ul className="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:mt-0 lg:justify-end lg:gap-12">
-              {FooterLink.map((linkinfo: linkType, idx: number) => (
-                <li key={idx}>
-                  <Link
-                    className="text-gray-700 transition hover:text-gray-700/75 dark:text-white dark:hover:text-white/75"
-                    to={linkinfo.to}
-                  >
-                    {linkinfo.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p className="mt-12 text-center text-sm text-gray-500 lg:text-right dark:text-gray-400">
-            Copyright &copy;{new Date().getFullYear()}. All rights reserved.
-          </p>
+          </nav>
         </div>
-      </footer>
-    </section>
+
+        <div className="flex flex-col gap-2 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>Copyright &copy; {new Date().getFullYear()} Shortwave.</p>
+          <p>A focused tool for shorter links and longer context.</p>
+        </div>
+      </div>
+    </footer>
   );
 };
 
