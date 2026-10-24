@@ -1,25 +1,27 @@
-import { Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import ShortwaveLogo from "/shortwave_logo.png";
 
 export const LoadingScreen = () => {
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen min-w-screen bg-slate-50 dark:bg-slate-950 px-6">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-        className="text-center space-y-4 flex flex-col items-center justify-center"
-      >
-        <div className="relative flex items-center justify-center">
-          {/* Elegant glow effect behind the spinner */}
-          <div className="absolute w-12 h-12 rounded-full bg-teal-500/20 blur-xl animate-pulse" />
-          <Loader2 className="w-10 h-10 animate-spin text-teal-600 dark:text-teal-400 relative z-10" />
+    <div
+      className="flex min-h-dvh items-center justify-center bg-background px-6"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="relative">
+          <div className="absolute inset-0 size-14 animate-pulse rounded-full bg-primary/15 blur-xl" />
+          <img
+            src={ShortwaveLogo}
+            alt=""
+            width={56}
+            height={56}
+            className="relative size-14 animate-pulse object-contain"
+          />
         </div>
-        <p className="text-sm font-semibold tracking-wide text-slate-500 dark:text-slate-400 animate-pulse">
-          Loading...
+        <p className="text-sm font-medium text-muted-foreground">
+          Opening your workspace...
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 };

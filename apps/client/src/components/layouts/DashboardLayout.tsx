@@ -1,255 +1,405 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { useCallback, useEffect, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  IconArrowLeft,
-  IconLayoutDashboard,
-  IconSettings,
-  IconChartCovariate,
-} from "@tabler/icons-react";
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+  ArrowLeft,
+  ChartLine,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Settings,
+  UserRound,
+} from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { App as CapacitorApp } from "@capacitor/app";
 import { cn } from "@/lib/utils";
-import { toast } from "../ui/use-toast";
-import ShortwaveLogo from "/shortwave_logo.png";
+import { useAuth } from "@/hooks/useAuth";
+import { BrandMark } from "@/components/BrandMark";
+import { ThemeMenu } from "@/components/ThemeMenu";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Moon, Sun, User } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
-import { useAuth } from "@/hooks/useAuth";
-import { Capacitor } from "@capacitor/core";
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
+import LoadingScreen from "@/components/LoadingScreen";
 
-export function DashboardLayout() {
+const NAV_ITEMS = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Analytics", href: "/analytics", icon: ChartLine },
+  { label: "Settings", href: "/settings", icon: Settings },
+] as const;
+
+function isActivePath(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function getInitials(email?: string, name?: string) {
+  const source = name?.trim() || email?.split("@")[0] || "S";
+  return source
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+function NavigationLinks({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
 
-  const links = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: (
-        <IconLayoutDashboard className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
-      ),
-    },
-    {
-      label: "Analytics",
-      href: "/analytics",
-      icon: (
-        <IconChartCovariate className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
-      ),
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-      icon: (
-        <IconSettings className="text-slate-500 dark:text-slate-400 h-5 w-5 shrink-0" />
-      ),
-    },
-  ];
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const { setTheme } = useTheme();
-  const { user, logout, isLoading: authLoading } = useAuth();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const handleLogout = async () => {
-    try {
-      setIsLoading(true);
-      await logout();
-      toast({
-        title: "Logged Out Successfully",
-        description: "You're all set. Come back soon!",
-      });
-      navigate(Capacitor.isNativePlatform() ? "/signin" : "/home");
-    } catch (error) {
-      console.log("Error : ", error);
-      toast({
-        title: "Logout Unsuccessful",
-        description: "Something went wrong. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isActive = (href: string) =>
-    location.pathname === href || location.pathname.startsWith(href + "/");
-
-  const isProtectedRoute = ["/dashboard", "/analytics", "/settings"].some(
-    (path) => isActive(path),
-  );
-
-  useEffect(() => {
-    if (!authLoading && !user && isProtectedRoute) {
-      navigate("/signin", { replace: true });
-    }
-  }, [navigate, user, authLoading, isProtectedRoute]);
-
   return (
-    <div
-      className={cn(
-        "relative flex flex-col md:flex-row w-full h-screen flex-1 mx-auto border border-slate-200 dark:border-slate-800 overflow-hidden",
-      )}
-    >
-      <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10 bg-white dark:bg-slate-900 pt-4 md:pt-8 overflow-visible border-r border-slate-200/60 dark:border-slate-800">
-          <div className="flex flex-col flex-1">
-            <Logo />
-            <div className="mt-8 flex flex-col gap-1 h-fit">
-              {links.map((link, idx) => (
-                <div key={idx} className="relative">
-                  {isActive(link.href) && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute left-0 top-0 bottom-0 w-0.75 rounded-r-full bg-teal-500 dark:bg-teal-400"
-                      transition={{
-                        type: "spring",
-                        bounce: 0.2,
-                        duration: 0.4,
-                      }}
-                    />
-                  )}
-                  <SidebarLink link={link} />
-                </div>
-              ))}
-              <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <ThemeButton setTheme={setTheme} />
-                <button
-                  disabled={isLoading ? true : false}
-                  onClick={handleLogout}
-                  className="flex items-center justify-start gap-2 group/sidebar w-full py-2 px-3 cursor-pointer rounded-lg transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
-                >
-                  <div className="rounded-lg p-1.5 bg-slate-100 dark:bg-slate-800 transition-colors group-hover/sidebar:bg-red-100 dark:group-hover/sidebar:bg-red-950/50">
-                    <IconArrowLeft className="h-4 w-4 shrink-0" />
-                  </div>
-                  <div className="text-sm font-medium whitespace-pre inline-block p-0! m-0!">
-                    Logout
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-auto w-full border-t border-slate-100 dark:border-slate-800 pt-3">
-            <Link
-              to="#"
-              className="flex items-center justify-start gap-3 group/sidebar py-2 px-3 rounded-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-            >
-              <div className="shrink-0">
-                {user?.profilePic ? (
-                  <img
-                    src={user.profilePic || "/placeholder.svg"}
-                    alt="Avatar"
-                    className="h-9 w-9 rounded-full ring-2 ring-slate-200 dark:ring-slate-700 shadow-sm object-cover"
-                  />
-                ) : (
-                  <div className="h-9 w-9 rounded-full bg-linear-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                    <User className="h-5 w-5 text-white" />
-                  </div>
-                )}
-              </div>
-
-              <span className="w-full truncate text-slate-700 dark:text-slate-300 text-sm font-medium">
-                <span>{user?.email || "User"}</span>
-              </span>
-            </Link>
-          </div>
-        </SidebarBody>
-      </Sidebar>
-
-      <Outlet />
-    </div>
+    <nav aria-label="Primary" className="space-y-1">
+      {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+        const active = isActivePath(location.pathname, href);
+        return (
+          <NavLink
+            key={href}
+            to={href}
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "group flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors",
+              active
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <Icon
+              className={cn(
+                "size-[1.15rem] shrink-0",
+                active
+                  ? "text-primary"
+                  : "text-muted-foreground group-hover:text-foreground",
+              )}
+              aria-hidden="true"
+            />
+            {label}
+          </NavLink>
+        );
+      })}
+    </nav>
   );
 }
 
-function ThemeButton({
-  setTheme,
-}: {
-  setTheme: (t: "dark" | "light" | "system") => void;
-}) {
+function UserMenu({ compact = false }: { compact?: boolean }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      toast({
+        title: "Signed out",
+        description: "Your session ended safely.",
+      });
+      navigate(Capacitor.isNativePlatform() ? "/signin" : "/home", {
+        replace: true,
+      });
+    } catch {
+      toast({
+        title: "Couldn't sign out",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          aria-label="Toggle theme"
-          className="flex w-full items-center justify-start gap-2 group/sidebar py-2 px-3 cursor-pointer rounded-lg transition-all duration-200 hover:bg-teal-50 dark:hover:bg-teal-500/10 text-teal-700 dark:text-teal-300"
+          type="button"
+          aria-label="Account menu"
+          className={cn(
+            "rounded-full transition-colors",
+            compact ? "size-10" : "w-full",
+          )}
         >
-          <div className="rounded-lg p-1.5 bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-300 transition-colors group-hover/sidebar:bg-teal-100 dark:group-hover/sidebar:bg-teal-500/25">
-            <Sun className="h-4 w-4 dark:hidden" />
-            <Moon className="hidden h-4 w-4 dark:block" />
-          </div>
-          <div className="text-sm font-medium whitespace-pre inline-block p-0! m-0!">
-            Theme
-          </div>
+          {compact ? (
+            <span className="mx-auto flex size-9 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+              {getInitials(user?.email, user?.name)}
+            </span>
+          ) : (
+            <span className="flex min-h-14 items-center gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-muted">
+              {user?.profilePic ? (
+                <img
+                  src={user.profilePic}
+                  alt=""
+                  className="size-9 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+                  {getInitials(user?.email, user?.name)}
+                </span>
+              )}
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-foreground">
+                  {user?.name || "Your account"}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {user?.email}
+                </span>
+              </span>
+            </span>
+          )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={4}
-        className="z-[60] dark:bg-gray-800"
-      >
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
+      <DropdownMenuContent align="end" sideOffset={8} className="w-60">
+        <DropdownMenuLabel className="font-normal">
+          <span className="block text-sm font-medium text-foreground">
+            {user?.name || "Your account"}
+          </span>
+          <span className="mt-0.5 block truncate text-xs font-normal text-muted-foreground">
+            {user?.email}
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer">
+            <UserRound className="size-4" />
+            Account settings
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem
+          disabled={isLoggingOut}
+          onSelect={handleLogout}
+          className="cursor-pointer text-destructive focus:text-destructive"
+        >
+          <LogOut className="size-4" />
+          {isLoggingOut ? "Signing out..." : "Sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-export const Logo = () => {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <Link to="/home" className="relative z-20 flex min-w-0 items-center gap-2.5 py-1">
-      <img
-        width={30}
-        height={30}
-        src={ShortwaveLogo || "/placeholder.svg"}
-        alt="Shortwave Logo"
-        className="h-7.5 w-7.5 shrink-0"
-      />
+    <div className="flex h-full flex-col">
+      <div className="px-2">
+        <BrandMark />
+      </div>
+      <div className="mt-7 flex-1 overflow-y-auto px-1">
+        <p className="px-3 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Workspace
+        </p>
+        <NavigationLinks onNavigate={onNavigate} />
+      </div>
+      <div className="space-y-3 border-t border-border/80 px-1 pt-3">
+        <ThemeMenu />
+        <UserMenu />
+      </div>
+    </div>
+  );
+}
 
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="
-          whitespace-nowrap
-          font-sans
-          text-xl
-          font-bold
-          tracking-tight
-          text-teal-600
-          dark:text-teal-400
-        "
+function WebShell() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-dvh border-r border-border/80 bg-sidebar px-4 py-5 lg:block">
+        <SidebarContent />
+      </aside>
+
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 bg-background/90 px-4 backdrop-blur-xl lg:hidden">
+        <BrandMark />
+        <div className="flex items-center gap-1">
+          <ThemeMenu compact />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open navigation"
+          >
+            <Menu className="size-5" />
+          </Button>
+        </div>
+      </header>
+
+      <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
+        <DialogContent className="left-0 top-0 h-dvh w-[min(20rem,86vw)] max-w-none translate-x-0 translate-y-0 rounded-none border-y-0 border-l-0 border-r border-border bg-sidebar p-4 shadow-xl data-[state=closed]:slide-out-to-left-full data-[state=open]:slide-in-from-left-full">
+          <DialogTitle className="sr-only">Navigation</DialogTitle>
+          <DialogDescription className="sr-only">
+            Move between dashboard, analytics, and settings.
+          </DialogDescription>
+          <SidebarContent onNavigate={() => setMenuOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
+      <main className="min-w-0">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+function NativeShell() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const segments = location.pathname.split("/").filter(Boolean);
+  const isAnalyticsDetail =
+    segments[0] === "analytics" && segments.length > 1;
+  const hideTabs = isAnalyticsDetail;
+
+  const title =
+    segments[0] === "dashboard"
+      ? "Dashboard"
+      : segments[0] === "settings"
+        ? "Settings"
+        : segments[0] === "analytics"
+          ? segments.length === 1
+            ? "Analytics"
+            : segments.length === 2
+              ? "Campaign"
+              : "Link"
+          : "Shortwave";
+
+  const goBack = useCallback(() => {
+    const parts = location.pathname.split("/").filter(Boolean);
+    if (parts[0] === "analytics" && parts.length === 3) {
+      navigate(`/analytics/${parts[1]}`);
+      return;
+    }
+    if (parts[0] === "analytics" && parts.length === 2) {
+      navigate("/analytics");
+      return;
+    }
+    if (parts[0] !== "dashboard") {
+      navigate("/dashboard");
+      return;
+    }
+    CapacitorApp.minimizeApp().catch(() => undefined);
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    let disposed = false;
+    let removeListener: (() => Promise<void>) | undefined;
+
+    CapacitorApp.addListener("backButton", goBack).then((listener) => {
+      if (disposed) {
+        listener.remove();
+      } else {
+        removeListener = () => listener.remove();
+      }
+    });
+
+    return () => {
+      disposed = true;
+      removeListener?.();
+    };
+  }, [goBack]);
+
+  return (
+    <div className="flex min-h-dvh flex-col bg-background">
+      <header className="pt-safe sticky top-0 z-30 border-b border-border/80 bg-background/92 backdrop-blur-xl">
+        <div className="flex h-14 items-center justify-between gap-3 px-4">
+          {isAnalyticsDetail ? (
+            <button
+              type="button"
+              onClick={goBack}
+              className="inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="size-5" />
+            </button>
+          ) : (
+            <BrandMark showWordmark={false} />
+          )}
+          <p className="min-w-0 flex-1 truncate text-center text-sm font-semibold tracking-[-0.01em]">
+            {title}
+          </p>
+          <div className="flex items-center gap-0.5">
+            <ThemeMenu compact />
+            <UserMenu compact />
+          </div>
+        </div>
+      </header>
+
+      <main
+        className={cn(
+          "min-w-0 flex-1",
+          hideTabs
+            ? "pb-safe"
+            : "pb-[calc(4.5rem+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]",
+        )}
       >
-        ShortWave
-      </motion.span>
-    </Link>
-  );
-};
+        <Outlet />
+      </main>
 
-export const LogoIcon = () => {
-  return (
-    <Link
-      to="/"
-      className="font-normal flex space-x-2 items-center text-sm text-gray-950 py-1 relative z-20"
-    >
-      <img
-        width={30}
-        height={30}
-        src={ShortwaveLogo || "/placeholder.svg"}
-        alt="Shortwave Logo"
-      />
-    </Link>
+      {hideTabs ? null : (
+        <nav
+          aria-label="Primary"
+          className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 backdrop-blur-xl"
+        >
+          <div className="mx-auto flex h-[4.25rem] max-w-md items-stretch px-2">
+            {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+              const active = isActivePath(location.pathname, href);
+              return (
+                <NavLink
+                  key={href}
+                  to={href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[0.68rem] font-medium transition-colors",
+                    active
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
+                      active ? "bg-accent" : "bg-transparent",
+                    )}
+                  >
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  {label}
+                </NavLink>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+    </div>
   );
-};
+}
+
+export function DashboardLayout() {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/signin", { replace: true });
+    }
+  }, [isLoading, navigate, user]);
+
+  if (isLoading) return <LoadingScreen />;
+  if (!user) return null;
+
+  return Capacitor.isNativePlatform() ? <NativeShell /> : <WebShell />;
+}
 
 export default DashboardLayout;

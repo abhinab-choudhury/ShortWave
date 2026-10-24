@@ -151,8 +151,6 @@ app.use("/api/v1/url", url_route_1.default);
 app.use("/api/v1/user", user_route_1.default);
 app.use("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
 app.use(error_middleware_1.default);
-// Listen first, connect after: a failed dependency must not kill the instance and
-// the requests it is already serving.
 app.listen(secret_1.env.PORT, () => {
     console.log(`Server running at http://localhost:${secret_1.env.PORT}`);
 });
