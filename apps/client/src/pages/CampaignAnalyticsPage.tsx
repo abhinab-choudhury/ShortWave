@@ -1,111 +1,129 @@
-import { CircleDot } from "lucide-react";
-import LinkCard, { LinkCardI } from "@/components/LinkCard";
-import { Button } from "@/components/ui/button";
-import { IconLink } from "@tabler/icons-react";
-import { AlertDeleteCampaignBtn } from "@/components/AlertDeleteBtn";
-import CreateLinkBtn from "@/components/CreateLinkBtn";
-import { useQueries } from "@tanstack/react-query";
-import { axiosInstance } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Link2 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { axiosInstance } from "@/lib/utils";
+import CreateLinkBtn from "@/components/CreateLinkBtn";
+import { AlertDeleteCampaignBtn } from "@/components/AlertDeleteBtn";
+import { EditCampaignBtn } from "@/components/EditCampaignBtn";
+import LinkCard from "@/components/LinkCard";
 import { CardSkeleton } from "@/components/CardSkeleton";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/ErrorState";
 import { ChartAreaInteractive } from "@/components/InteractiveAreaChart";
 import ReloadBtn from "@/components/ReloadBtn";
 
+interface LinkRecord {
+  campaign_id: string;
+  original_url: string;
+  short_url: string;
+  createdAt: string;
+  from_date?: string | null;
+  to_date?: string | null;
+  is_active?: boolean;
+}
+
+interface CampaignRecord {
+  _id: string;
+  name: string;
+  description?: string;
+  urls?: LinkRecord[];
+}
+
 const CampaignAnalyticsPage = () => {
   const { campaignId } = useParams();
-  const [campaignLinks] = useQueries({
-    queries: [
-      {
-        queryKey: ["campaignLink", campaignId],
-        queryFn: () =>
-          axiosInstance
-            .get(`/campaign/${campaignId}/url`)
-            .then((res) => res.data.data),
-      },
-    ],
+
+  const campaignLinks = useQuery<CampaignRecord>({
+    queryKey: ["campaignLink", campaignId],
+    queryFn: () =>
+      axiosInstance
+        .get(`/campaign/${campaignId}/url`)
+        .then((res) => res.data.data),
+    enabled: Boolean(campaignId),
   });
 
+  const urls = campaignLinks.data?.urls ?? [];
+
   return (
-    <div className="min-h-screen w-full bg-slate-50/50 dark:bg-slate-950 overflow-y-auto overflow-x-hidden scrollbar-slim">
-      <div className="p-4 sm:p-6 md:p-8 lg:p-10 w-full mx-auto max-w-[1600px]">
-        <div className="flex flex-col justify-start items-start mb-6 sm:mb-8 gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Analytics
-          </h1>
-          <div className="flex flex-wrap gap-2 items-center w-full">
-            <Button
-              variant="default"
-              className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-400 text-white dark:text-slate-950 rounded-lg font-medium shadow-sm h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4 max-w-full truncate"
-            >
-              <CircleDot className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 shrink-0" />
-              <span className="truncate">
-                {campaignLinks.isPending
-                  ? "Loading..."
-                  : campaignLinks.data?.name || "unknown"}
-              </span>
-            </Button>
-            <div className="flex gap-2 shrink-0">
-              <AlertDeleteCampaignBtn campaignId={campaignId!} />
-              <ReloadBtn />
-            </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Campaign"
+        title={campaignLinks.data?.name || "Campaign analytics"}
+        description={campaignLinks.data?.description || "Daily clicks and every short link created for this campaign."}
+        back={{ to: "/analytics", label: "Back to campaigns" }}
+        actions={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <ReloadBtn />
+            <CreateLinkBtn campaignId={campaignId!} />
+            <EditCampaignBtn
+              campaignId={campaignId!}
+              name={campaignLinks.data?.name || ""}
+              description={campaignLinks.data?.description}
+            />
+            <AlertDeleteCampaignBtn campaignId={campaignId!} />
           </div>
-        </div>
-        <ChartAreaInteractive
-          campaignId={campaignId!}
-          data={campaignLinks.data}
-        />
-        <div className="w-full rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 p-4 sm:p-6 mt-6 sm:mt-8 shadow-sm">
-          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
-            <h2 className="text-base sm:text-lg font-semibold flex gap-2 sm:gap-2.5 items-center text-slate-800 dark:text-white">
-              <div className="p-1 sm:p-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/10 shrink-0">
-                <IconLink className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 dark:text-teal-400" />
-              </div>
-              Links
-            </h2>
-            <div className="shrink-0 self-start xs:self-auto">
-              <CreateLinkBtn campaignId={campaignId!} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 w-full mt-4 sm:mt-5">
-            {campaignLinks.isPending ? (
-              <>
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-              </>
-            ) : campaignLinks.data?.urls.length > 0 ? (
-              campaignLinks.data.urls.map(
-                (
-                  linkData: {
-                    campaign_id: LinkCardI["campaign_id"];
-                    original_url: LinkCardI["original_link"];
-                    short_url: LinkCardI["short_link"];
-                    createdAt: LinkCardI["created_at"];
-                  },
-                  index: number,
-                ) => (
-                  <LinkCard
-                    key={index}
-                    campaign_id={campaignLinks.data?._id}
-                    original_link={linkData.original_url}
-                    short_link={linkData.short_url}
-                    created_at={linkData.createdAt}
-                  />
-                ),
-              )
-            ) : (
-              <div className="flex flex-col justify-center items-center w-full col-span-full text-slate-400 dark:text-slate-500 min-h-[120px] sm:min-h-[140px] gap-2 py-6">
-                <IconLink className="w-8 h-8 text-slate-300 dark:text-slate-600" />
-                <p className="text-sm font-medium">No links yet</p>
-                <p className="text-xs text-slate-400 dark:text-slate-600">
-                  Create your first short link
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        }
+      />
+
+      <div className="mt-8">
+        {campaignLinks.isError ? (
+          <ErrorState
+            title="Couldn't load campaign"
+            description="Campaign details are unavailable right now."
+            onRetry={() => campaignLinks.refetch()}
+          />
+        ) : (
+          <ChartAreaInteractive
+            campaignId={campaignId!}
+            data={campaignLinks.data}
+          />
+        )}
       </div>
-    </div>
+
+      <section className="mt-10">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-[-0.01em]">Links</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Copy, share as a QR card, or open per-link analytics.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {campaignLinks.isPending ? (
+            <>
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </>
+          ) : urls.length === 0 ? (
+            <div className="md:col-span-2 xl:col-span-3">
+              <EmptyState
+                icon={<Link2 className="size-5" />}
+                title="No short links yet"
+                description="Add your first destination URL to start tracking clicks for this campaign."
+                action={<CreateLinkBtn campaignId={campaignId!} />}
+              />
+            </div>
+          ) : (
+            urls.map((link) => (
+              <LinkCard
+                key={link.short_url}
+                campaign_id={campaignLinks.data?._id || campaignId!}
+                original_link={link.original_url}
+                short_link={link.short_url}
+                created_at={link.createdAt}
+                from_date={link.from_date}
+                to_date={link.to_date}
+                is_active={link.is_active}
+              />
+            ))
+          )}
+        </div>
+      </section>
+    </PageContainer>
   );
 };
 

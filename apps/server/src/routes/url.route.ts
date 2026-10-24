@@ -3,6 +3,7 @@ import { isAuthenticated } from "../middlewares/auth.middleware";
 import {
   deleteUserUrl,
   getUserUrlDetails,
+  updateUserUrl,
 } from "../controllers/url.controller";
 
 const router = express.Router();
@@ -13,6 +14,13 @@ const router = express.Router();
  * @access  Authenticated
  */
 router.get("/:urlId", isAuthenticated, getUserUrlDetails);
+
+/**
+ * @route   PATCH /api/v1/url/:shortLink
+ * @desc    Update a short URL
+ * @access  Authenticated
+ */
+router.patch("/:shortLink", isAuthenticated, updateUserUrl);
 
 /**
  * @route   DELETE /api/v1/url/:shortLink

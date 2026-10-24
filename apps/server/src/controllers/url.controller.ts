@@ -8,6 +8,7 @@ import {
   deleteUrl,
   getAllCampaignUrlsClick,
   getLongUrlHandler,
+  updateUrl,
 } from "../services/url.services";
 import { IUrl } from "../interfaces/model";
 import ApiResponse from "../utils/api-response-handling";
@@ -15,9 +16,26 @@ import { Types } from "mongoose";
 
 const urlSchema = z.object({
   url: z.string().url(),
-  to_date: z.date().optional(),
-  from_date: z.date().optional(),
+  to_date: z.coerce.date().optional(),
+  from_date: z.coerce.date().optional(),
 });
+
+const updateUrlSchema = z
+  .object({
+    original_url: z.string().url().optional(),
+    from_date: z.coerce.date().nullable().optional(),
+    to_date: z.coerce.date().nullable().optional(),
+    is_active: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.from_date && data.to_date) {
+        return data.from_date <= data.to_date;
+      }
+      return true;
+    },
+    { message: "from_date must be before or equal to to_date", path: ["to_date"] },
+  );
 
 /**
  * @desc    Get details of a specific short URL
@@ -36,18 +54,19 @@ export async function deleteUserUrl(
   res: Response,
   next: NextFunction,
 ) {
-  if (!req.user) return next(new ApiError(401, "Unauthorized"));
   try {
-    const urlId = req.params.urlId as string;
-    await deleteUrl(req.user._id, urlId);
+    const shortLink = (req.params.shortLink || req.params.urlId) as string;
+    if (!shortLink) return next(new ApiError(400, "Short link is required"));
+    if (!req.user) return next(new ApiError(401, "Unauthorized"));
+    await deleteUrl(req.user._id, shortLink);
     res
       .status(200)
       .json(new ApiResponse(200, "short-url deleted successfully", true));
   } catch (error) {
     return next(
-      normalizeError(error, "Unexprected error occured while deleting the url"),
+      normalizeError(error, "Unexpected error occured while deleting the url"),
     );
-  } 
+  }
 }
 
 /**
@@ -139,6 +158,52 @@ export async function getUserUrlsBycampaign(
         error,
         "Unexpected error occured while fetching campaigns",
       ),
+    );
+  }
+}
+
+/**
+ * @route   PATCH /api/v1/url/:shortLink
+ * @desc    Update a short URL
+ * @access  Authenticated
+ */
+export async function updateUserUrl(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const shortLink = req.params.shortLink as string;
+    if (!shortLink) return next(new ApiError(400, "Short link is required"));
+    if (!req.user) return next(new ApiError(401, "Unauthorized"));
+    const parsed = updateUrlSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return next(
+        new ApiError(
+          400,
+          parsed.error.errors[0]?.message || "Invalid request body",
+        ),
+      );
+    }
+    const data: Partial<
+      Pick<IUrl, "original_url" | "from_date" | "to_date" | "is_active">
+    > = {};
+    if (parsed.data.original_url !== undefined)
+      data.original_url = parsed.data.original_url;
+    if (parsed.data.from_date !== undefined)
+      data.from_date = parsed.data.from_date as any;
+    if (parsed.data.to_date !== undefined)
+      data.to_date = parsed.data.to_date as any;
+    if (parsed.data.is_active !== undefined)
+      data.is_active = parsed.data.is_active;
+    const response = await updateUrl(req.user._id, shortLink, data);
+    if (!response) return next(new ApiError(404, "URL not found"));
+    res
+      .status(200)
+      .json(new ApiResponse(200, "URL updated successfully", true, response));
+  } catch (err) {
+    return next(
+      normalizeError(err, "Unexpected error occured while updating URL"),
     );
   }
 }

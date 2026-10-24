@@ -28,11 +28,14 @@ const globalErrorHandler: ErrorRequestHandler = (
   }
 
   if (error instanceof ApiError) {
+    const data: any = {
+      errors: error.errors || [],
+    };
+    if (env.NODE_ENV === "development") {
+      data.stack = error.stack;
+    }
     res.status(error.statusCode).json(
-      new ApiResponse(error.statusCode, error.message, false, {
-        errors: error.errors || [],
-        stack: env.NODE_ENV === "development" ? error.stack : undefined,
-      }),
+      new ApiResponse(error.statusCode, error.message, false, data),
     );
     return;
   }
@@ -49,11 +52,14 @@ const globalErrorHandler: ErrorRequestHandler = (
     return;
   }
 
+  const data500: any = {
+    errors: [error.message || "Unexpected error occurred"],
+  };
+  if (env.NODE_ENV === "development") {
+    data500.stack = error.stack;
+  }
   res.status(500).json(
-    new ApiResponse(500, "Internal Server Error", false, {
-      errors: [error.message || "Unexpected error occurred"],
-      stack: env.NODE_ENV === "development" ? error.stack : undefined,
-    }),
+    new ApiResponse(500, "Internal Server Error", false, data500),
   );
   return;
 };

@@ -71,6 +71,26 @@ async function getAllUrl(userId: IUser["_id"]): Promise<IUrl[]> {
   return await Url.find({ user_id: userId });
 }
 
+export async function updateUrl(
+  userId: IUser["_id"],
+  shortUrl: IUrl["short_url"],
+  data: Partial<Pick<IUrl, "original_url" | "from_date" | "to_date" | "is_active">>,
+): Promise<IUrl | null> {
+  const updated = await Url.findOneAndUpdate(
+    { short_url: shortUrl, user_id: userId },
+    data,
+    { new: true },
+  );
+  if (updated && redisClient.isReady) {
+    try {
+      await redisClient.del(shortUrl);
+    } catch (error) {
+      console.error("Failed to invalidate Redis cache:", error);
+    }
+  }
+  return updated;
+}
+
 /* delete a specific url from a campaign by the help of short_url */
 export async function deleteUrl(
   userId: IUser["_id"],
@@ -141,6 +161,9 @@ export async function getAllCampaignUrlsClick(campaignId: string) {
           short_url: 1,
           original_url: 1,
           createdAt: 1,
+          from_date: 1,
+          to_date: 1,
+          is_active: 1,
           clicks: 1,
         },
       },
@@ -163,9 +186,38 @@ export async function getActiveLinkCnt(userId: IUser["_id"]): Promise<Number> {
   allLinks.forEach((link) => {
     const fromDate = link.from_date;
     const toDate = link.to_date;
-    if ((!fromDate || now >= fromDate) && (!toDate || now <= toDate))
+    if (
+      link.is_active !== false &&
+      (!fromDate || now >= fromDate) &&
+      (!toDate || now <= toDate)
+    )
       activeLinkCnt++;
   });
 
   return activeLinkCnt;
+}
+
+/* Resolve a short URL for redirection, honoring active status and schedule. */
+export async function getRedirectTarget(
+  short_url: IUrl["short_url"],
+): Promise<
+  | { ok: true; url: string }
+  | { ok: false; reason: "not_found" | "inactive" | "not_started" | "expired" }
+> {
+  const doc = await Url.findOne({ short_url })
+    .select("original_url is_active from_date to_date")
+    .lean();
+
+  if (!doc) return { ok: false, reason: "not_found" };
+  if (doc.is_active === false) return { ok: false, reason: "inactive" };
+
+  const now = new Date();
+  if (doc.from_date && now < new Date(doc.from_date)) {
+    return { ok: false, reason: "not_started" };
+  }
+  if (doc.to_date && now > new Date(doc.to_date)) {
+    return { ok: false, reason: "expired" };
+  }
+
+  return { ok: true, url: doc.original_url };
 }

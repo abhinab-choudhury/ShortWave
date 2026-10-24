@@ -1,191 +1,153 @@
-import { useEffect } from "react";
-import DashboardQuickInfoCard from "@/components/DashoardQuickInfoCard";
-import CampaignCard, { type CampaignCardI } from "@/components/CampaignCard";
-import CreateCampaign from "@/components/CreateCampaignBtn";
-import {
-  Link2,
-  ListFilter,
-  Megaphone,
-  SlidersHorizontal,
-  TentIcon,
-  TrendingUp,
-} from "lucide-react";
-import { CardSkeleton } from "@/components/CardSkeleton";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Plus, Sparkles, BarChart3 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { axiosInstance } from "@/lib/utils";
-import { useQueries } from "@tanstack/react-query";
-import { toast } from "@/components/ui/use-toast";
+import CreateCampaign from "@/components/CreateCampaignBtn";
+import CampaignCard from "@/components/CampaignCard";
+import { CardSkeleton } from "@/components/CardSkeleton";
+import { PageContainer } from "@/components/PageContainer";
+import { PageHeader } from "@/components/PageHeader";
+import { StatCard } from "@/components/StatCard";
+import { EmptyState } from "@/components/EmptyState";
+import { ErrorState } from "@/components/ErrorState";
+import { Button } from "@/components/ui/button";
+
+interface DashboardStats {
+  total_links: number | string;
+  crg: number | string;
+  active_links: number | string;
+}
+
+interface RecentCampaign {
+  _id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
 
 const DashboardPage = () => {
-  const [recentLinks, dashboardStats] = useQueries({
-    queries: [
-      {
-        queryKey: ["recentLinks"],
-        queryFn: () =>
-          axiosInstance.get("/campaign/recent").then((res) => res.data),
-      },
-      {
-        queryKey: ["dashboardStats"],
-        queryFn: () =>
-          axiosInstance.get("/campaign/stats").then((res) => res.data),
-      },
-    ],
+  const dashboardStats = useQuery<{
+    data: DashboardStats;
+  }>({
+    queryKey: ["dashboardStats"],
+    queryFn: () => axiosInstance.get("/campaign/stats").then((res) => res.data),
   });
 
-  useEffect(() => {
-    if (recentLinks.isError) {
-      toast({
-        variant: "default",
-        title: "❌ failed to fetch recent links",
-        description: recentLinks.error?.message,
-      });
-    }
-    if (dashboardStats.isError) {
-      toast({
-        variant: "default",
-        title: "❌ Failed to fetch Dashboard Stats",
-        description: dashboardStats.error?.message,
-      });
-    }
-  }, [recentLinks, dashboardStats]);
+  const recentLinks = useQuery<{
+    data: { links: RecentCampaign[] };
+  }>({
+    queryKey: ["recentLinks"],
+    queryFn: () => axiosInstance.get("/campaign/recent").then((res) => res.data),
+  });
 
-  const StatCards = () => {
-    if (dashboardStats.isPending) {
-      return (
-        <>
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-        </>
-      );
-    }
-
-    const stats = dashboardStats.data?.data;
-    return (
-      <>
-        <DashboardQuickInfoCard
-          className="group bg-linear-to-br from-teal-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-teal-100 dark:border-slate-700"
-          title="Total Links Created"
-          data={stats.total_links}
-          footer="+10 this week"
-          icon_styles="bg-teal-100 dark:bg-teal-500/15"
-          icon={<Link2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
-        />
-        <DashboardQuickInfoCard
-          title="Click Rate Growth"
-          data={stats.crg}
-          className="group bg-linear-to-br from-emerald-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-emerald-100 dark:border-slate-700"
-          footer="Since yesterday"
-          icon_styles="bg-emerald-100 dark:bg-emerald-500/15"
-          icon={
-            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          }
-        />
-        <DashboardQuickInfoCard
-          title="Active Links"
-          data={stats.active_links}
-          className="group bg-linear-to-br from-indigo-50 to-white dark:from-slate-800/80 dark:to-slate-800/40 border-indigo-100 dark:border-slate-700"
-          footer="Running this week"
-          icon_styles="bg-indigo-100 dark:bg-indigo-500/15"
-          icon={
-            <Megaphone className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          }
-        />
-      </>
-    );
-  };
-
-  const CampaignCards = () => {
-    return recentLinks.isPending ? (
-      <>
-        <CardSkeleton />
-        <CardSkeleton />
-        <CardSkeleton />
-        <CardSkeleton />
-      </>
-    ) : recentLinks.data?.data?.links.length > 0 ? (
-      recentLinks.data?.data?.links.map(
-        (link: CampaignCardI, index: number) => (
-          <CampaignCard
-            key={index}
-            name={link.name}
-            description={link.description}
-            _id={link._id}
-            createdAt={link.createdAt}
-          />
-        ),
-      )
-    ) : (
-      <div className="flex flex-col justify-center items-center col-span-full text-slate-400 dark:text-slate-500 min-h-50 gap-2">
-        <TentIcon className="w-10 h-10 text-slate-300 dark:text-slate-600" />
-        <p className="text-sm font-medium">No campaigns yet</p>
-        <p className="text-xs text-slate-400 dark:text-slate-600">
-          Create your first campaign to get started
-        </p>
-      </div>
-    );
-  };
+  const stats = dashboardStats.data?.data;
+  const campaigns = recentLinks.data?.data?.links ?? [];
 
   return (
-    <div className="flex flex-1 min-w-0">
-      <div className="font-sans p-4 sm:p-6 pb-8 sm:pb-12 bg-slate-50/50 dark:bg-slate-950 flex flex-col gap-3 flex-1 w-full max-h-screen overflow-y-auto overflow-x-hidden scrollbar-slim">
-        <div className="mb-4">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Overview of your link management activity
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Campaigns, links, and a quick read on what's active right now."
+        actions={<CreateCampaign />}
+      />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <StatCards />
-        </div>
-
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mt-4 sm:mt-5 mb-3 gap-3">
-          <div className="flex gap-2 w-full lg:w-auto overflow-x-auto scrollbar-slim pb-1 lg:pb-0">
-            <Button
-              variant="outline"
-              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-8 sm:h-9 text-xs"
-            >
-              Filter{" "}
-              <ListFilter className="w-3.5 h-3.5 ml-1.5 text-slate-400" />
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 whitespace-nowrap shrink-0 h-8 sm:h-9 text-xs"
-            >
-              Display{" "}
-              <SlidersHorizontal className="w-3.5 h-3.5 ml-1.5 text-slate-400" />
-            </Button>
-          </div>
-
-          <div className="flex gap-2 items-center w-full lg:w-auto">
-            <input
-              className="h-8 sm:h-9 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm leading-6 flex-1 lg:w-56 min-w-0 bg-white dark:bg-slate-800 dark:text-white placeholder:text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-all duration-200"
-              type="text"
-              placeholder="Search campaigns..."
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {dashboardStats.isPending ? (
+          <>
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </>
+        ) : dashboardStats.isError ? (
+          <div className="sm:col-span-2 xl:col-span-3">
+            <ErrorState
+              title="Couldn't load stats"
+              description="Campaign totals are unavailable right now."
+              onRetry={() => dashboardStats.refetch()}
             />
-            <div className="shrink-0">
-              <CreateCampaign />
-            </div>
           </div>
+        ) : (
+          <>
+            <StatCard
+              label="Total links"
+              value={stats?.total_links ?? 0}
+              hint="Short links created across all campaigns"
+              icon={<Plus className="size-4" aria-hidden="true" />}
+              tone="primary"
+            />
+            <StatCard
+              label="Click growth"
+              value={typeof stats?.crg === "string" && stats.crg.includes("%") ? stats.crg : `${stats?.crg ?? 0}%`}
+              hint="Day-over-day click growth"
+              icon={<Sparkles className="size-4" aria-hidden="true" />}
+              tone="sand"
+            />
+            <StatCard
+              label="Active links"
+              value={stats?.active_links ?? 0}
+              hint="Currently within their scheduled window"
+              icon={<BarChart3 className="size-4" aria-hidden="true" />}
+              tone="blue"
+            />
+          </>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-[-0.01em]">
+              Recent campaigns
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Jump straight into analytics for your newest groups.
+            </p>
+          </div>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/analytics">View all analytics</Link>
+          </Button>
         </div>
 
-        <div className="flex flex-col gap-3 p-4 sm:p-5 flex-1 border border-slate-200/60 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50 h-auto shadow-sm min-w-0">
-          <h2 className="text-sm sm:text-base font-semibold tracking-tight flex gap-2 items-center text-slate-800 dark:text-white">
-            <div className="p-1 rounded-lg bg-teal-50 dark:bg-teal-500/10 shrink-0">
-              <TentIcon className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {recentLinks.isPending ? (
+            <>
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </>
+          ) : recentLinks.isError ? (
+            <div className="sm:col-span-2 xl:col-span-3">
+              <ErrorState
+                title="Couldn't load campaigns"
+                description="Recent campaigns are unavailable right now."
+                onRetry={() => recentLinks.refetch()}
+              />
             </div>
-            Recent Campaigns
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 w-full">
-            <CampaignCards />
-          </div>
+          ) : campaigns.length === 0 ? (
+            <div className="sm:col-span-2 xl:col-span-3">
+              <EmptyState
+                icon={<Plus className="size-5" />}
+                title="Create your first campaign"
+                description="Group short links together to track clicks by device, browser, location, and time."
+                action={<CreateCampaign />}
+              />
+            </div>
+          ) : (
+            campaigns.map((campaign) => (
+              <CampaignCard
+                key={campaign._id}
+                name={campaign.name}
+                description={campaign.description}
+                _id={campaign._id}
+                createdAt={campaign.createdAt}
+              />
+            ))
+          )}
         </div>
-      </div>
-    </div>
+      </section>
+    </PageContainer>
   );
 };
 

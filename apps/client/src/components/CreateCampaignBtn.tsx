@@ -55,11 +55,12 @@ export default function CreateCampaign() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
-          size={"icon"}
-          className="dark:bg-gray-700 active:scale-95 cursor-pointer"
+          variant="default"
+          size="sm"
+          className="gap-2"
         >
-          <PlusCircle className="dark:text-white" />
+          <PlusCircle className="size-4" />
+          New campaign
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] dark:bg-gray-950">
