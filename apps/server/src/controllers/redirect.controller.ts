@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { waitUntil } from "@vercel/functions";
-import { getLongUrlHandler } from "../services/url.services";
+import { getRedirectTarget } from "../services/url.services";
 import ApiError from "../utils/api-error-handling";
 import { recordClickInBuffer } from "../utils/redis-helpers";
 
@@ -23,11 +23,18 @@ export async function handleRedirect(
   }
 
   try {
-    const longUrl = await getLongUrlHandler(shortCode.toString());
-    if (!longUrl) {
-      return next(new ApiError(404, "Short URL Not Found"));
+    const target = await getRedirectTarget(shortCode.toString());
+    if (!target.ok) {
+      const messages: Record<typeof target.reason, string> = {
+        not_found: "Short URL Not Found",
+        inactive: "This short link is currently inactive",
+        not_started: "This short link is not active yet",
+        expired: "This short link has expired",
+      };
+      return next(new ApiError(target.reason === "not_found" ? 404 : 410, messages[target.reason]));
     }
 
+    const longUrl = target.url;
     console.log(`[Redirect] ${shortCode} → ${longUrl}`);
 
     // 302 (not 301): the browser has to come back for every visit, otherwise

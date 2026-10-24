@@ -59,6 +59,7 @@ export interface IUrl extends Document {
   short_url: string;
   from_date?: Date;
   to_date?: Date;
+  is_active?: boolean;
 }
 
 export interface IClick extends Document {

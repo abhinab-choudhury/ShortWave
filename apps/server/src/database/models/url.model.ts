@@ -32,6 +32,10 @@ const UrlSchema = new mongoose.Schema<IUrl>(
       type: Date,
       required: false,
     },
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
