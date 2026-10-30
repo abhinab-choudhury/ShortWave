@@ -27,8 +27,8 @@ export function Hero() {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link to={user ? "/dashboard" : "/signin"}>
-                {user ? "Open dashboard" : "Start with email"}
+              <Link to={user ? "/analytics" : "/signin"}>
+                {user ? "View analytics" : "Start with email"}
                 <ArrowRight className="ml-2 size-4" aria-hidden="true" />
               </Link>
             </Button>

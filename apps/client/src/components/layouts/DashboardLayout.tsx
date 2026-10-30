@@ -177,7 +177,7 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
         <DropdownMenuItem
           disabled={isLoggingOut}
           onSelect={handleLogout}
-          className="cursor-pointer text-destructive focus:text-destructive"
+          className="cursor-pointer gap-2 text-destructive focus:text-destructive"
         >
           <LogOut className="size-4" />
           {isLoggingOut ? "Signing out..." : "Sign out"}

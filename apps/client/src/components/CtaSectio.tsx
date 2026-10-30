@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 export function Cta() {
   const { user } = useAuth();
 
+  if (user) return null;
+
   return (
     <section className="bg-foreground text-background">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
@@ -27,18 +29,10 @@ export function Cta() {
             size="lg"
             className="bg-background text-foreground hover:bg-background/90"
           >
-            <Link to={user ? "/dashboard" : "/signin"}>
-              {user ? "Open dashboard" : "Get started"}
+            <Link to="/signin">
+              Get started
               <ArrowRight className="ml-2 size-4" aria-hidden="true" />
             </Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="ghost"
-            className="border border-background/25 text-background hover:bg-background/10 hover:text-background"
-          >
-            <Link to="/signin">Sign in</Link>
           </Button>
         </div>
       </div>

@@ -24,9 +24,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <a href="#workflow" className="transition-colors hover:text-foreground">
               How it works
             </a>
-            <Link to="/signin" className="transition-colors hover:text-foreground">
-              Sign in
-            </Link>
+
           </nav>
           <div className="ml-auto flex items-center gap-1 md:ml-0">
             <ThemeMenu compact />
