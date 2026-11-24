@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { BarChart3 } from "lucide-react";
 import { axiosInstance } from "@/lib/utils";
 import CampaignCard from "@/components/CampaignCard";
 import { CardSkeleton } from "@/components/CardSkeleton";
@@ -8,7 +7,6 @@ import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
-import { Button } from "@/components/ui/button";
 import CreateCampaign from "@/components/CreateCampaignBtn";
 
 interface CampaignCardI {
@@ -72,17 +70,6 @@ const AnalyticsPage = () => {
           ))
         )}
       </div>
-
-      {!campaigns.isPending && items.length > 0 ? (
-        <div className="mt-8 flex justify-center">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/dashboard">
-              <Plus className="mr-2 size-4" aria-hidden="true" />
-              Create another campaign
-            </Link>
-          </Button>
-        </div>
-      ) : null}
     </PageContainer>
   );
 };

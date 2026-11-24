@@ -8,23 +8,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CLAIM_BATCH = void 0;
 exports.getDeviceFingerprint = getDeviceFingerprint;
 exports.recordClickInBuffer = recordClickInBuffer;
 exports.flushRedishStatsToMongo = flushRedishStatsToMongo;
+exports.flushBatches = flushBatches;
 const redis_connect_1 = require("../database/redis-connect");
 const crypto_1 = __importDefault(require("crypto"));
 const click_service_1 = require("../services/click.service");
+const db_connect_1 = __importDefault(require("../database/db-connect"));
+const redis_connect_2 = require("../database/redis-connect");
 const parse_ua_1 = require("./parse-ua");
 /** A stuck Redis must not keep the function open: the click is dropped instead. */
 function withTimeout(promise, ms) {
+    let timer;
     return Promise.race([
         promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms)),
-    ]);
+        new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms);
+        }),
+    ]).finally(() => clearTimeout(timer));
 }
 function recordToArray(record, keyName, valueName) {
     return Object.entries(record).map(([k, v]) => {
@@ -42,7 +56,7 @@ function getDeviceFingerprint(req) {
     return crypto_1.default.createHash("sha256").update(raw).digest("hex");
 }
 /**
- * Buffers one click in Redis. The daily cron moves the buffer over to Mongo,
+ * Buffers one click in Redis. The scheduled cron moves the buffer over to Mongo,
  * so the redirect itself never has to wait for a database write.
  */
 function recordClickInBuffer(req, shortCode) {
@@ -62,85 +76,152 @@ function bufferClick(req, shortCode) {
         const hitKey = `device_hit:${shortCode}:${fingerprint}`;
         const statsKey = `url_stats:${shortCode}:${new Date().toISOString().split("T")[0]}`;
         try {
-            // Set device fingerprint to prevent duplicate stats
-            const isUniqueDevice = yield redis_connect_1.redisClient.set(hitKey, "1", {
-                expiration: { type: "EX", value: ttl },
-                condition: "NX",
+            // Deduplication and all counters must be atomic with respect to a flush.
+            // Unflushed stats have no TTL: a missed cron must not erase clicks.
+            yield redis_connect_1.redisClient.eval(`
+      if not redis.call('SET', KEYS[1], '1', 'EX', ARGV[1], 'NX') then return 0 end
+      redis.call('HINCRBY', KEYS[2], 'hits', 1)
+      for i = 3, 6 do redis.call('HINCRBY', KEYS[2], ARGV[i], 1) end
+      redis.call('HSET', KEYS[2], 'last_access', ARGV[2])
+      redis.call('PERSIST', KEYS[2])
+      return 1
+    `, {
+                keys: [hitKey, statsKey],
+                arguments: [
+                    String(ttl),
+                    timeStamp,
+                    `country:${country}`,
+                    `os:${osType}`,
+                    `device:${deviceType}`,
+                    `browser:${browserType}`,
+                ],
             });
-            // Only update stats for unique devices
-            if (!isUniqueDevice)
-                return;
-            yield redis_connect_1.redisClient.hIncrBy(statsKey, "hits", 1);
-            yield redis_connect_1.redisClient.hIncrBy(statsKey, `country:${country}`, 1);
-            yield redis_connect_1.redisClient.hIncrBy(statsKey, `os:${osType}`, 1);
-            yield redis_connect_1.redisClient.hIncrBy(statsKey, `device:${deviceType}`, 1);
-            yield redis_connect_1.redisClient.hIncrBy(statsKey, `browser:${browserType}`, 1);
-            yield redis_connect_1.redisClient.hSet(statsKey, "last_access", timeStamp);
-            // update the expire as per the latest entry.
-            yield redis_connect_1.redisClient.expire(statsKey, ttl);
         }
         catch (redisErr) {
             console.error("[Redis Error]", redisErr);
         }
     });
 }
+// Atomically detach a complete buffer. New clicks recreate the live key.
+exports.CLAIM_BATCH = `
+  if redis.call('EXISTS', KEYS[1]) == 0 then return 0 end
+  redis.call('RENAME', KEYS[1], KEYS[2])
+  redis.call('PERSIST', KEYS[2])
+  return 1
+`;
 function flushRedishStatsToMongo(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url_stats_keys = yield redis_connect_1.redisClient.keys("url_stats:*");
-        if (url_stats_keys.length === 0) {
-            return res.status(200).json({ status: 200, message: "No stats found" });
+        const secret = process.env.CRON_SECRET;
+        if (!secret)
+            return res.status(503).json({ message: "CRON_SECRET is not configured" });
+        const supplied = Buffer.from(req.get("authorization") || "");
+        const expected = Buffer.from(`Bearer ${secret}`);
+        if (supplied.length !== expected.length ||
+            !crypto_1.default.timingSafeEqual(supplied, expected)) {
+            return res.status(401).json({ message: "Unauthorized" });
         }
-        for (const key of url_stats_keys) {
-            const data = yield redis_connect_1.redisClient.hGetAll(key);
-            if (!data || Object.keys(data).length === 0) {
-                continue;
-            }
-            const [, shortCode, date] = key.split(":");
-            if (!shortCode || !date) {
-                console.warn(`Skipping invalid Redis key: ${key}`);
-                continue;
-            }
-            const clickCount = parseInt(data.hits || "0", 10);
-            const country = {};
-            const os = {};
-            const device = {};
-            const browser = {};
-            for (const [field, value] of Object.entries(data)) {
-                if (field.startsWith("country:")) {
-                    country[field.split(":")[1]] = parseInt(value, 10);
-                }
-                else if (field.startsWith("os:")) {
-                    os[field.split(":")[1]] = parseInt(value, 10);
-                }
-                else if (field.startsWith("device:")) {
-                    device[field.split(":")[1]] = parseInt(value, 10);
-                }
-                else if (field.startsWith("browser:")) {
-                    browser[field.split(":")[1]] = parseInt(value, 10);
-                }
-            }
-            const clickData = {
-                short_url: shortCode,
-                click_cnt: clickCount,
-                date: date,
-                device: recordToArray(device, "device_name", "count"),
-                country: recordToArray(country, "country_name", "count"),
-                os: recordToArray(os, "os_name", "count"),
-                browser: recordToArray(browser, "browser_name", "count"),
-            };
+        try {
+            const result = yield withTimeout(flushBatches(), 25000);
+            return res.status(200).json(result);
+        }
+        catch (error) {
+            console.error("[Analytics sync failed]", error);
+            return res
+                .status(503)
+                .json({ message: "Analytics sync unavailable; retry later" });
+        }
+    });
+}
+function flushBatches() {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, e_1, _b, _c;
+        yield Promise.all([(0, db_connect_1.default)(), (0, redis_connect_2.REDIS_CONNECT)()]);
+        const deadline = Date.now() + 15000;
+        let processed = 0;
+        // Retry detached batches before claiming new ones. SCAN avoids blocking Redis.
+        for (const pattern of ["analytics_pending:*", "url_stats:*"]) {
             try {
-                yield (0, click_service_1.createClick)(clickData);
+                for (var _d = true, _e = (e_1 = void 0, __asyncValues(redis_connect_1.redisClient.scanIterator({
+                    MATCH: pattern,
+                    COUNT: 50,
+                }))), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
+                    _c = _f.value;
+                    _d = false;
+                    const keys = _c;
+                    for (const key of keys) {
+                        if (processed >= 50 || Date.now() >= deadline) {
+                            return {
+                                processed,
+                                message: "Batch limit reached; remaining data retained",
+                            };
+                        }
+                        const [, shortCode, date] = key.split(":");
+                        if (!shortCode || !date)
+                            continue;
+                        let batchKey = key;
+                        if (pattern === "url_stats:*") {
+                            batchKey = `analytics_pending:${shortCode}:${date}:${crypto_1.default.randomUUID()}`;
+                            const claimed = yield redis_connect_1.redisClient.eval(exports.CLAIM_BATCH, {
+                                keys: [key, batchKey],
+                                arguments: [],
+                            });
+                            if (!claimed)
+                                continue;
+                        }
+                        const data = yield redis_connect_1.redisClient.hGetAll(batchKey);
+                        if (Object.keys(data).length === 0)
+                            continue;
+                        yield persistBatch(shortCode, date, batchKey, data);
+                        // A Mongo receipt makes retry safe even if this delete fails.
+                        yield redis_connect_1.redisClient.del(batchKey);
+                        processed++;
+                    }
+                }
             }
-            catch (error) {
-                console.error("Error during MongoDB insert:", error);
-                return res.status(500).json({ status: 500, message: "Internal Server Error" });
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
         }
-        // cleanup (after all keys processed)
-        if (url_stats_keys.length > 0) {
-            yield redis_connect_1.redisClient.del(url_stats_keys);
+        return {
+            processed,
+            message: processed ? "Analytics synced" : "No stats found",
+        };
+    });
+}
+function persistBatch(shortCode, date, batchKey, data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const clickCount = parseInt(data.hits || "0", 10);
+        const country = {};
+        const os = {};
+        const device = {};
+        const browser = {};
+        for (const [field, value] of Object.entries(data)) {
+            if (field.startsWith("country:")) {
+                country[field.split(":")[1]] = parseInt(value, 10);
+            }
+            else if (field.startsWith("os:")) {
+                os[field.split(":")[1]] = parseInt(value, 10);
+            }
+            else if (field.startsWith("device:")) {
+                device[field.split(":")[1]] = parseInt(value, 10);
+            }
+            else if (field.startsWith("browser:")) {
+                browser[field.split(":")[1]] = parseInt(value, 10);
+            }
         }
-        console.log(`Flushed and deleted Redis keys`);
-        return res.status(200).json({ status: 200, message: "CRON hit and data flushed" });
+        const clickData = {
+            short_url: shortCode,
+            click_cnt: clickCount,
+            date: date,
+            device: recordToArray(device, "device_name", "count"),
+            country: recordToArray(country, "country_name", "count"),
+            os: recordToArray(os, "os_name", "count"),
+            browser: recordToArray(browser, "browser_name", "count"),
+        };
+        yield (0, click_service_1.createClick)(clickData, batchKey);
     });
 }

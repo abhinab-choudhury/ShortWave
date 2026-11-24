@@ -97,6 +97,8 @@ app.use((0, cors_1.default)({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
+// Cron uses bearer authentication and does not need browser sessions.
+app.get("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
 // Redirect must be public + fast. Do NOT run session/passport/Mongo sessions here
 app.use("/", redirect_route_1.default);
 app.use(express_1.default.json({ limit: "16kb" }));
@@ -149,7 +151,6 @@ app.use("/api/v1/auth", auth_route_1.default);
 app.use("/api/v1/campaign", campaign_route_1.default);
 app.use("/api/v1/url", url_route_1.default);
 app.use("/api/v1/user", user_route_1.default);
-app.use("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
 app.use(error_middleware_1.default);
 app.listen(secret_1.env.PORT, () => {
     console.log(`Server running at http://localhost:${secret_1.env.PORT}`);

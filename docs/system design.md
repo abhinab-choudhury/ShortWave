@@ -50,7 +50,7 @@ Node 20+, pnpm 11.5.1, Docker, Android Studio (SDK 34, JDK 17, ANDROID_HOME), en
 pnpm install
 cp apps/server/.env.example apps/server/.env
 cp apps/client/.env.example apps/client/.env
-# edit JWT_SECRET, SESSION_SECRET, GOOGLE_*/GITHUB_*, EMAIL, CLIENT_URL, SERVER_URL, MONGODB_*, REDIS_URL, VITE_SERVER_URL
+# edit JWT_SECRET, SESSION_SECRET, GOOGLE_*/GITHUB_*, EMAIL, CLIENT_URL, SERVER_URL, MONGODB_*, REDIS_URL, VITE_SERVER_URL, CRON_SECRET
 docker-compose up -d  # Mongo + Redis
 ```
 
@@ -73,3 +73,60 @@ cd apps/client/android && ./gradlew assembleDebug  # APK
 - App icon/splash from `public/shortwave_logo.png` (640×640) → `mipmap-*/ic_launcher*.png` (48/72/96/144/192) + `drawable*/splash.png` (land/port per density).
 - Native entry `/` → `Capacitor.isNativePlatform()` → `/signin` (JWT flow), web → `/home`. OAuth native uses `@capacitor/browser` + `App.appUrlOpen` deep-link `capacitor://localhost/dashboard?token=`.
 - CORS server allows `capacitor://localhost`, `http://localhost`, `CLIENT_URL`.
+
+## Mermaid Flowcharts
+
+### High-Level Architecture
+```mermaid
+flowchart LR
+  U[User Web / Android] -->|HTTPS| S[Express Server]
+  S -->|auth + data| M[(MongoDB)]
+  S -->|cache + click buffer| R[(Redis)]
+  S -->|302 redirect| U
+  CRON[cron-job.org / Vercel Cron] -->|GET /cron/flush (Bearer CRON_SECRET)| S
+  S -->|flush batches| M
+```
+
+### Hybrid Auth Flow
+```mermaid
+flowchart TD
+  A[Client sign-in request] --> N{Native platform?}
+  N -- Yes --> O1[POST /api/v1/auth/otp/request]
+  O1 --> O2[Store hashed OTP (10 min, 5 attempts)]
+  O2 --> O3[Send OTP email]
+  O3 --> O4[POST /api/v1/auth/otp/verify]
+  O4 --> O5[Return 7d JWT + user]
+  N -- No --> M1[POST /api/v1/auth/signin]
+  M1 --> M2[Send magic link (1h JWT)]
+  M2 --> M3[GET /verify?token]
+  M3 --> M4[express-session + JWT]
+  A --> G[Google/GitHub OAuth]
+  G --> GC[OAuth callback]
+  GC --> GR[Redirect with token]
+```
+
+### Redirect & Analytics Buffer Flow
+```mermaid
+flowchart TD
+  V[Visitor] -->|GET /:shortCode| RR[Redirect route]
+  RR --> L[getRedirectTarget]
+  L --> OK{Valid & active?}
+  OK -- No --> E[404 / 410 error]
+  OK -- Yes --> R302[302 redirect to original URL]
+  R302 --> BUF[recordClickInBuffer (after response)]
+  BUF --> RS[(Redis url_stats)]
+  BUF --> DEDUP[device_hit dedup (1h)]
+```
+
+### Scheduled Analytics Sync Flow
+```mermaid
+flowchart TD
+  SCH[Scheduler] --> AUTH{Bearer CRON_SECRET?}
+  AUTH -- No --> U401[401 Unauthorized]
+  AUTH -- Yes --> FLUSH[flushBatches]
+  FLUSH --> CLAIM[Claim url_stats -> analytics_pending]
+  CLAIM --> PERSIST[persistBatch -> createClick Mongo transaction]
+  PERSIST --> RECEIPT[AnalyticsSyncRecord receipt]
+  RECEIPT --> DEL[Delete Redis batch]
+  FLUSH --> RESULT[200 processed / message]
+```

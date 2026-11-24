@@ -35,6 +35,7 @@ export default function CreateCampaign() {
       setName("");
       setDescription("");
       setOpen(false);
+      createCampaignQC.invalidateQueries({ queryKey: ["campaigns"] });
       createCampaignQC.invalidateQueries({ queryKey: ["recentLinks"] });
       createCampaignQC.invalidateQueries({ queryKey: ["dashboardStats"] });
     },
