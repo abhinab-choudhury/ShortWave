@@ -3,6 +3,8 @@ import { env } from "../utils/secret";
 
 const redisClient = createClient({
   url: env.REDIS_URL,
+  disableOfflineQueue: true,
+  socket: { connectTimeout: 5000 },
 });
 
 redisClient.on("error", (err) => console.error("Redis Client Error:", err));
@@ -11,14 +13,18 @@ redisClient.on("connect", () =>
 );
 redisClient.on("reconnecting", () => console.log("Reconnecting to Redis..."));
 
+let connecting: Promise<void> | null = null;
 const REDIS_CONNECT = async () => {
-  try {
-    await redisClient.connect();
-  } catch (error) {
-    // Redis is only a cache/analytics buffer, so an outage must not take the API
-    // down: the redirect handler falls back to a plain DB lookup.
-    console.error("Redis Connection Error: ", error);
+  if (redisClient.isReady) return;
+  if (!connecting) {
+    connecting = (async () => {
+      if (!redisClient.isOpen) await redisClient.connect();
+      if (!redisClient.isReady) throw new Error("Redis is reconnecting");
+    })().finally(() => {
+      connecting = null;
+    });
   }
+  await connecting;
 };
 
 export { redisClient, REDIS_CONNECT };

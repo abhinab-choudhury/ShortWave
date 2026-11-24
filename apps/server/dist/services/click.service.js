@@ -18,6 +18,12 @@ exports.getTotalCGRPercent = getTotalCGRPercent;
 const click_model_1 = __importDefault(require("../database/models/click.model"));
 const url_model_1 = __importDefault(require("../database/models/url.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
+// Receipts are committed in the same transaction as the counters. Keep them
+// permanently so a delayed Redis retry cannot reapply an already committed batch.
+const SyncRecord = mongoose_1.default.model("AnalyticsSyncRecord", new mongoose_1.default.Schema({
+    _id: { type: String, required: true },
+    version: { type: Number, default: 0 },
+}));
 function getClickById(urlId) {
     return __awaiter(this, void 0, void 0, function* () {
         const requiredUrl = yield click_model_1.default.findById(urlId);
@@ -53,11 +59,18 @@ function increaseOrPushArrayField(session, short_url, date, field, key, value, c
         }
     });
 }
-function createClick(data) {
+function createClick(data, batchId) {
     return __awaiter(this, void 0, void 0, function* () {
         const session = yield mongoose_1.default.startSession();
         try {
             yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
+                // Serialize updates for this link/day, including concurrent first inserts.
+                yield SyncRecord.updateOne({ _id: `day:${data.short_url}:${data.date}` }, { $inc: { version: 1 } }, { upsert: true, session });
+                if (batchId) {
+                    if (yield SyncRecord.exists({ _id: batchId }).session(session))
+                        return;
+                    yield SyncRecord.create([{ _id: batchId }], { session });
+                }
                 yield click_model_1.default.updateOne({ short_url: data.short_url, date: data.date }, {
                     $inc: { click_cnt: data.click_cnt },
                 }, { upsert: true, session });

@@ -14,19 +14,27 @@ const redis_1 = require("redis");
 const secret_1 = require("../utils/secret");
 const redisClient = (0, redis_1.createClient)({
     url: secret_1.env.REDIS_URL,
+    disableOfflineQueue: true,
+    socket: { connectTimeout: 5000 },
 });
 exports.redisClient = redisClient;
 redisClient.on("error", (err) => console.error("Redis Client Error:", err));
 redisClient.on("connect", () => console.log("Successfully connected to Redis."));
 redisClient.on("reconnecting", () => console.log("Reconnecting to Redis..."));
+let connecting = null;
 const REDIS_CONNECT = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield redisClient.connect();
+    if (redisClient.isReady)
+        return;
+    if (!connecting) {
+        connecting = (() => __awaiter(void 0, void 0, void 0, function* () {
+            if (!redisClient.isOpen)
+                yield redisClient.connect();
+            if (!redisClient.isReady)
+                throw new Error("Redis is reconnecting");
+        }))().finally(() => {
+            connecting = null;
+        });
     }
-    catch (error) {
-        // Redis is only a cache/analytics buffer, so an outage must not take the API
-        // down: the redirect handler falls back to a plain DB lookup.
-        console.error("Redis Connection Error: ", error);
-    }
+    yield connecting;
 });
 exports.REDIS_CONNECT = REDIS_CONNECT;

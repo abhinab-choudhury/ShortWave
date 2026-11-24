@@ -62,6 +62,9 @@ app.use(
   }),
 );
 
+// Cron uses bearer authentication and does not need browser sessions.
+app.get("/cron/flush", flushRedishStatsToMongo);
+
 // Redirect must be public + fast. Do NOT run session/passport/Mongo sessions here
 app.use("/", redirectRoute);
 
@@ -118,7 +121,7 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/campaign", campaignRoute);
 app.use("/api/v1/url", urlRoute);
 app.use("/api/v1/user", userRoute);
-app.use("/cron/flush", flushRedishStatsToMongo);
+
 app.use(globalErrorHandler);
 
 app.listen(env.PORT, () => {

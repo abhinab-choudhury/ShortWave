@@ -100,13 +100,36 @@ MAIL_USER=
 MAIL_PASS=
 MAIL_SECURE=false
 MAIL_FROM=Shortwave <noreply@shortwave.com>
+
+# Scheduled analytics sync (GET /cron/flush)
+CRON_SECRET=your_random_cron_secret_32+chars
 ```
 
 **`apps/client/.env`**
 
-```
+```bash
 VITE_SERVER_URL=http://localhost:8080
 ```
+
+#### Environment Variables Reference
+
+| Variable | Scope | Required | Description & Example |
+|---|---|---|---|
+| `PORT` | Server | Optional (default: `8080`) | Backend HTTP server port. |
+| `NODE_ENV` | Server | Optional (default: `development`) | `development` or `production`. Controls cookie security, error stack traces, and logging. |
+| `CLIENT_URL` | Server | Yes | Frontend client origin (e.g. `http://localhost:5173` or `https://short-wave.vercel.app`). Used for CORS and OAuth redirects. |
+| `SERVER_URL` | Server | Yes | Backend base URL (e.g. `http://localhost:8080` or `https://api.shortwave.com`). Used for email verification links and OAuth callbacks. |
+| `MONGODB_BASE_URI` | Server | Optional (default: `mongodb://localhost:27017`) | MongoDB base connection URI (e.g. `mongodb://localhost:27017` or MongoDB Atlas URI). |
+| `DATABASE_NAME` | Server | Optional (default: `shortwave-db`) | MongoDB database name. |
+| `REDIS_URL` | Server | Optional (default: `redis://localhost:6379`) | Redis connection URL for caching and buffering click analytics. |
+| `SESSION_SECRET` | Server | Yes | 32+ character random string for signing express-session cookies. |
+| `JWT_SECRET` | Server | Yes | 32+ character random string for signing JWT tokens. |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Server | Yes (for Google OAuth) | Google OAuth 2.0 credentials from Google Cloud Console. |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | Server | Yes (for GitHub OAuth) | GitHub OAuth application credentials from GitHub Developer Settings. |
+| `CRON_SECRET` | Server | Yes (for cron sync) | Secret token required to authenticate `GET /cron/flush` calls via `Authorization: Bearer <CRON_SECRET>`. |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_SECURE`, `MAIL_FROM` | Server | Optional in local dev | SMTP configuration for OTP / magic-link emails. Defaults to Mailpit (`127.0.0.1:1025`) in local development. |
+| `EMAIL`, `EMAIL_PASSWORD` | Server | Optional fallback | Fallback SMTP credentials for Gmail if `MAIL_USER`/`MAIL_PASS` are unset. |
+| `VITE_SERVER_URL` | Client | Yes | Base URL pointing the client app to the backend API (`http://localhost:8080` for web, `http://10.0.2.2:8080` for Android emulator in `.env.android`). |
 
 ### 2. Databases & Email (Docker)
 
@@ -224,3 +247,47 @@ pnpm-workspace.yaml
 ```
 
 See `docs/system design.md` for deep-dive on shortening, analytics (Redis → cron flush), and hybrid auth flow.
+
+### Scheduled analytics sync
+
+After deploying the backend, configure a strong random `CRON_SECRET` in its
+production environment and redeploy. Configure cron-job.org as follows:
+
+- URL: `https://<backend-production-domain>/cron/flush` (not the frontend domain,
+  and no `/api/v1` prefix)
+- Method: `GET`
+- Schedule: every 5 minutes
+- Header: `Authorization: Bearer <CRON_SECRET>`
+- Enable failure notifications.
+
+The existing daily Vercel cron can remain as a fallback; Vercel sends the
+`CRON_SECRET` bearer header automatically. Concurrent invocations are retry-safe.
+A successful response is HTTP 200 with `processed` and `message`; zero processed
+batches is normal when there are no new clicks. Runs process at most 50 batches
+and stop starting new batches after 15 seconds. Larger backlogs drain over
+subsequent runs. Hosting/database usage limits still apply.
+
+Troubleshooting:
+
+- 401 JSON `Unauthorized`: header is missing or does not match the backend secret.
+- 503 `CRON_SECRET is not configured`: set the backend environment variable and redeploy.
+- 503 `Analytics sync unavailable; retry later`: check backend logs for
+  `[Analytics sync failed]`, Redis connectivity, MongoDB connectivity, and MongoDB
+  transaction support. MongoDB must be a replica set (including Atlas) or sharded
+  deployment; a standalone MongoDB does not support the transactions used here.
+- HTML login/protection page, 404, or redirect: verify the backend production domain,
+  deployment protection settings, and exact path. The cron is independent of user login.
+- Scheduler timeout: inspect backend logs. Pending batches are retained for retry;
+  Mongo receipts prevent reapplying a committed batch even if Redis cleanup failed.
+
+Clicks are atomically detached into persistent Redis batches and acknowledged only
+once MongoDB commits the counters and batch receipt together. Pending buffers no
+longer expire after an hour. Keep the `analyticssyncrecords` Mongo collection:
+its receipts provide retry deduplication and intentionally have no TTL. Redis
+persistence/eviction settings still determine survival of Redis data loss.
+The existing one-click-per-device-per-link-per-hour deduplication remains unchanged.
+The dashboard Refresh button refetches persisted analytics; it does not run this cron.
+
+Regression checks: `pnpm --filter server build`, then
+`node --test apps/server/tests/analytics-sync.test.cjs`. These use mocked storage;
+production connectivity and real MongoDB transactions need a deployment smoke test.

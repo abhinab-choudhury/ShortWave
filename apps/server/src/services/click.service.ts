@@ -3,6 +3,16 @@ import Click from "../database/models/click.model";
 import Url from "../database/models/url.model";
 import mongoose, { ClientSession } from "mongoose";
 
+// Receipts are committed in the same transaction as the counters. Keep them
+// permanently so a delayed Redis retry cannot reapply an already committed batch.
+const SyncRecord = mongoose.model(
+  "AnalyticsSyncRecord",
+  new mongoose.Schema({
+    _id: { type: String, required: true },
+    version: { type: Number, default: 0 },
+  }),
+);
+
 export async function getClickById(urlId: string): Promise<IClick> {
   const requiredUrl = await Click.findById(urlId);
   return requiredUrl!;
@@ -57,10 +67,21 @@ export async function createClick(
     IClick,
     "short_url" | "date" | "click_cnt" | "device" | "country" | "os" | "browser"
   >,
+  batchId?: string,
 ): Promise<void> {
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
+      // Serialize updates for this link/day, including concurrent first inserts.
+      await SyncRecord.updateOne(
+        { _id: `day:${data.short_url}:${data.date}` },
+        { $inc: { version: 1 } },
+        { upsert: true, session },
+      );
+      if (batchId) {
+        if (await SyncRecord.exists({ _id: batchId }).session(session)) return;
+        await SyncRecord.create([{ _id: batchId }], { session });
+      }
       await Click.updateOne(
         { short_url: data.short_url, date: data.date },
         {

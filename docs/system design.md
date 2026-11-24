@@ -50,7 +50,7 @@ Node 20+, pnpm 11.5.1, Docker, Android Studio (SDK 34, JDK 17, ANDROID_HOME), en
 pnpm install
 cp apps/server/.env.example apps/server/.env
 cp apps/client/.env.example apps/client/.env
-# edit JWT_SECRET, SESSION_SECRET, GOOGLE_*/GITHUB_*, EMAIL, CLIENT_URL, SERVER_URL, MONGODB_*, REDIS_URL, VITE_SERVER_URL
+# edit JWT_SECRET, SESSION_SECRET, GOOGLE_*/GITHUB_*, EMAIL, CLIENT_URL, SERVER_URL, MONGODB_*, REDIS_URL, VITE_SERVER_URL, CRON_SECRET
 docker-compose up -d  # Mongo + Redis
 ```
 
