@@ -42,6 +42,9 @@ flowchart TD
     OP --> OCB[OAuth callback]
     OCB --> OREDIR[Redirect with token]
   end
+
+  OTP -->|or| MAGIC
+  MAGIC -->|or| OAUTH
 ```
 
 ## Campaign & Short URL Creation Workflow
