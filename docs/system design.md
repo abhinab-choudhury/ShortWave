@@ -83,7 +83,7 @@ flowchart LR
   S -->|auth + data| M[(MongoDB)]
   S -->|cache + click buffer| R[(Redis)]
   S -->|302 redirect| U
-  CRON[cron-job.org / Vercel Cron] -->|GET /cron/flush (Bearer CRON_SECRET)| S
+  CRON[cron-job.org / Vercel Cron] -->|"GET /cron/flush (Bearer CRON_SECRET)"| S
   S -->|flush batches| M
 ```
 
@@ -92,12 +92,12 @@ flowchart LR
 flowchart TD
   A[Client sign-in request] --> N{Native platform?}
   N -- Yes --> O1[POST /api/v1/auth/otp/request]
-  O1 --> O2[Store hashed OTP (10 min, 5 attempts)]
+  O1 --> O2["Store hashed OTP (10 min, 5 attempts)"]
   O2 --> O3[Send OTP email]
   O3 --> O4[POST /api/v1/auth/otp/verify]
   O4 --> O5[Return 7d JWT + user]
   N -- No --> M1[POST /api/v1/auth/signin]
-  M1 --> M2[Send magic link (1h JWT)]
+  M1 --> M2["Send magic link (1h JWT)"]
   M2 --> M3[GET /verify?token]
   M3 --> M4[express-session + JWT]
   A --> G[Google/GitHub OAuth]
@@ -113,9 +113,9 @@ flowchart TD
   L --> OK{Valid & active?}
   OK -- No --> E[404 / 410 error]
   OK -- Yes --> R302[302 redirect to original URL]
-  R302 --> BUF[recordClickInBuffer (after response)]
+  R302 --> BUF["recordClickInBuffer (after response)"]
   BUF --> RS[(Redis url_stats)]
-  BUF --> DEDUP[device_hit dedup (1h)]
+  BUF --> DEDUP["device_hit dedup (1h)"]
 ```
 
 ### Scheduled Analytics Sync Flow

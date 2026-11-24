@@ -7,7 +7,7 @@ This document describes the main backend request and processing workflows. Diagr
 flowchart TD
   REQ[Incoming HTTP request] --> CORS[CORS middleware]
   CORS --> REDIR{Mounted redirect route?}
-  REDIR -- Yes (GET /:shortCode) --> RH[handleRedirect]
+  REDIR -- "Yes (GET /:shortCode)" --> RH[handleRedirect]
   REDIR -- No --> BODY[express.json / urlencoded]
   BODY --> MORGAN[morgan logger]
   MORGAN --> SESSION[express-session + MongoStore]
@@ -21,7 +21,7 @@ flowchart TD
 flowchart TD
   subgraph OTP [Native OTP flow]
     OR[POST /api/v1/auth/otp/request] --> OU[Find or create user]
-    OU --> OS[Store hashed OTP (10 min, 5 attempts)]
+    OU --> OS["Store hashed OTP (10 min, 5 attempts)"]
     OS --> OE[Send OTP email]
     OE --> OV[POST /api/v1/auth/otp/verify]
     OV --> ODEL[Delete OTP record]
@@ -48,13 +48,13 @@ flowchart TD
 ```mermaid
 flowchart TD
   AUTH[isAuthenticated] --> CC[POST /api/v1/campaign]
-  CC --> CV[Zod validation (name/description)]
+  CC --> CV["Zod validation (name/description)"]
   CV --> CS[createCampaign]
   CS --> CM[(Campaign document)]
 
   AUTH --> CU[POST /api/v1/campaign/:campaignId/url]
-  CU --> UV[Zod validation (url, dates)]
-  UV --> HASH[sha256(url+attempt) slice -6]
+  CU --> UV["Zod validation (url, dates)"]
+  UV --> HASH["sha256(url+attempt) slice -6"]
   HASH --> COLL{Collision?}
   COLL -- Yes --> HASH
   COLL -- No --> CUC[createCampaignUrl]
@@ -78,7 +78,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   CLICKS[(Click documents per date)] --> AGG[Aggregate click_cnt by short_url/date]
-  AGG --> STATS[Campaign stats (total_links, active_links, CGR)]
+  AGG --> STATS["Campaign stats (total_links, active_links, CGR)"]
   STATS --> DASH[Dashboard charts]
 ```
 
