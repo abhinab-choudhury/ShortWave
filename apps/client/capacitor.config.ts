@@ -7,9 +7,11 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: "https",
     iosScheme: "https",
+    // Allow the app (served over https://localhost) to call http:// backends
+    // such as a local dev server or an emulator host (10.0.2.2).
+    cleartext: true,
     // Uncomment for live-reload dev on device:
     // url: 'http://192.168.1.5:5173',
-    // cleartext: true,
   },
   android: {
     allowMixedContent: true,
