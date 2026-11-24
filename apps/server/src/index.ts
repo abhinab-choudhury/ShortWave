@@ -62,6 +62,18 @@ app.use(
   }),
 );
 
+// Ensure MongoDB is connected before handling any request. This makes cold
+// starts (e.g. Vercel serverless) wait for the connection instead of failing
+// with "Cannot call ... before initial connection is complete".
+app.use(async (_req, _res, next) => {
+  try {
+    await DB_CONNECT();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Cron uses bearer authentication and does not need browser sessions.
 app.get("/cron/flush", flushRedishStatsToMongo);
 

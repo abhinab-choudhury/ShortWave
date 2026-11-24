@@ -28,14 +28,19 @@ const globalErrorHandler: ErrorRequestHandler = (
   }
 
   if (error instanceof ApiError) {
+    const isProd = env.NODE_ENV === "production";
+    const statusCode = error.statusCode;
+    const message =
+      isProd && statusCode >= 500 ? "Internal Server Error" : error.message;
     const data: any = {
-      errors: error.errors || [],
+      errors:
+        isProd && statusCode >= 500 ? [] : error.errors || [],
     };
-    if (env.NODE_ENV === "development") {
+    if (!isProd) {
       data.stack = error.stack;
     }
-    res.status(error.statusCode).json(
-      new ApiResponse(error.statusCode, error.message, false, data),
+    res.status(statusCode).json(
+      new ApiResponse(statusCode, message, false, data),
     );
     return;
   }
@@ -52,10 +57,13 @@ const globalErrorHandler: ErrorRequestHandler = (
     return;
   }
 
+  const isProd = env.NODE_ENV === "production";
   const data500: any = {
-    errors: [error.message || "Unexpected error occurred"],
+    errors: isProd
+      ? ["Internal Server Error"]
+      : [error.message || "Unexpected error occurred"],
   };
-  if (env.NODE_ENV === "development") {
+  if (!isProd) {
     data500.stack = error.stack;
   }
   res.status(500).json(

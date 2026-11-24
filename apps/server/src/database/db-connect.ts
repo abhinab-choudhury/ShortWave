@@ -3,8 +3,10 @@ import { env } from "../utils/secret";
 
 export const MONGODB_URI = `${env.MONGODB_BASE_URI}/${env.DATABASE_NAME}?retryWrites=true`;
 
-// Don't buffer commands if not connected (prevents hanging requests on cold start)
-mongoose.set("bufferCommands", false);
+// Buffer Mongoose commands until the initial connection completes. This prevents
+// "Cannot call ... before initial connection is complete" errors on cold starts
+// (e.g. Vercel serverless) while the connection is still being established.
+mongoose.set("bufferCommands", true);
 
 // One pool per warm instance, reused by every request. A client per request would
 // pay a fresh TCP + TLS handshake on every redirect.
