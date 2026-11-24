@@ -55,6 +55,7 @@ jobs:
         working-directory: apps/client/android
         run: |
           ./gradlew assembleRelease --console=plain \
+            -PversionCode=${{ github.run_number }} \
             -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=512m" \
             -Dorg.gradle.workers.max=4 \
             -Dorg.gradle.internal.http.socketTimeout=300000 \
