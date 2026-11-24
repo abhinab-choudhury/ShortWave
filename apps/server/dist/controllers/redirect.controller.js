@@ -31,10 +31,17 @@ function handleRedirect(req, res, next) {
             return next(new api_error_handling_1.default(400, "ShortCode Not Provided"));
         }
         try {
-            const longUrl = yield (0, url_services_1.getLongUrlHandler)(shortCode.toString());
-            if (!longUrl) {
-                return next(new api_error_handling_1.default(404, "Short URL Not Found"));
+            const target = yield (0, url_services_1.getRedirectTarget)(shortCode.toString());
+            if (!target.ok) {
+                const messages = {
+                    not_found: "Short URL Not Found",
+                    inactive: "This short link is currently inactive",
+                    not_started: "This short link is not active yet",
+                    expired: "This short link has expired",
+                };
+                return next(new api_error_handling_1.default(target.reason === "not_found" ? 404 : 410, messages[target.reason]));
             }
+            const longUrl = target.url;
             console.log(`[Redirect] ${shortCode} → ${longUrl}`);
             // 302 (not 301): the browser has to come back for every visit, otherwise
             // the clicks would be cached and the analytics would stay empty.

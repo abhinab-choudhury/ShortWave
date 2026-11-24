@@ -49,6 +49,7 @@ exports.getUserUrlDetails = getUserUrlDetails;
 exports.deleteUserUrl = deleteUserUrl;
 exports.createUserUrl = createUserUrl;
 exports.getUserUrlsBycampaign = getUserUrlsBycampaign;
+exports.updateUserUrl = updateUserUrl;
 const zod_1 = __importDefault(require("zod"));
 const sha256_1 = __importDefault(require("sha256"));
 const api_error_handling_1 = __importStar(require("../utils/api-error-handling"));
@@ -57,9 +58,22 @@ const api_response_handling_1 = __importDefault(require("../utils/api-response-h
 const mongoose_1 = require("mongoose");
 const urlSchema = zod_1.default.object({
     url: zod_1.default.string().url(),
-    to_date: zod_1.default.date().optional(),
-    from_date: zod_1.default.date().optional(),
+    to_date: zod_1.default.coerce.date().optional(),
+    from_date: zod_1.default.coerce.date().optional(),
 });
+const updateUrlSchema = zod_1.default
+    .object({
+    original_url: zod_1.default.string().url().optional(),
+    from_date: zod_1.default.coerce.date().nullable().optional(),
+    to_date: zod_1.default.coerce.date().nullable().optional(),
+    is_active: zod_1.default.boolean().optional(),
+})
+    .refine((data) => {
+    if (data.from_date && data.to_date) {
+        return data.from_date <= data.to_date;
+    }
+    return true;
+}, { message: "from_date must be before or equal to to_date", path: ["to_date"] });
 /**
  * @desc    Get details of a specific short URL
  * @route   GET /api/v1/url/:urlId
@@ -75,17 +89,19 @@ function getUserUrlDetails() {
  */
 function deleteUserUrl(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.user)
-            return next(new api_error_handling_1.default(401, "Unauthorized"));
         try {
-            const urlId = req.params.urlId;
-            yield (0, url_services_1.deleteUrl)(req.user._id, urlId);
+            const shortLink = (req.params.shortLink || req.params.urlId);
+            if (!shortLink)
+                return next(new api_error_handling_1.default(400, "Short link is required"));
+            if (!req.user)
+                return next(new api_error_handling_1.default(401, "Unauthorized"));
+            yield (0, url_services_1.deleteUrl)(req.user._id, shortLink);
             res
                 .status(200)
                 .json(new api_response_handling_1.default(200, "short-url deleted successfully", true));
         }
         catch (error) {
-            return next((0, api_error_handling_1.normalizeError)(error, "Unexprected error occured while deleting the url"));
+            return next((0, api_error_handling_1.normalizeError)(error, "Unexpected error occured while deleting the url"));
         }
     });
 }
@@ -148,6 +164,45 @@ function getUserUrlsBycampaign(req, res, next) {
         }
         catch (error) {
             return next((0, api_error_handling_1.normalizeError)(error, "Unexpected error occured while fetching campaigns"));
+        }
+    });
+}
+/**
+ * @route   PATCH /api/v1/url/:shortLink
+ * @desc    Update a short URL
+ * @access  Authenticated
+ */
+function updateUserUrl(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            const shortLink = req.params.shortLink;
+            if (!shortLink)
+                return next(new api_error_handling_1.default(400, "Short link is required"));
+            if (!req.user)
+                return next(new api_error_handling_1.default(401, "Unauthorized"));
+            const parsed = updateUrlSchema.safeParse(req.body);
+            if (!parsed.success) {
+                return next(new api_error_handling_1.default(400, ((_a = parsed.error.errors[0]) === null || _a === void 0 ? void 0 : _a.message) || "Invalid request body"));
+            }
+            const data = {};
+            if (parsed.data.original_url !== undefined)
+                data.original_url = parsed.data.original_url;
+            if (parsed.data.from_date !== undefined)
+                data.from_date = parsed.data.from_date;
+            if (parsed.data.to_date !== undefined)
+                data.to_date = parsed.data.to_date;
+            if (parsed.data.is_active !== undefined)
+                data.is_active = parsed.data.is_active;
+            const response = yield (0, url_services_1.updateUrl)(req.user._id, shortLink, data);
+            if (!response)
+                return next(new api_error_handling_1.default(404, "URL not found"));
+            res
+                .status(200)
+                .json(new api_response_handling_1.default(200, "URL updated successfully", true, response));
+        }
+        catch (err) {
+            return next((0, api_error_handling_1.normalizeError)(err, "Unexpected error occured while updating URL"));
         }
     });
 }

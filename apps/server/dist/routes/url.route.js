@@ -14,6 +14,12 @@ const router = express_1.default.Router();
  */
 router.get("/:urlId", auth_middleware_1.isAuthenticated, url_controller_1.getUserUrlDetails);
 /**
+ * @route   PATCH /api/v1/url/:shortLink
+ * @desc    Update a short URL
+ * @access  Authenticated
+ */
+router.patch("/:shortLink", auth_middleware_1.isAuthenticated, url_controller_1.updateUserUrl);
+/**
  * @route   DELETE /api/v1/url/:shortLink
  * @desc    Delete a short URL
  * @access  Authenticated

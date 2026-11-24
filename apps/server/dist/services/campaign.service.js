@@ -52,11 +52,11 @@ function getCampaignById(campaignId, userId) {
 }
 /**
  * Update a campaign by ID
- * updates name of the campaign
+ * updates name/description of the campaign
  */
 function updateCampaign(campaignId, userId, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield campaign_model_1.default.findOneAndUpdate({ _id: campaignId, user: userId }, data, { new: true });
+        return yield campaign_model_1.default.findOneAndUpdate({ _id: campaignId, user_id: userId }, data, { new: true });
     });
 }
 /**
