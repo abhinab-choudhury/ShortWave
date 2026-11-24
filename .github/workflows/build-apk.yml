@@ -75,7 +75,7 @@ jobs:
           name: Shortwave APK (latest)
           body: |
             Automated release — APK built from `${{ github.ref_name }}` @ `${{ github.sha }}`.
-            Install the attached `app-release-unsigned.apk` directly on any Android phone.
+            Install the attached `app-release.apk` directly on any Android phone.
           files: apps/client/android/app/build/outputs/apk/release/*.apk
           update_release_body: true
           make_latest: true

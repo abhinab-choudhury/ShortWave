@@ -18,6 +18,10 @@ android {
     }
     buildTypes {
         release {
+            // Sign release builds with the debug keystore so the produced APK is
+            // installable without a separate release keystore. Replace with a
+            // proper release signing config for production distribution.
+            signingConfig signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
