@@ -9,17 +9,12 @@
 <p align="center">
   ⚡ Lightning-fast URL shortener with real-time analytics and interactive dashboards ⚡
 </p>
+<img width="1920" height="931" alt="Screenshot From 2026-11-24 15-13-26" src="https://github.com/user-attachments/assets/cce88777-6bdb-4550-ac8e-ae8cf9437cba" />
 
-<p align="center">
-  <a href="https://github.com/yourusername/shortwave/actions/workflows/main.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/yourusername/shortwave/main.yml?label=build&style=flat-square&color=brightgreen" alt="build passing" />
-  </a>
-  <img src="https://img.shields.io/npm/dw/shortwave?style=flat-square&color=brightgreen" alt="downloads/week" />
-  <img src="https://img.shields.io/npm/v/shortwave?style=flat-square&color=blue" alt="npm version" />
-</p>
 
 **Shortwave** is a modern **URL shortener** with **built-in tracking** and **rich analytics**.  
 Designed for simplicity and speed, it allows you to **shorten, manage, and analyze links** effortlessly.
+
 
 ## ✨ Features
 
