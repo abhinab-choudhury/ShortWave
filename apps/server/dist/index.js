@@ -97,6 +97,18 @@ app.use((0, cors_1.default)({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
+// Ensure MongoDB is connected before handling any request. This makes cold
+// starts (e.g. Vercel serverless) wait for the connection instead of failing
+// with "Cannot call ... before initial connection is complete".
+app.use((_req, _res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, db_connect_1.default)();
+        next();
+    }
+    catch (error) {
+        next(error);
+    }
+}));
 // Cron uses bearer authentication and does not need browser sessions.
 app.get("/cron/flush", redis_helpers_1.flushRedishStatsToMongo);
 // Redirect must be public + fast. Do NOT run session/passport/Mongo sessions here

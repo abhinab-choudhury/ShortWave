@@ -15,10 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createCampaignUrl = createCampaignUrl;
 exports.getLongUrl = getLongUrl;
 exports.getLongUrlHandler = getLongUrlHandler;
+exports.updateUrl = updateUrl;
 exports.deleteUrl = deleteUrl;
 exports.getAllCampaignUrlsClick = getAllCampaignUrlsClick;
 exports.getTotalLinkCnt = getTotalLinkCnt;
 exports.getActiveLinkCnt = getActiveLinkCnt;
+exports.getRedirectTarget = getRedirectTarget;
 const mongoose_1 = __importDefault(require("mongoose"));
 const url_model_1 = __importDefault(require("../database/models/url.model"));
 const redis_connect_1 = require("../database/redis-connect");
@@ -79,6 +81,20 @@ function getLongUrlHandler(short_url) {
 function getAllUrl(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield url_model_1.default.find({ user_id: userId });
+    });
+}
+function updateUrl(userId, shortUrl, data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const updated = yield url_model_1.default.findOneAndUpdate({ short_url: shortUrl, user_id: userId }, data, { new: true });
+        if (updated && redis_connect_1.redisClient.isReady) {
+            try {
+                yield redis_connect_1.redisClient.del(shortUrl);
+            }
+            catch (error) {
+                console.error("Failed to invalidate Redis cache:", error);
+            }
+        }
+        return updated;
     });
 }
 /* delete a specific url from a campaign by the help of short_url */
@@ -145,6 +161,9 @@ function getAllCampaignUrlsClick(campaignId) {
                         short_url: 1,
                         original_url: 1,
                         createdAt: 1,
+                        from_date: 1,
+                        to_date: 1,
+                        is_active: 1,
                         clicks: 1,
                     },
                 },
@@ -168,9 +187,31 @@ function getActiveLinkCnt(userId) {
         allLinks.forEach((link) => {
             const fromDate = link.from_date;
             const toDate = link.to_date;
-            if ((!fromDate || now >= fromDate) && (!toDate || now <= toDate))
+            if (link.is_active !== false &&
+                (!fromDate || now >= fromDate) &&
+                (!toDate || now <= toDate))
                 activeLinkCnt++;
         });
         return activeLinkCnt;
+    });
+}
+/* Resolve a short URL for redirection, honoring active status and schedule. */
+function getRedirectTarget(short_url) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const doc = yield url_model_1.default.findOne({ short_url })
+            .select("original_url is_active from_date to_date")
+            .lean();
+        if (!doc)
+            return { ok: false, reason: "not_found" };
+        if (doc.is_active === false)
+            return { ok: false, reason: "inactive" };
+        const now = new Date();
+        if (doc.from_date && now < new Date(doc.from_date)) {
+            return { ok: false, reason: "not_started" };
+        }
+        if (doc.to_date && now > new Date(doc.to_date)) {
+            return { ok: false, reason: "expired" };
+        }
+        return { ok: true, url: doc.original_url };
     });
 }

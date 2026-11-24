@@ -34,6 +34,10 @@ const UrlSchema = new mongoose_1.default.Schema({
         type: Date,
         required: false,
     },
+    is_active: {
+        type: Boolean,
+        default: true,
+    },
 }, {
     timestamps: true,
 });

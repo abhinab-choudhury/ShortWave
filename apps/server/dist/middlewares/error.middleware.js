@@ -22,20 +22,32 @@ const globalErrorHandler = (error, req, res, _next) => {
         }
     }
     if (error instanceof api_error_handling_1.default) {
-        res.status(error.statusCode).json(new api_response_handling_1.default(error.statusCode, error.message, false, {
-            errors: error.errors || [],
-            stack: secret_1.env.NODE_ENV === "development" ? error.stack : undefined,
-        }));
+        const isProd = secret_1.env.NODE_ENV === "production";
+        const statusCode = error.statusCode;
+        const message = isProd && statusCode >= 500 ? "Internal Server Error" : error.message;
+        const data = {
+            errors: isProd && statusCode >= 500 ? [] : error.errors || [],
+        };
+        if (!isProd) {
+            data.stack = error.stack;
+        }
+        res.status(statusCode).json(new api_response_handling_1.default(statusCode, message, false, data));
         return;
     }
     if (error instanceof zod_1.z.ZodError) {
         res.status(400).json(new api_response_handling_1.default(400, "Validation Failed", false, error.issues.map((issue) => issue.message)));
         return;
     }
-    res.status(500).json(new api_response_handling_1.default(500, "Internal Server Error", false, {
-        errors: [error.message || "Unexpected error occurred"],
-        stack: secret_1.env.NODE_ENV === "development" ? error.stack : undefined,
-    }));
+    const isProd = secret_1.env.NODE_ENV === "production";
+    const data500 = {
+        errors: isProd
+            ? ["Internal Server Error"]
+            : [error.message || "Unexpected error occurred"],
+    };
+    if (!isProd) {
+        data500.stack = error.stack;
+    }
+    res.status(500).json(new api_response_handling_1.default(500, "Internal Server Error", false, data500));
     return;
 };
 exports.default = globalErrorHandler;
