@@ -38,10 +38,10 @@ export default function ChangeUsernameForm() {
       {/* Username */}
       <div className="md:flex-col md:items-start">
         <div className="md:w-4/6">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-foreground">
             Username
           </label>
-          <p className="text-sm text-gray-500 dark:text-gray-400 my-2">
+          <p className="text-sm text-muted-foreground my-2">
             This is your unique profile identifier. You can change it, but be
             cautious as links may break.
           </p>
@@ -54,7 +54,7 @@ export default function ChangeUsernameForm() {
             value={username}
             onChange={(e) => setUsername(e.currentTarget.value)}
             placeholder="Enter new username"
-            className="w-full bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-slate-700 rounded-md px-3 py-2"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
       </div>

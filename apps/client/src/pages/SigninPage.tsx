@@ -386,7 +386,7 @@ const SigninPage: React.FC = () => {
                       <img
                         src={GithubLogo}
                         alt=""
-                        className="mr-2.5 size-5"
+                        className="mr-2.5 size-5 dark:invert"
                       />
                     )}
                     Continue with GitHub
